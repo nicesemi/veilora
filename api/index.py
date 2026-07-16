@@ -5,7 +5,7 @@ import asyncio, base64, hashlib, hmac, json, os, secrets, time, uuid
 from urllib.parse import quote
 from fastapi import FastAPI, Request, HTTPException, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse, Response
 import httpx
 
 # config
@@ -413,17 +413,28 @@ async def brand_page_url(entry=Depends(_dealer)):
 @app.post("/api/dealer/logo")
 async def upload_logo(file: UploadFile = File(...), entry=Depends(_dealer)):
     ext = os.path.splitext(file.filename or 'logo')[1] or '.png'
-    fname = f"{uuid.uuid4().hex}{ext}"
-    fpath = os.path.join(UPLOAD_DIR, fname)
     content = await file.read()
-    with open(fpath, 'wb') as f:
-        f.write(content)
-    logo_url = f"/uploads/{fname}"
+    # Store base64 in KV (Vercel /tmp is ephemeral)
+    logo_b64 = base64.b64encode(content).decode('utf-8')
+    mime = file.content_type or ('image/png' if ext=='.png' else 'image/jpeg')
+    logo_url = f"/api/dealer/logo-image/{entry['id']}"
     dealer = await kv_get(f"dealer:{entry['id']}")
     if dealer:
         dealer['logo_url'] = logo_url
+        dealer['logo_data'] = logo_b64
+        dealer['logo_mime'] = mime
         await kv_set(f"dealer:{entry['id']}", dealer)
     return {"ok": True, "logo_url": logo_url}
+
+# --- Dealer: serve logo image from KV ---
+@app.get("/api/dealer/logo-image/{dealer_id}")
+async def serve_logo_image(dealer_id: int):
+    dealer = await kv_get(f"dealer:{dealer_id}")
+    if not dealer or not dealer.get('logo_data'):
+        raise HTTPException(404)
+    content = base64.b64decode(dealer['logo_data'])
+    mime = dealer.get('logo_mime', 'image/png')
+    return Response(content=content, media_type=mime)
 
 @app.get("/uploads/{path:path}")
 async def serve_upload(path: str):
