@@ -154,7 +154,9 @@ async def admin_login(req: Request):
     if entry.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
     token = secrets.token_hex(24)
-    await kv_set(f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
+    ok = await _kv_retry(kv_set, f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
+    if not ok:
+        raise HTTPException(503, "会话创建失败，请重试")
     return {"token": token, "username": u}
 
 @app.post("/api/dealer/login")
@@ -173,7 +175,9 @@ async def dealer_login(req: Request):
     if not dealer or dealer.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
     token = secrets.token_hex(24)
-    await kv_set(f"dealer:token:{token}", {"type": "dealer", "id": dealer_id}, ttl=86400)
+    ok = await _kv_retry(kv_set, f"dealer:token:{token}", {"type": "dealer", "id": dealer_id}, ttl=86400)
+    if not ok:
+        raise HTTPException(503, "会话创建失败，请重试")
     return {"token": token, "dealer_id": dealer_id, "company_name": dealer.get('company_name', '')}
 
 # --- Admin: dealer management ---
