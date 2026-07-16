@@ -1,0 +1,17 @@
+{
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/uploads/(.*)", "dest": "api/index.py" },
+    { "src": "/brand/(.*)", "dest": "api/index.py" },
+    { "src": "/admin", "dest": "api/index.py" },
+    { "src": "/dealer", "dest": "api/index.py" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "api/index.py" }
+  ]
+}

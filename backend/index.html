@@ -1,0 +1,2883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEILORA 安全手机 — 真机功能演示</title>
+<style>
+:root {
+  --bg: #060b10; --bg-card: #0d141f; --bg-card-hover: #131d2b;
+  --border: #1a2a3a; --accent: #00e5a0; --accent-dim: rgba(0,229,160,.1);
+  --accent-glow: rgba(0,229,160,.22); --text: #e2e8f0; --text-dim: #8899aa;
+  --text-muted: #556677; --danger: #ff5c6e; --warn: #f0a030; --blue: #4da6ff;
+  --radius: 16px; --radius-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+  background: var(--bg); color: var(--text); line-height:1.7; overflow-x:hidden;
+}
+#particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(6,11,16,.82); backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--border); padding:0 2rem;
+}
+nav .nav-inner { max-width:1280px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:60px; }
+nav .logo { font-size:1.2rem; font-weight:700; color:var(--accent); letter-spacing:.06em; }
+nav .nav-links { display:flex; gap:2rem; list-style:none; }
+nav .nav-links a { color:var(--text-dim); text-decoration:none; font-size:.88rem; transition:color .2s; }
+nav .nav-links a:hover, nav .nav-links a.active { color:var(--accent); }
+
+.hero {
+  position:relative; z-index:1; min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:6rem 2rem 4rem;
+}
+.hero-badge {
+  display:inline-block; padding:.3rem 1rem; border:1px solid var(--accent);
+  border-radius:50px; color:var(--accent); font-size:.78rem; letter-spacing:.1em; margin-bottom:1.5rem;
+}
+.hero h1 {
+  font-size:clamp(2.2rem,5.5vw,3.8rem); font-weight:800; letter-spacing:-.02em; margin-bottom:1rem;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 45%,#6ef0c8 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero p { font-size:1.1rem; color:var(--text-dim); max-width:600px; margin-bottom:2.5rem; }
+.btn {
+  display:inline-flex; align-items:center; gap:.5rem; padding:.7rem 1.6rem;
+  border-radius:var(--radius-sm); font-size:.9rem; font-weight:600; cursor:pointer;
+  border:none; transition:all .25s; text-decoration:none;
+}
+.btn-primary { background:var(--accent); color:#060b10; }
+.btn-primary:hover { box-shadow:0 0 28px var(--accent-glow); transform:translateY(-1px); }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+
+.section { position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:5rem 2rem; }
+.section-header { text-align:center; margin-bottom:4rem; }
+.section-header h2 { font-size:1.9rem; font-weight:700; margin-bottom:.5rem; }
+.section-header .sub { color:var(--text-dim); font-size:.95rem; max-width:540px; margin:0 auto; }
+
+/* 手机框 */
+.phone-frame {
+  width:320px; margin:0 auto 2rem;
+  background:#0a0f17; border:2px solid #1e2e40; border-radius:28px;
+  padding:12px; position:relative;
+}
+.phone-screen {
+  background:#0d141f; border-radius:18px; padding:1.5rem 1rem;
+  min-height:420px; position:relative; overflow:hidden;
+  font-size:.85rem;
+}
+.phone-notch {
+  width:100px; height:22px; background:#060b10;
+  border-radius:0 0 14px 14px; margin:0 auto 12px;
+}
+
+/* 模块卡片 */
+.module-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(350px,1fr)); gap:1.25rem; }
+.module-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.75rem; transition:all .3s; position:relative; overflow:hidden;
+}
+.module-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),transparent); opacity:0; transition:opacity .3s; }
+.module-card:hover { background:var(--bg-card-hover); border-color:#263548; }
+.module-card:hover::before { opacity:1; }
+.module-card .card-num { font-size:.68rem; font-weight:700; letter-spacing:.14em; color:var(--accent); margin-bottom:.6rem; text-transform:uppercase; }
+.module-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:.35rem; }
+.module-card .card-desc { color:var(--text-dim); font-size:.85rem; margin-bottom:.85rem; }
+.tag-list { display:flex; flex-wrap:wrap; gap:.4rem; }
+.tag { padding:.15rem .55rem; border-radius:5px; font-size:.72rem; font-weight:500; background:rgba(77,166,255,.08); color:var(--blue); border:1px solid rgba(77,166,255,.12); }
+.tag.warn { background:rgba(240,160,48,.08); color:var(--warn); border-color:rgba(240,160,48,.12); }
+.tag.danger { background:rgba(255,92,110,.08); color:var(--danger); border-color:rgba(255,92,110,.12); }
+
+/* 演示区块 */
+.demo-block {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; margin-top:3rem;
+}
+.demo-tabs { display:flex; border-bottom:1px solid var(--border); overflow-x:auto; }
+.demo-tab {
+  padding:.9rem 1.4rem; font-size:.85rem; font-weight:500; color:var(--text-dim);
+  cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+  transition:all .2s; background:none; border-top:none; border-left:none; border-right:none;
+}
+.demo-tab:hover { color:var(--text); }
+.demo-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.demo-content { display:none; padding:2.5rem 2rem; }
+.demo-content.active { display:block; }
+.demo-content h4 { font-size:1.1rem; margin-bottom:.6rem; }
+.demo-content > p { color:var(--text-dim); font-size:.88rem; margin-bottom:1.5rem; }
+
+/* 聊天模拟 */
+.chat-box {
+  max-width:480px; margin:0 auto;
+  background:#080d14; border:1px solid var(--border); border-radius:12px; padding:1.25rem;
+}
+.chat-bubble {
+  padding:.65rem .9rem; border-radius:10px; margin-bottom:.6rem;
+  font-size:.85rem; max-width:82%; word-break:break-all; line-height:1.5;
+}
+.chat-bubble.sent { background:var(--accent-dim); color:var(--accent); margin-left:auto; text-align:right; border:1px solid rgba(0,229,160,.15); }
+.chat-bubble.received { background:#131d2b; border:1px solid rgba(255,255,255,.04); }
+.chat-bubble.encrypted { background:#1a1220; color:#a78bfa; border:1px solid rgba(167,139,250,.15); font-family:monospace; font-size:.78rem; }
+.chat-bubble.decrypted { background:var(--accent-dim); color:var(--accent); border:1px solid rgba(0,229,160,.15); }
+.chat-input-row { display:flex; gap:.5rem; margin-top:1rem; }
+.chat-input-row input {
+  flex:1; padding:.6rem .9rem; background:#080d14; border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:.85rem; outline:none;
+}
+.chat-input-row input:focus { border-color:var(--accent); }
+.chat-input-row button {
+  padding:.6rem 1.1rem; background:var(--accent); border:none; border-radius:8px;
+  font-weight:600; color:#060b10; cursor:pointer; font-size:.85rem;
+}
+.chat-input-row button:hover { box-shadow:0 0 16px var(--accent-dim); }
+.chat-toggle { display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; font-size:.8rem; color:var(--text-dim); }
+.chat-toggle .toggle {
+  width:40px; height:22px; border-radius:11px; background:#1a2a3a;
+  position:relative; cursor:pointer; transition:background .3s;
+}
+.chat-toggle .toggle.on { background:var(--accent); }
+.chat-toggle .toggle::after {
+  content:''; position:absolute; top:2px; left:2px;
+  width:18px; height:18px; border-radius:50%; background:#fff;
+  transition:transform .3s;
+}
+.chat-toggle .toggle.on::after { transform:translateX(18px); }
+
+/* 加密通信 - 加密区域 */
+.encrypt-area {
+  background:#0a1018; border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:1.25rem; margin-bottom:1.5rem;
+}
+.encrypt-label { font-size:.78rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem; }
+.encrypt-area textarea {
+  width:100%; min-height:64px; max-height:120px; resize:vertical;
+  background:#080d14; border:1px solid var(--border); border-radius:8px; padding:.7rem .9rem;
+  color:var(--text); font-size:.88rem; font-family:inherit; outline:none; margin-bottom:.75rem;
+}
+.encrypt-area textarea:focus { border-color:var(--accent); }
+.encrypt-area textarea::placeholder { color:var(--text-muted); }
+.encrypt-actions { display:flex; align-items:center; gap:.75rem; }
+.encrypt-btn {
+  padding:.55rem 1.2rem; background:var(--accent); color:#060b10;
+  border:none; border-radius:8px; font-size:.82rem; font-weight:700;
+  cursor:pointer; transition:all .2s;
+}
+.encrypt-btn:hover { box-shadow:0 0 20px var(--accent-glow); }
+.encrypt-btn:disabled { background:#1a2a3a; color:var(--text-muted); cursor:not-allowed; box-shadow:none; }
+.encrypt-toast {
+  font-size:.78rem; color:var(--accent); opacity:0; transition:opacity .3s;
+}
+.encrypt-toast.show { opacity:1; }
+
+/* 加密通信 - 悬浮提示 */
+.cipher-tooltip {
+  position:fixed; background:var(--accent); color:#060b10;
+  padding:.6rem .9rem; border-radius:8px; font-size:.83rem; max-width:360px;
+  word-break:break-word; line-height:1.5;
+  box-shadow:0 6px 24px rgba(0,0,0,.5); z-index:9999; pointer-events:none;
+}
+.cipher-tooltip::before {
+  content:'解密明文'; display:block; font-size:.62rem; text-transform:uppercase;
+  letter-spacing:.06em; opacity:.6; margin-bottom:.2rem;
+}
+.chat-bubble.encrypted.hoverable { cursor:pointer; position:relative; }
+.chat-bubble.encrypted.hoverable:hover { border-color:#a78bfa; box-shadow:0 0 12px rgba(167,139,250,.2); }
+.chat-bubble.info {
+  background:rgba(100,140,220,.06); color:#6eb5ff; border:1px solid rgba(100,140,220,.12);
+  font-size:.76rem; text-align:center; max-width:100%;
+}
+
+/* 文件加密 */
+.file-row {
+  display:flex; align-items:center; gap:1rem; padding:.85rem 1rem;
+  background:#080d14; border-radius:var(--radius-sm); margin-bottom:.6rem;
+  border:1px solid transparent; transition:border .3s;
+}
+.file-row.enc { border-color:var(--accent); background:rgba(0,229,160,.04); }
+.file-icon { font-size:1.8rem; }
+.file-info { flex:1; }
+.file-info .fname { font-weight:600; font-size:.88rem; }
+.file-info .fmeta { font-size:.72rem; color:var(--text-muted); }
+.file-badge {
+  font-size:.7rem; padding:.15rem .5rem; border-radius:4px; font-weight:600;
+}
+.file-badge.enc { background:var(--accent-dim); color:var(--accent); }
+.file-badge.plain { background:rgba(240,160,48,.1); color:var(--warn); }
+.file-actions { display:flex; gap:.4rem; }
+.file-btn {
+  padding:.3rem .7rem; border-radius:5px; font-size:.72rem; font-weight:600;
+  cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-dim);
+  transition:all .2s;
+}
+.file-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* --- 微信 Mock 聊天 --- */
+.wechat-mock {
+  max-width:420px; margin:0 auto; border-radius:12px; overflow:hidden;
+  background:#ededed; box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.wechat-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.8rem 1rem; background:#303030; color:#fff; font-size:.9rem;
+}
+.wechat-back, .wechat-menu { width:36px; text-align:center; cursor:default; opacity:.5; }
+.wechat-title { font-weight:600; }
+.wechat-chat {
+  height:340px; overflow-y:auto; padding:1rem; display:flex; flex-direction:column;
+  gap:.6rem; background:#ededed;
+}
+.wechat-chat .wx-bubble {
+  max-width:75%; padding:.5rem .75rem; border-radius:4px; font-size:.82rem;
+  line-height:1.5; word-break:break-all; position:relative;
+}
+.wechat-chat .wx-bubble.me {
+  align-self:flex-end; background:#95ec69; color:#000;
+}
+.wechat-chat .wx-bubble.other {
+  align-self:flex-start; background:#fff; color:#000;
+}
+.wechat-chat .wx-file-bubble {
+  display:flex; align-items:center; gap:.5rem; cursor:pointer;
+  transition:background .15s;
+}
+.wechat-chat .wx-file-bubble:hover { filter:brightness(.95); }
+.wx-file-bubble .wx-file-icon { font-size:1.6rem; }
+.wx-file-bubble .wx-file-info { display:flex; flex-direction:column; }
+.wx-file-bubble .wx-file-name { font-size:.8rem; font-weight:600; }
+.wx-file-bubble .wx-file-meta { font-size:.65rem; color:#666; }
+.wx-file-bubble .wx-file-badge {
+  font-size:.6rem; padding:.1rem .35rem; border-radius:3px;
+  background:#07c160; color:#fff; margin-left:auto;
+}
+.wx-file-bubble.xefc .wx-file-badge { background:#e02020; }
+.wechat-input {
+  display:flex; align-items:center; gap:.5rem; padding:.6rem .8rem;
+  background:#f5f5f5; border-top:1px solid #ddd;
+}
+.wechat-input button {
+  width:34px; height:34px; border-radius:50%; border:none; font-size:1.2rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  background:#303030; color:#fff; font-weight:bold;
+}
+.wechat-input input {
+  flex:1; padding:.45rem .7rem; border:1px solid #ddd; border-radius:4px;
+  font-size:.82rem; background:#fff; outline:none;
+}
+#wechatSendBtn { width:auto; border-radius:4px; padding:0 .9rem; font-size:.78rem; }
+
+/* 文件选择器 */
+.file-picker {
+  max-width:420px; margin:.75rem auto 0; background:#fff; border-radius:10px;
+  overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+.file-picker-header {
+  padding:.7rem 1rem; font-size:.78rem; color:#999; border-bottom:1px solid #f0f0f0;
+}
+.file-picker-item {
+  display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem;
+  cursor:pointer; border-bottom:1px solid #f5f5f5; transition:background .15s;
+}
+.file-picker-item:hover { background:#f0faf5; }
+.file-picker-item.selected { background:#e8f8f0; border-left:3px solid #07c160; }
+.file-picker-icon { font-size:1.8rem; }
+.file-picker-info { flex:1; }
+.file-picker-name { font-size:.85rem; font-weight:600; color:#333; }
+.file-picker-meta { font-size:.7rem; color:#999; }
+
+/* 对话框遮罩 */
+.dialog-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10000;
+  display:flex; align-items:center; justify-content:center;
+  animation:fadeIn .2s;
+}
+.dialog-box {
+  background:#fff; border-radius:12px; width:300px; overflow:hidden;
+  text-align:center; box-shadow:0 12px 48px rgba(0,0,0,.3);
+}
+.dialog-title { font-size:.9rem; font-weight:700; padding:1.4rem 1rem .5rem; color:#333; }
+.dialog-desc { font-size:.78rem; color:#888; padding:0 1rem 1rem; }
+.dialog-actions { display:flex; border-top:1px solid #eee; }
+.dialog-btn {
+  flex:1; padding:.85rem; border:none; background:none; font-size:.85rem;
+  cursor:pointer; transition:background .15s;
+}
+.dialog-btn:hover { background:#f5f5f5; }
+.dialog-btn.cancel { color:#999; border-right:1px solid #eee; }
+.dialog-btn.confirm { color:#07c160; font-weight:600; }
+.dialog-btn.veilora { color:#00c896; font-weight:700; }
+
+/* 图片查看器 */
+.img-viewer {
+  position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:11000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  animation:fadeIn .2s;
+}
+.img-viewer-header {
+  position:absolute; top:0; left:0; right:0; display:flex; align-items:center;
+  justify-content:space-between; padding:.8rem 1rem; color:#fff;
+}
+.img-viewer-close {
+  width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.15);
+  border:none; color:#fff; font-size:1.2rem; cursor:pointer; display:flex;
+  align-items:center; justify-content:center;
+}
+.img-viewer-badge {
+  font-size:.72rem; background:#07c160; padding:.2rem .6rem; border-radius:4px;
+}
+.img-viewer-content {
+  max-width:90%; max-height:70vh; border-radius:8px; overflow:hidden;
+  background:#222; box-shadow:0 8px 40px rgba(0,0,0,.5);
+}
+.img-viewer-content img { width:100%; height:auto; display:block; }
+.img-viewer-caption { color:#aaa; font-size:.78rem; margin-top:.8rem; }
+.file-btn.encrypt { background:var(--accent); color:#060b10; border:none; }
+.file-btn.encrypt:hover { box-shadow:0 0 12px var(--accent-dim); }
+
+/* 雷达隐身 */
+.radar-area { text-align:center; }
+.radar {
+  width:180px; height:180px; margin:0 auto 1.5rem;
+  border-radius:50%; border:2px solid var(--border);
+  position:relative; background:radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+  display:flex; align-items:center; justify-content:center; transition:all .6s;
+}
+.radar.stealth { border-color:#1a1a2a; background:radial-gradient(circle, rgba(100,100,120,.06) 0%, transparent 70%); }
+.radar-dot {
+  width:10px; height:10px; border-radius:50%; background:var(--accent);
+  position:absolute; box-shadow:0 0 14px var(--accent-glow); transition:all .5s;
+}
+.radar.stealth .radar-dot { opacity:0; box-shadow:none; }
+.radar-label { font-size:.82rem; font-weight:700; color:var(--accent); transition:color .5s; }
+.radar.stealth .radar-label { color:var(--text-muted); }
+.stealth-toggle {
+  display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.2rem;
+  border-radius:50px; cursor:pointer; font-size:.85rem; font-weight:600;
+  background:#1a2a3a; color:var(--text-dim); border:1px solid var(--border);
+  transition:all .25s; user-select:none;
+}
+.stealth-toggle.active { background:var(--accent-dim); color:var(--accent); border-color:var(--accent); }
+
+/* 超级隐私 */
+.privacy-grid { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+.pcard {
+  display:flex; flex-direction:column; align-items:center; gap:.6rem;
+  padding:1.2rem .8rem; background:#080d14; border:1px solid var(--border);
+  border-radius:var(--radius-sm); width:130px; transition:all .4s;
+}
+.pcard.off { border-color:#1f1a1a; }
+.pcard.on { border-color:var(--accent); box-shadow:0 0 18px var(--accent-dim); background:rgba(0,229,160,.03); }
+.pcard .picon { font-size:1.8rem; }
+.pcard .plabel { font-size:.78rem; font-weight:500; }
+.pcard .pstate { font-size:.68rem; font-weight:600; }
+.pcard.on .pstate { color:var(--accent); }
+.pcard.off .pstate { color:var(--danger); }
+.pmaster-btn {
+  display:block; margin:1.5rem auto 0; padding:.7rem 2rem;
+  border-radius:8px; font-weight:700; font-size:.85rem; cursor:pointer;
+  background:#1a0f0f; color:var(--danger); border:1px solid rgba(255,92,110,.25);
+  transition:all .3s;
+}
+.pmaster-btn:hover { background:rgba(255,92,110,.12); box-shadow:0 0 18px rgba(255,92,110,.2); }
+.pmaster-btn.active { background:var(--accent-dim); color:var(--accent); border-color:var(--accent); }
+
+/* 双空间 PIN */
+.dual-pin-phone {
+  width:340px; height:600px; margin:0 auto; border-radius:32px;
+  background:#000; border:2px solid #1a1a2e; overflow:hidden;
+  position:relative; box-shadow:0 12px 48px rgba(0,0,0,.5);
+}
+.dual-pin-notch {
+  width:100px; height:24px; background:#000; border-radius:0 0 16px 16px;
+  margin:0 auto; position:relative; z-index:2;
+}
+/* 锁屏 */
+.lock-screen {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:2rem; z-index:3;
+  background:linear-gradient(180deg,#0a0f1a 0%,#060a14 100%);
+  transition:opacity .4s, transform .4s;
+}
+.lock-screen.hidden { opacity:0; transform:scale(1.05); pointer-events:none; }
+.lock-time { font-size:3rem; font-weight:200; color:#fff; letter-spacing:2px; }
+.lock-date { font-size:.82rem; color:#888; margin:.3rem 0 1.5rem; }
+.lock-icon { font-size:2rem; margin-bottom:1.5rem; opacity:.6; }
+.lock-pin-dots { display:flex; gap:.7rem; justify-content:center; margin-bottom:2rem; }
+.lock-pin-dot {
+  width:14px; height:14px; border-radius:50%; border:1.5px solid #555;
+  background:transparent; transition:all .2s;
+}
+.lock-pin-dot.fill { background:#fff; border-color:#fff; }
+.lock-pin-error {
+  animation:shake .4s;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+}
+.pin-pad { display:grid; grid-template-columns:repeat(3,60px); gap:10px; margin-top:.5rem; }
+.pin-key {
+  width:60px; height:60px; border-radius:50%; border:1px solid #333;
+  background:rgba(255,255,255,.04); color:#fff; font-size:1.4rem; font-weight:300;
+  cursor:pointer; transition:all .15s; line-height:60px; padding:0; text-align:center;
+}
+.pin-key:hover { background:rgba(255,255,255,.1); }
+.pin-key:active { background:rgba(255,255,255,.2); transform:scale(.95); }
+.pin-key.del { font-size:.85rem; color:#888; border:none; background:transparent; }
+.pin-key.del:hover { color:#fff; background:rgba(255,255,255,.05); }
+.lock-msg { font-size:.78rem; color:var(--text-dim); margin-top:.8rem; min-height:1.2em; text-align:center; }
+.lock-msg.error { color:var(--danger); }
+
+/* 主屏幕 */
+.home-screen {
+  position:absolute; inset:0; display:flex; flex-direction:column; z-index:1;
+  background:#0f1420; transition:opacity .3s;
+}
+.home-status-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 20px 4px; color:#fff; font-size:.72rem; font-weight:500;
+}
+.home-status-bar .space-tag {
+  font-size:.62rem; padding:2px 8px; border-radius:10px; font-weight:600;
+}
+.home-status-bar .space-tag.main { background:rgba(77,166,255,.2); color:#4da6ff; }
+.home-status-bar .space-tag.private { background:var(--accent-dim); color:var(--accent); }
+.home-time { font-size:.72rem; color:#ccc; }
+.app-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px 10px;
+  padding:24px 18px; flex:1; align-content:flex-start;
+}
+.app-icon-wrap {
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  cursor:default; transition:transform .15s;
+}
+.app-icon-wrap:active { transform:scale(.9); }
+.app-icon-img {
+  width:56px; height:56px; border-radius:14px; display:flex;
+  align-items:center; justify-content:center; font-size:1.6rem;
+}
+.app-icon-label { font-size:.65rem; color:#ccc; max-width:64px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.home-bottom-bar {
+  display:flex; justify-content:center; gap:20px; padding:10px 0 20px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.home-bottom-btn {
+  width:44px; height:44px; border-radius:50%; border:1px solid #333;
+  background:rgba(255,255,255,.04); color:#888; font-size:1.1rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.home-bottom-btn:hover { color:#fff; border-color:#555; }
+.home-bottom-btn.lock-btn:hover { color:var(--danger); border-color:var(--danger); }
+
+/* 应急还原 */
+.emergency-phone {
+  width:340px; height:600px; margin:0 auto; border-radius:32px;
+  background:#000; border:2px solid #1a1a2e; overflow:hidden;
+  position:relative; box-shadow:0 12px 48px rgba(0,0,0,.5);
+}
+.emergency-notch {
+  width:100px; height:24px; background:#000; border-radius:0 0 16px 16px;
+  margin:0 auto; position:relative; z-index:2;
+}
+.em-status-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 20px 0; color:#fff; font-size:.68rem; font-weight:500;
+}
+.em-screen {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  background:#f5f5f7; z-index:1;
+}
+.em-nav {
+  padding:6px 14px; background:#fff; border-bottom:1px solid #e5e5e5;
+  font-size:.64rem; color:#007aff; overflow-x:auto; white-space:nowrap;
+}
+.em-nav span { color:#999; }
+.em-nav span.current { color:#000; font-weight:600; }
+.em-title {
+  font-size:.92rem; font-weight:700; padding:18px 16px 8px; background:#fff; color:#000;
+}
+.em-list {
+  flex:1; background:#fff; overflow-y:auto;
+}
+.em-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 16px; border-bottom:1px solid #f0f0f0; cursor:pointer;
+  transition:background .15s; min-height:44px;
+}
+.em-item:hover { background:#f8f8f8; }
+.em-item-left { display:flex; flex-direction:column; }
+.em-item-title { font-size:.78rem; color:#000; }
+.em-item-desc { font-size:.65rem; color:#999; margin-top:2px; }
+.em-item-right { font-size:.78rem; color:#999; display:flex; align-items:center; gap:4px; }
+.em-item-right.set { color:#000; font-weight:500; }
+.em-arrow { font-size:.7rem; color:#c7c7cc; margin-left:2px; }
+
+/* Toggle */
+.toggle-switch {
+  width:48px; height:28px; border-radius:14px; background:#e5e5e5;
+  position:relative; cursor:pointer; transition:background .3s; border:none; padding:0;
+}
+.toggle-switch.on { background:#34c759; }
+.toggle-switch::after {
+  content:''; position:absolute; top:2px; left:2px; width:24px; height:24px;
+  border-radius:50%; background:#fff; transition:transform .3s; box-shadow:0 1px 3px rgba(0,0,0,.15);
+}
+.toggle-switch.on::after { transform:translateX(20px); }
+
+/* PIN overlay for emergency */
+.em-pin-overlay {
+  position:absolute; inset:0; z-index:5; background:rgba(0,0,0,.85);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:2rem; animation:fadeIn .25s;
+}
+.em-pin-title { color:#fff; font-size:.95rem; font-weight:600; margin-bottom:.3rem; text-align:center; }
+.em-pin-sub { color:#aaa; font-size:.72rem; margin-bottom:1.5rem; text-align:center; }
+.em-pin-dots { display:flex; gap:.6rem; justify-content:center; margin-bottom:1.5rem; }
+.em-pin-dot {
+  width:12px; height:12px; border-radius:50%; border:1.5px solid #666;
+  background:transparent; transition:all .2s;
+}
+.em-pin-dot.fill { background:#fff; border-color:#fff; }
+.em-pin-dots.error .em-pin-dot { border-color:var(--danger); background:transparent; }
+.em-pin-error { animation:shake .4s; }
+.em-pin-msg { font-size:.72rem; color:#999; margin-bottom:.8rem; min-height:1em; text-align:center; }
+.em-pin-msg.error { color:var(--danger); }
+.em-pin-cancel {
+  background:none; border:none; color:#888; font-size:.78rem; cursor:pointer; margin-top:.8rem;
+}
+.em-pin-cancel:hover { color:#fff; }
+
+.em-toast {
+  position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,.8); color:#fff; font-size:.76rem; padding:.5rem 1.2rem;
+  border-radius:20px; z-index:6; pointer-events:none;
+  animation:fadeIn .2s;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* 应急还原 - 黑屏覆盖 */
+.restore-overlay {
+  position:absolute; inset:0; z-index:10; background:#000;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  animation: restoreGlow 1.5s ease-in-out infinite;
+}
+@keyframes restoreGlow {
+  0%,100%{ box-shadow:inset 0 0 60px rgba(255,92,110,.15); }
+  50%{ box-shadow:inset 0 0 120px rgba(255,92,110,.35); }
+}
+.restore-overlay .restore-text {
+  color:#ff5c6e; font-size:.95rem; font-weight:600; margin-bottom:1.5rem;
+  letter-spacing:.04em;
+}
+.restore-overlay .restore-progress {
+  width:200px; height:3px; background:#222; border-radius:2px; overflow:hidden;
+}
+.restore-overlay .restore-progress::after {
+  content:''; display:block; width:0; height:100%; background:#ff5c6e;
+  border-radius:2px; animation:restoreBar 3s linear forwards;
+}
+@keyframes restoreBar { to{width:100%;} }
+.restore-overlay .restore-logo {
+  display:none; font-size:1.6rem; font-weight:800; color:var(--accent);
+  letter-spacing:.08em; animation:logoPulse 1s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%,100%{ opacity:.3; transform:scale(.95); }
+  50%{ opacity:1; transform:scale(1.05); }
+}
+
+/* 应急还原 - 配置向导 */
+.config-overlay {
+  position:absolute; inset:0; z-index:10; background:#0f1420;
+  display:none; flex-direction:column;
+}
+.config-step {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:2rem; text-align:center; animation:fadeIn .4s;
+}
+.config-step h2 { font-size:1.3rem; font-weight:700; color:#fff; margin-bottom:.8rem; }
+.config-step p { font-size:.82rem; color:var(--text-dim); margin-bottom:2rem; max-width:240px; }
+.config-step .config-btn {
+  padding:.7rem 2rem; border-radius:8px; font-size:.85rem; font-weight:600;
+  cursor:pointer; border:none; transition:all .2s;
+}
+.config-step .config-btn.primary { background:var(--accent); color:#060b10; }
+.config-step .config-btn.primary:hover { box-shadow:0 0 18px var(--accent-glow); }
+.config-step .config-btn.ghost { background:transparent; border:1px solid var(--border); color:var(--text); margin-top:.6rem; }
+.config-step .config-btn.ghost:hover { border-color:var(--accent); color:var(--accent); }
+.config-lang-list { display:flex; flex-direction:column; gap:.5rem; width:200px; }
+.config-lang-item {
+  padding:.6rem 1rem; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text); font-size:.85rem; cursor:pointer;
+  transition:all .2s; text-align:center;
+}
+.config-lang-item:hover { border-color:var(--accent); }
+.config-lang-item.selected { border-color:var(--accent); background:var(--accent-dim); color:var(--accent); }
+.config-net-list { display:flex; flex-direction:column; gap:.5rem; width:220px; margin-bottom:1rem; }
+.config-net-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.6rem 1rem; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text); font-size:.82rem; cursor:pointer;
+  transition:all .2s;
+}
+.config-net-item:hover { border-color:var(--accent); }
+.config-net-item .net-lock { font-size:.7rem; color:var(--text-muted); }
+.config-step .config-done-icon { font-size:3rem; margin-bottom:1rem; }
+
+/* 应急还原 - 独立演示手机 */
+.em-lock-screen {
+  position:absolute; inset:0; z-index:3; background:#0d1117;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:2rem; color:#c9d1d9;
+}
+.em-lock-screen .lock-icon { font-size:2rem; margin-bottom:.5rem; }
+.em-lock-screen .lock-time { font-size:2.2rem; font-weight:300; margin-bottom:.15rem; }
+.em-lock-screen .lock-date { font-size:.72rem; color:#8b949e; margin-bottom:2rem; }
+.em-lock-pin-dots { display:flex; gap:.7rem; justify-content:center; margin-bottom:1.5rem; }
+.em-lock-dot {
+  width:12px; height:12px; border-radius:50%; border:1.5px solid #30363d;
+  background:transparent; transition:all .2s;
+}
+.em-lock-dot.fill { background:var(--accent); border-color:var(--accent); }
+.em-lock-pin-dots.error .em-lock-dot { border-color:var(--danger); background:transparent; }
+
+.em-home-screen {
+  position:absolute; inset:0; z-index:2; display:flex; flex-direction:column;
+  background:#0d1117; color:#fff;
+}
+.em-home-screen .home-status-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px 4px; font-size:.68rem;
+}
+.em-home-screen .app-grid {
+  flex:1; display:grid; grid-template-columns:repeat(4, 1fr);
+  gap:12px; padding:16px; align-content:start;
+}
+.em-home-screen .home-bottom-bar {
+  display:flex; justify-content:space-around; padding:8px 16px 16px;
+  border-top:1px solid #21262d;
+}
+.em-home-screen .home-bottom-btn {
+  background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px 8px;
+}
+
+/* 网络扫描 */
+.scan-bar { display:flex;align-items:center;gap:1rem;margin-bottom:1rem }
+.scan-btn { background:linear-gradient(135deg,#00e5a0,#00b37e);color:#111;border:none;padding:.7rem 1.6rem;border-radius:.5rem;font-weight:700;cursor:pointer;font-size:.88rem;transition:all .2s }
+.scan-btn:hover { transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,229,160,.3) }
+.scan-btn:disabled { opacity:.5;cursor:not-allowed;transform:none }
+.scan-status { color:var(--text-muted);font-size:.82rem }
+.scan-summary { color:#00e5a0;font-weight:600;margin-bottom:.8rem;font-size:.88rem }
+.device-table { width:100%;border-collapse:collapse;font-size:.82rem }
+.device-table th { text-align:left;padding:.5rem .8rem;color:var(--text-muted);font-weight:500;border-bottom:1px solid rgba(255,255,255,.08) }
+.device-table td { padding:.55rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);color:#ddd }
+.device-table .local { color:#00e5a0;font-weight:600 }
+.device-table .gateway-row td { color:#ffd700 }
+.vendor-tag { font-size:.72rem;padding:.12rem .4rem;border-radius:3px;background:rgba(255,255,255,.06) }
+
+/* 预约购买 */
+.order-layout { max-width:900px; margin:0 auto; display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; }
+.order-card {
+  flex:1; min-width:280px; max-width:400px; background:var(--card-bg);
+  border:1px solid var(--border); border-radius:16px; padding:2rem;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  transition:transform .2s, box-shadow .2s;
+}
+.order-card:hover { transform:translateY(-4px); box-shadow:0 8px 32px rgba(0,0,0,.3); }
+.order-card-badge {
+  font-size:.78rem; font-weight:700; padding:.25rem 1rem; border-radius:20px;
+  background:var(--accent-dim); color:var(--accent); margin-bottom:1.2rem;
+}
+.order-card-price { display:flex; align-items:baseline; gap:.5rem; margin-bottom:1.5rem; }
+.price-cn { font-size:1.8rem; font-weight:800; color:var(--text); }
+.price-divider { color:var(--border); font-size:1.2rem; }
+.price-intl { font-size:1.2rem; font-weight:600; color:var(--text-dim); }
+.order-card-specs { width:100%; margin-bottom:1.5rem; }
+.spec-item {
+  padding:.45rem 0; border-bottom:1px solid var(--border); font-size:.82rem;
+  color:var(--text-dim); text-align:left;
+}
+.spec-item:last-child { border-bottom:none; }
+.order-card-btn {
+  width:100%; padding:.75rem; border-radius:10px; border:none;
+  font-size:.85rem; font-weight:700; cursor:pointer; transition:all .2s;
+  background:var(--accent-dim); color:var(--accent);
+}
+.order-card-btn:hover { filter:brightness(1.2); }
+.order-card-btn.ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+
+/* 预约弹窗 */
+.reserve-modal-overlay {
+  position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.6);
+  display:flex; align-items:center; justify-content:center; animation:fadeIn .2s;
+}
+.reserve-modal {
+  background:var(--card-bg); border:1px solid var(--border); border-radius:16px;
+  width:400px; max-width:90vw; padding:0; overflow:hidden;
+}
+.reserve-modal-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.2rem 1.5rem; border-bottom:1px solid var(--border);
+}
+.reserve-modal-header h3 { font-size:1rem; color:var(--text); }
+.reserve-modal-close {
+  background:none; border:none; font-size:1.4rem; color:var(--text-dim); cursor:pointer;
+}
+.reserve-modal-body { padding:1.5rem; }
+.reserve-modal-body .form-group { margin-bottom:1rem; }
+.reserve-modal-body label { display:block; font-size:.82rem; color:var(--text-dim); margin-bottom:.35rem; }
+.reserve-modal-body input {
+  width:100%; padding:.65rem .8rem; border-radius:8px; border:1px solid var(--border);
+  background:#0d1117; color:var(--text); font-size:.85rem; box-sizing:border-box;
+}
+.reserve-modal-body input:focus { outline:none; border-color:var(--accent); }
+.reserve-modal-success {
+  padding:2.5rem 1.5rem; text-align:center; display:flex; flex-direction:column;
+  align-items:center;
+}
+.reserve-success-text { font-size:1rem; font-weight:700; color:var(--accent); margin-top:.8rem; }
+
+/* shared form/table styles (dealer portal) */
+.form-group { margin-bottom:1.25rem; }
+.form-group label { display:block; font-size:.82rem; font-weight:600; margin-bottom:.4rem; color:var(--text-dim); }
+.form-group select, .form-group input {
+  width:100%; padding:.65rem .9rem; background:#080d14; border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:.88rem; outline:none;
+  appearance:none; -webkit-appearance:none;
+}
+.form-group select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238899aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right .8rem center; padding-right:2.2rem; }
+.form-group select:focus, .form-group input:focus { border-color:var(--accent); }
+.form-group .hint { font-size:.72rem; color:var(--text-muted); margin-top:.25rem; }
+.radio-group { display:flex; gap:.5rem; }
+.radio-opt {
+  flex:1; padding:.6rem; text-align:center; border:1px solid var(--border);
+  border-radius:8px; cursor:pointer; font-size:.82rem; font-weight:500;
+  color:var(--text-dim); transition:all .2s; background:transparent;
+}
+.radio-opt:hover { border-color:var(--accent); color:var(--accent); }
+.radio-opt.selected { border-color:var(--accent); background:var(--accent-dim); color:var(--accent); }
+.price-table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.8rem; }
+.price-table th, .price-table td { padding:.5rem .6rem; text-align:center; border-bottom:1px solid var(--border); }
+.price-table th { color:var(--text-dim); font-weight:500; font-size:.72rem; }
+.price-table td { color:var(--text); }
+.price-table .active-row { background:var(--accent-dim); }
+.price-table .active-row td { color:var(--accent); font-weight:600; }
+.total-row { display:flex; justify-content:space-between; padding:.75rem 0; border-top:1px solid var(--border); margin-top:.75rem; }
+.total-row .total-label { font-size:.85rem; color:var(--text-dim); }
+.total-row .total-price { font-size:1.3rem; font-weight:800; color:var(--accent); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* Footer */
+footer {
+  position:relative; z-index:1; text-align:center;
+  padding:3rem 2rem; color:var(--text-muted); font-size:.8rem;
+  border-top:1px solid var(--border);
+}
+
+@media (max-width:768px) {
+  nav .nav-links { display:none; }
+  .module-grid { grid-template-columns:1fr; }
+  .demo-content { padding:1.5rem 1rem; }
+  .privacy-grid { gap:.5rem; }
+  .pcard { width:100px; padding:.8rem .5rem; }
+}
+
+/* ===== 智能问答框 ===== */
+/* ===== AI 智能问答（DeepSeek 风格） ===== */
+.ai-hero {
+  position:relative; z-index:1; text-align:center; padding:5.5rem 2rem 2rem;
+  max-width:800px; margin:0 auto;
+}
+.ai-hero-title {
+  font-size:1.8rem; font-weight:800; margin-bottom:.4rem;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,#6ef0c8 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.ai-hero-desc { color:var(--text-dim); font-size:.88rem; margin-bottom:1.5rem; }
+.ai-input-wrap {
+  position:relative; background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:.8rem; transition:border-color .3s;
+}
+.ai-input-wrap:focus-within { border-color:var(--accent); box-shadow:0 0 20px rgba(0,229,160,.08); }
+.ai-input-wrap textarea {
+  width:100%; min-height:52px; max-height:160px; resize:none;
+  background:transparent; border:none; outline:none; color:var(--text);
+  font-size:.95rem; line-height:1.6; font-family:inherit; padding:.3rem .2rem;
+}
+.ai-input-wrap textarea::placeholder { color:var(--text-muted); }
+.ai-input-actions {
+  display:flex; align-items:center; justify-content:space-between; padding:.3rem .2rem 0;
+}
+.ai-input-hint { font-size:.72rem; color:var(--text-muted); }
+.ai-send-btn {
+  display:inline-flex; align-items:center; gap:.4rem; padding:.45rem 1rem;
+  background:var(--accent); color:#060b10; border:none; border-radius:6px;
+  font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s;
+}
+.ai-send-btn:hover { box-shadow:0 0 16px var(--accent-glow); }
+.ai-send-btn:disabled { background:#1a2a3a; color:var(--text-muted); cursor:not-allowed; box-shadow:none; }
+
+.ai-answers { max-width:800px; margin:0 auto; padding:0 2rem 1.5rem; position:relative; z-index:1; }
+.ai-answer-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:1.25rem; margin-bottom:.8rem; animation:fadeIn .35s;
+}
+.ai-answer-card .q-label { font-size:.72rem; color:var(--text-muted); margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.05em; }
+.ai-answer-card .q-text { font-size:.88rem; color:var(--accent); margin-bottom:.8rem; font-weight:500; }
+.ai-answer-card .a-text { font-size:.88rem; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+.ai-answer-card .a-loading { color:var(--text-muted); font-style:italic; }
+
+/* ===== 经销商 & 管理后台 ===== */
+.dealer-section { position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:5rem 2rem; display:none; }
+.dealer-section.active { display:block; }
+.dealer-section h2 { font-size:1.9rem; font-weight:700; margin-bottom:.5rem; text-align:center; }
+.dealer-section .sub { color:var(--text-dim); font-size:.95rem; text-align:center; margin-bottom:2.5rem; }
+
+.auth-card {
+  max-width:460px; margin:0 auto;
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:2rem;
+}
+.auth-card h3 { font-size:1.2rem; margin-bottom:1.5rem; text-align:center; }
+.auth-switch { text-align:center; margin-top:1rem; font-size:.82rem; color:var(--text-dim); }
+.auth-switch a { color:var(--accent); cursor:pointer; text-decoration:none; }
+.auth-switch a:hover { text-decoration:underline; }
+
+.form-input {
+  width:100%; padding:.65rem .9rem; background:#080d14; border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:.88rem; outline:none; margin-bottom:1rem;
+}
+.form-input:focus { border-color:var(--accent); }
+textarea.form-input { resize:vertical; min-height:80px; }
+
+.dashboard { display:none; }
+.dashboard.active { display:block; }
+.dashboard-header {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+  margin-bottom:2rem; padding:1.25rem 1.5rem;
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+}
+.dashboard-header .dealer-info h3 { font-size:1.1rem; margin-bottom:.2rem; }
+.dashboard-header .dealer-info .status-badge { font-size:.75rem; font-weight:600; }
+.status-badge.pending { color:var(--warn); }
+.status-badge.approved { color:var(--accent); }
+.status-badge.rejected { color:var(--danger); }
+
+.dash-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.5rem; margin-bottom:1.25rem;
+}
+.dash-card h4 { font-size:1rem; margin-bottom:1rem; color:var(--accent); }
+
+.data-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.data-table th { text-align:left; padding:.55rem .7rem; color:var(--text-muted); font-weight:500; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02); }
+.data-table td { padding:.55rem .7rem; border-bottom:1px solid rgba(255,255,255,.04); }
+.data-table tr:hover td { background:rgba(0,229,160,.03); }
+
+.btn-sm {
+  padding:.3rem .75rem; border-radius:5px; font-size:.75rem; font-weight:600;
+  cursor:pointer; border:none; transition:all .2s; margin-right:.3rem;
+}
+.btn-sm.approve { background:var(--accent); color:#060b10; }
+.btn-sm.approve:hover { box-shadow:0 0 12px var(--accent-dim); }
+.btn-sm.reject { background:rgba(255,92,110,.15); color:var(--danger); border:1px solid rgba(255,92,110,.25); }
+.btn-sm.reject:hover { background:rgba(255,92,110,.25); }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-danger:hover { box-shadow:0 0 12px rgba(255,92,110,.3); }
+
+/* 价格管理行 */
+.pricing-row { display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1.5rem; }
+.pricing-item { flex:1; min-width:150px; }
+.pricing-item label { display:block; font-size:.78rem; color:var(--text-dim); margin-bottom:.3rem; }
+.pricing-item input {
+  width:100%; padding:.55rem .7rem; background:#080d14; border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-size:.85rem; outline:none;
+}
+.pricing-item input:focus { border-color:var(--accent); }
+
+.dealer-public-link {
+  display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem;
+  background:var(--accent-dim); border-radius:6px; font-size:.82rem; color:var(--accent);
+  margin-bottom:1rem; word-break:break-all;
+}
+
+.tab-nav { display:flex; gap:.25rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.tab-nav-btn {
+  padding:.5rem 1.1rem; border-radius:6px; font-size:.8rem; font-weight:500;
+  cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-dim);
+  transition:all .2s;
+}
+.tab-nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+.tab-nav-btn.active { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+
+.empty-state { text-align:center; padding:2rem; color:var(--text-muted); font-size:.85rem; }
+
+.toast {
+  position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:999;
+  padding:.65rem 1.5rem; border-radius:8px; font-size:.84rem; font-weight:500;
+  animation:toastIn .3s, toastOut .3s 2.7s forwards;
+  pointer-events:none;
+}
+.toast.success { background:var(--accent); color:#060b10; }
+.toast.error { background:var(--danger); color:#fff; }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+@keyframes toastOut { from{opacity:1} to{opacity:0} }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">VEILORA</div>
+    <ul class="nav-links">
+      <li><a href="#hero" class="active">概览</a></li>
+      <li><a href="#modules">功能模块</a></li>
+      <li><a href="#demo">真机演示</a></li>
+      <li><a href="#order">预约购买</a></li>
+      <li><a href="/dealer">经销商门户</a></li>
+      <li><a href="/admin">管理后台</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- AI 智能问答（DeepSeek 风格） -->
+<section class="ai-hero" id="aiHero">
+  <div class="ai-hero-title">有任何问题，尽管问我</div>
+  <div class="ai-hero-desc">基于 VEILORA 安全手机用户使用手册，快速为你解答</div>
+  <div class="ai-input-wrap">
+    <textarea id="aiInput" placeholder="输入你的问题，例如：隐私空间如何创建？" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
+    <div class="ai-input-actions">
+      <span class="ai-input-hint">换行按 Shift+Enter，发送按 Enter</span>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="sendAI()">发送</button>
+    </div>
+  </div>
+</section>
+<div class="ai-answers" id="aiAnswers"></div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-badge">REAL DEVICE DEMO</div>
+  <h1>VEILORA 安全手机</h1>
+  <p>8 大安全模块 · 22 项核心防护能力 — 从端到端加密通信到硬件级空间隔离，重新定义移动安全边界。</p>
+  <div class="cta">
+    <a href="#demo" class="btn btn-primary">进入真机演示</a>
+    <a href="#modules" class="btn btn-ghost">查看功能矩阵</a>
+  </div>
+</section>
+
+<!-- 功能模块总览 -->
+<section class="section" id="modules">
+  <div class="section-header">
+    <h2>安全功能矩阵</h2>
+    <p class="sub">8 大安全模块覆盖通信加密、隐私空间、网络隐身、应急还原等全方位防护场景</p>
+  </div>
+  <div class="module-grid">
+
+    <div class="module-card">
+      <div class="card-num">模块 01</div>
+      <h3>隐私空间</h3>
+      <p class="card-desc">物理级多空间隔离 + 应用沙箱 + 文件级加密，双 PIN 码无感切换，独立 UID / 独立密钥。</p>
+      <div class="tag-list">
+        <span class="tag">双PIN切换</span><span class="tag">文件同步</span><span class="tag">独立加密</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 02</div>
+      <h3>网络隐身与防追踪</h3>
+      <p class="card-desc">设备隐身规避嗅探与端口扫描，流量防火墙按应用级精准管控网络访问。</p>
+      <div class="tag-list">
+        <span class="tag">设备隐身</span><span class="tag">流量管控</span><span class="tag warn">反追踪</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 03</div>
+      <h3>应用权限管控</h3>
+      <p class="card-desc">实时审计所有 APP 对通讯录/相册/麦克风/定位等敏感资源的调用，超级隐私模式一键断联。</p>
+      <div class="tag-list">
+        <span class="tag">权限审计</span><span class="tag">行为监控</span><span class="tag danger">超级隐私</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 04</div>
+      <h3>即时通信加密</h3>
+      <p class="card-desc">悬浮安全锁唤出密写工具，文字语音文件端到端加密，第三方服务器仅见无法破解的乱码。</p>
+      <div class="tag-list">
+        <span class="tag">密文聊天</span><span class="tag">.xefc 加密文件</span><span class="tag">加密语音</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 05</div>
+      <h3>私有云加密备份</h3>
+      <p class="card-desc">支持 WebDAV 自建 NAS / 个人服务器，离屏即加密，端到端保护，全自主数据主权。</p>
+      <div class="tag-list">
+        <span class="tag">WebDAV</span><span class="tag">自动备份</span><span class="tag">端到端加密</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 06</div>
+      <h3>具身安全智能体</h3>
+      <p class="card-desc">本地 AI 主动防御：智能识别零日攻击、禁止远控、多维度风险审计、USB-C 端口防护。</p>
+      <div class="tag-list">
+        <span class="tag">AI 防御</span><span class="tag">禁止远控</span><span class="tag danger">漏洞防护</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 07</div>
+      <h3>三级密钥应急体系</h3>
+      <p class="card-desc">日常密钥 → 隐私还原密钥 → 手机还原密钥，支持远程锁定 / 轨迹追踪 / 远程抹除。</p>
+      <div class="tag-list">
+        <span class="tag">还原密码</span><span class="tag">远程锁定</span><span class="tag danger">远程抹除</span>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="card-num">模块 08</div>
+      <h3>账号安全体系</h3>
+      <p class="card-desc">设备硬件唯一强绑定，恢复密语离线保管云端不留存，关键操作强制身份验证。</p>
+      <div class="tag-list">
+        <span class="tag">恢复密语</span><span class="tag">设备绑定</span><span class="tag danger">身份验证</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 真机演示 -->
+<section class="section" id="demo">
+  <div class="section-header">
+    <h2>真机交互演示</h2>
+    <p class="sub">以下每个 Tab 对应真机上的一项核心安全功能，可直接操作体验</p>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-tabs" id="demoTabs">
+      <button class="demo-tab active" data-tab="encrypt-chat">加密通信</button>
+      <button class="demo-tab" data-tab="encrypt-file">文件加密</button>
+      <button class="demo-tab" data-tab="stealth">网络隐身</button>
+      <button class="demo-tab" data-tab="super-privacy">超级隐私</button>
+      <button class="demo-tab" data-tab="dual-pin">双 PIN 空间切换</button>
+      <button class="demo-tab" data-tab="emergency">应急还原</button>
+    </div>
+
+    <!-- 1. 加密通信 -->
+    <div class="demo-content active" id="encrypt-chat">
+      <h4>端到端加密通信演示</h4>
+      <p>在下方输入明文，点击加密生成密文并自动复制到剪贴板。将密文粘贴到聊天输入框发送，悬浮在密文气泡上即可查看解密后的明文。全程使用 AES-256-GCM 真加密。</p>
+
+      <!-- 加密区域 -->
+      <div class="encrypt-area">
+        <div class="encrypt-label">明文输入</div>
+        <textarea id="plaintextInput" placeholder="在此输入要加密的明文消息..."></textarea>
+        <div class="encrypt-actions">
+          <button class="encrypt-btn" id="encryptBtn" onclick="encryptAndCopy()">加密并复制密文</button>
+          <span class="encrypt-toast" id="encryptToast">密文已复制到剪贴板，快去粘贴发送吧</span>
+        </div>
+      </div>
+
+      <!-- 聊天区域 -->
+      <div class="chat-box">
+        <div class="chat-toggle" style="margin-bottom:.8rem">
+          <span style="color:var(--accent);font-size:.76rem;">AES-256-GCM 端到端加密 | 共享密钥已协商</span>
+        </div>
+        <div id="chatMessages">
+          <div class="chat-bubble info">会话已建立（AES-256-GCM），请在加密区域生成密文后粘贴到此发送</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="在此粘贴密文，按 Enter 发送..." onkeydown="if(event.key==='Enter')sendCipherMsg()">
+          <button onclick="sendCipherMsg()">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 文件加密 -->
+    <div class="demo-content" id="encrypt-file">
+      <h4>文件加密传输 (.xefc)</h4>
+      <p>模拟微信发送加密文件：选择 .xefc 文件 → 发送到聊天 → 点击文件体验 VEILORA 解密流程。</p>
+
+      <!-- 微信 Mock -->
+      <div class="wechat-mock">
+        <div class="wechat-header">
+          <div class="wechat-back">&lt;</div>
+          <div class="wechat-title">文件传输助手</div>
+          <div class="wechat-menu">&#8942;</div>
+        </div>
+        <div class="wechat-chat" id="wechatChat">
+          <div class="wx-bubble other">你好，文件接收成功，请查看</div>
+        </div>
+        <div class="wechat-input">
+          <button onclick="toggleFilePicker()">+</button>
+          <input type="text" placeholder="选择文件后点击发送" readonly id="wechatInputHint">
+          <button id="wechatSendBtn" onclick="sendSelectedFile()">发送</button>
+        </div>
+      </div>
+
+      <!-- 文件选择器 -->
+      <div class="file-picker" id="filePicker" style="display:none;">
+        <div class="file-picker-header">选择文件</div>
+        <div class="file-picker-item" data-file="png" onclick="selectFile(this)">
+          <div class="file-picker-icon">&#x1F5BC;</div>
+          <div class="file-picker-info">
+            <div class="file-picker-name">产品原型图.png</div>
+            <div class="file-picker-meta">5.1 MB</div>
+          </div>
+        </div>
+        <div class="file-picker-item" data-file="xefc" onclick="selectFile(this)">
+          <div class="file-picker-icon">&#x1F512;</div>
+          <div class="file-picker-info">
+            <div class="file-picker-name">产品原型图.xefc</div>
+            <div class="file-picker-meta">VEILORA 加密文件</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 网络隐身 -->
+    <div class="demo-content" id="stealth">
+      <h4>设备网络隐身</h4>
+      <p>开启后将设备从局域网/互联网扫描中隐藏，规避嗅探与端口扫描。关闭 GPS 与基站连接，动态收敛攻击面。</p>
+      <div class="radar-area">
+        <div class="radar" id="radar">
+          <div class="radar-dot" style="top:30%;left:40%"></div>
+          <div class="radar-dot" style="top:55%;left:65%"></div>
+          <div class="radar-dot" style="top:70%;left:30%"></div>
+          <div class="radar-label" id="radarLabel">设备可见</div>
+        </div>
+        <div class="stealth-toggle" id="stealthBtn" onclick="toggleStealth()">开启隐身模式</div>
+        <p style="margin-top:1rem;font-size:.78rem;color:var(--text-muted)" id="stealthNote">当前：设备在网络中可被扫描发现</p>
+      </div>
+
+      <hr style="border-color:rgba(255,255,255,.06);margin:1.8rem 0 1.2rem">
+
+      <h4 style="margin-bottom:.6rem">⚡ 真实局域网设备扫描</h4>
+      <p style="color:var(--text-muted);font-size:.8rem;margin-bottom:1rem;">对当前局域网执行真实 Ping Sweep + ARP 表扫描，发现所有接入设备。</p>
+      <div class="scan-bar">
+        <button class="scan-btn" id="scanBtn" onclick="startNetworkScan()">🔍 扫描局域网</button>
+        <span class="scan-status" id="scanStatus"></span>
+      </div>
+      <div class="scan-results" id="scanResults" style="display:none">
+        <div class="scan-summary" id="scanSummary"></div>
+        <table class="device-table">
+          <thead><tr><th>IP 地址</th><th>MAC 地址</th><th>厂商</th><th>类型</th></tr></thead>
+          <tbody id="deviceList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. 超级隐私 -->
+    <div class="demo-content" id="super-privacy">
+      <h4>超级隐私模式</h4>
+      <p>一键触发驱动层强制禁用相机、麦克风及 GPS 定位模块，彻底切断所有数据交互。适用于涉密会议等场景。</p>
+      <div class="privacy-grid">
+        <div class="pcard on" id="pCam"><div class="picon">📷</div><div class="plabel">相机</div><div class="pstate">正常</div></div>
+        <div class="pcard on" id="pMic"><div class="picon">🎤</div><div class="plabel">麦克风</div><div class="pstate">正常</div></div>
+        <div class="pcard on" id="pGps"><div class="picon">📍</div><div class="plabel">GPS 定位</div><div class="pstate">正常</div></div>
+      </div>
+      <button class="pmaster-btn" id="privacyMaster" onclick="toggleSuperPrivacy()">⚡ 一键启用超级隐私</button>
+    </div>
+
+    <!-- 5. 双 PIN 空间切换 -->
+    <div class="demo-content" id="dual-pin">
+      <h4>双 PIN 码空间切换</h4>
+      <p>两套独立 PIN，触发完全隔离的桌面环境。在锁屏输入 <b>123456</b> 进入主空间（应用更多），输入 <b>000000</b> 进入隐私空间（仅保留最基本应用）。</p>
+
+      <div class="dual-pin-phone">
+        <div class="dual-pin-notch"></div>
+
+        <!-- 锁屏 -->
+        <div class="lock-screen" id="lockScreen">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-time" id="lockTime">09:41</div>
+          <div class="lock-date" id="lockDate">2026年7月16日 星期四</div>
+          <div class="lock-pin-dots" id="lockPinDots">
+            <div class="lock-pin-dot"></div><div class="lock-pin-dot"></div><div class="lock-pin-dot"></div>
+            <div class="lock-pin-dot"></div><div class="lock-pin-dot"></div><div class="lock-pin-dot"></div>
+          </div>
+          <div class="pin-pad" id="pinPad">
+            <button class="pin-key" data-key="1">1</button>
+            <button class="pin-key" data-key="2">2</button>
+            <button class="pin-key" data-key="3">3</button>
+            <button class="pin-key" data-key="4">4</button>
+            <button class="pin-key" data-key="5">5</button>
+            <button class="pin-key" data-key="6">6</button>
+            <button class="pin-key" data-key="7">7</button>
+            <button class="pin-key" data-key="8">8</button>
+            <button class="pin-key" data-key="9">9</button>
+            <button class="pin-key del" id="pinDel">删除</button>
+            <button class="pin-key" data-key="0">0</button>
+            <button class="pin-key del" id="pinClear">清空</button>
+          </div>
+          <div class="lock-msg" id="lockMsg">请输入 6 位 PIN 码</div>
+        </div>
+
+        <!-- 主屏幕（主空间 123456） -->
+        <div class="home-screen" id="homeMain" style="display:none;">
+          <div class="home-status-bar">
+            <div class="home-time" id="mainTime">09:41</div>
+            <div class="space-tag main">主空间 · UID 10001</div>
+            <div>📶 🔋</div>
+          </div>
+          <div class="app-grid" id="appGridMain"></div>
+          <div class="home-bottom-bar">
+            <button class="home-bottom-btn">📞</button>
+            <button class="home-bottom-btn">💬</button>
+            <button class="home-bottom-btn">🌐</button>
+            <button class="home-bottom-btn lock-btn" onclick="lockPhone()">🔒</button>
+          </div>
+        </div>
+
+        <!-- 主屏幕（隐私空间 000000） -->
+        <div class="home-screen" id="homePrivate" style="display:none;">
+          <div class="home-status-bar">
+            <div class="home-time" id="privateTime">09:41</div>
+            <div class="space-tag private">隐私空间 · UID 10002</div>
+            <div>📶 🔋</div>
+          </div>
+          <div class="app-grid" id="appGridPrivate"></div>
+          <div class="home-bottom-bar">
+            <button class="home-bottom-btn">📞</button>
+            <button class="home-bottom-btn">💬</button>
+            <button class="home-bottom-btn">🌐</button>
+            <button class="home-bottom-btn lock-btn" onclick="lockPhone()">🔒</button>
+          </div>
+        </div>
+
+        <!-- 手机内 Toast -->
+        <div class="em-toast" id="phoneToast" style="display:none;"></div>
+      </div>
+
+      <div style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-muted)">
+        提示：123456 触发主空间（含 12 个应用） · 000000 触发隐私空间（含 5 个应用）
+      </div>
+    </div>
+
+    <!-- 6. 应急还原 -->
+    <div class="demo-content" id="emergency">
+      <h4>应急还原</h4>
+      <p>在锁屏界面输入应急还原密码 <b>999999</b>，模拟设备远程抹除与恢复出厂设置。相册中的图片将被清除。</p>
+
+      <div class="emergency-phone" id="emDemoPhone">
+        <div class="emergency-notch"></div>
+
+        <!-- 锁屏 -->
+        <div class="em-lock-screen" id="emLockScreen2">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-time" id="emLockTime2">09:41</div>
+          <div class="lock-date" id="emLockDate2">2026年7月16日 星期四</div>
+          <div class="em-lock-pin-dots" id="emLockPinDots2">
+            <div class="em-lock-dot"></div><div class="em-lock-dot"></div><div class="em-lock-dot"></div>
+            <div class="em-lock-dot"></div><div class="em-lock-dot"></div><div class="em-lock-dot"></div>
+          </div>
+          <div class="pin-pad" id="emRestorePad">
+            <button class="pin-key" data-key="1">1</button>
+            <button class="pin-key" data-key="2">2</button>
+            <button class="pin-key" data-key="3">3</button>
+            <button class="pin-key" data-key="4">4</button>
+            <button class="pin-key" data-key="5">5</button>
+            <button class="pin-key" data-key="6">6</button>
+            <button class="pin-key" data-key="7">7</button>
+            <button class="pin-key" data-key="8">8</button>
+            <button class="pin-key" data-key="9">9</button>
+            <button class="pin-key del" id="emRestoreDel">删除</button>
+            <button class="pin-key" data-key="0">0</button>
+            <button class="pin-key del" id="emRestoreClear">清空</button>
+          </div>
+          <div class="lock-msg" id="emLockMsg2">输入 6 位应急还原密码（默认：999999）</div>
+        </div>
+
+        <!-- 主屏幕（含相册） -->
+        <div class="em-home-screen" id="emHomeScreen2" style="display:none;">
+          <div class="home-status-bar">
+            <div class="home-time" id="emMainTime2">09:41</div>
+            <div class="space-tag main">主空间</div>
+            <div>📶 🔋</div>
+          </div>
+          <div class="app-grid" id="emAppGrid"></div>
+          <div class="home-bottom-bar">
+            <button class="home-bottom-btn">📞</button>
+            <button class="home-bottom-btn">💬</button>
+            <button class="home-bottom-btn">🌐</button>
+            <button class="home-bottom-btn lock-btn" onclick="emLockPhone2()">🔒</button>
+          </div>
+        </div>
+
+        <!-- 应急还原 - 黑屏覆盖 -->
+        <div class="restore-overlay" id="emRestoreOverlay2">
+          <div class="restore-text" id="emRestoreText2">正在擦除所有数据...</div>
+          <div class="restore-progress" id="emRestoreProgress2"></div>
+          <div class="restore-logo" id="emRestoreLogo2">VEILORA</div>
+        </div>
+
+        <!-- 应急还原 - 配置向导 -->
+        <div class="config-overlay" id="emConfigOverlay2">
+          <div class="config-step" id="emConfigStep1_2">
+            <div class="config-done-icon">🛡️</div>
+            <h2>欢迎使用 VEILORA 安全手机</h2>
+            <p>设备已恢复出厂设置，请跟随向导完成初始配置</p>
+            <button class="config-btn primary" onclick="emNextConfigStep2()">开始配置</button>
+          </div>
+          <div class="config-step" id="emConfigStep2_2" style="display:none;">
+            <h2>选择语言</h2>
+            <p>请选择系统显示语言</p>
+            <div class="config-lang-list">
+              <div class="config-lang-item selected" data-lang="zh-CN" onclick="emSelectConfigLang2(this)">简体中文</div>
+              <div class="config-lang-item" data-lang="en" onclick="emSelectConfigLang2(this)">English</div>
+              <div class="config-lang-item" data-lang="ja" onclick="emSelectConfigLang2(this)">日本語</div>
+            </div>
+            <button class="config-btn primary" onclick="emNextConfigStep2()" style="margin-top:1.5rem;">下一步</button>
+          </div>
+          <div class="config-step" id="emConfigStep3_2" style="display:none;">
+            <h2>网络设置</h2>
+            <p>选择 Wi-Fi 网络或稍后设置</p>
+            <div class="config-net-list">
+              <div class="config-net-item"><span>VEILORA-Secure</span><span class="net-lock">🔒</span></div>
+              <div class="config-net-item"><span>Office-Guest</span></div>
+              <div class="config-net-item"><span>Home-5G</span><span class="net-lock">🔒</span></div>
+            </div>
+            <button class="config-btn primary" onclick="emNextConfigStep2()">连接</button>
+            <button class="config-btn ghost" onclick="emNextConfigStep2()">跳过</button>
+          </div>
+          <div class="config-step" id="emConfigStep4_2" style="display:none;">
+            <div class="config-done-icon">✅</div>
+            <h2>配置完成</h2>
+            <p>所有设置已完成，欢迎开始使用</p>
+            <button class="config-btn primary" onclick="emFinishConfig2()">进入主空间</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-muted)">
+        提示：输入 <b>999999</b> 触发应急还原 · 还原后相册图片将被清空
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 预约购买 -->
+<section class="section" id="order">
+  <div class="section-header">
+    <h2>预约购买</h2>
+    <p class="sub">VEILORA 安全手机现支持预约，选择版本后提交联系方式即可</p>
+  </div>
+
+  <div class="order-layout" style="max-width:900px;margin:0 auto;display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;">
+
+    <!-- 标准版 -->
+    <div class="order-card" data-edition="standard">
+      <div class="order-card-badge">标准版</div>
+      <div class="order-card-price">
+        <span class="price-cn">¥12,888</span>
+        <span class="price-divider">|</span>
+        <span class="price-intl">$2,300</span>
+      </div>
+      <div class="order-card-specs">
+        <div class="spec-item">VEILORA OS 3.0</div>
+        <div class="spec-item">安全芯片 SE-200</div>
+        <div class="spec-item">6.7" AMOLED</div>
+        <div class="spec-item">16GB + 128GB</div>
+        <div class="spec-item">基础安全套件</div>
+      </div>
+      <button class="order-card-btn" onclick="openReserve('standard')">预约标准版</button>
+    </div>
+
+    <!-- 专业版 -->
+    <div class="order-card" data-edition="pro" style="border-color:var(--accent);">
+      <div class="order-card-badge" style="background:var(--accent);color:#060b10;">专业版</div>
+      <div class="order-card-price">
+        <span class="price-cn">¥15,888</span>
+        <span class="price-divider">|</span>
+        <span class="price-intl">$2,868</span>
+      </div>
+      <div class="order-card-specs">
+        <div class="spec-item">VEILORA OS 3.0 Pro</div>
+        <div class="spec-item">安全芯片 SE-300</div>
+        <div class="spec-item">6.9" LTPO AMOLED</div>
+        <div class="spec-item">16GB + 512GB</div>
+        <div class="spec-item">高级安全套件 + 应急保护</div>
+      </div>
+      <button class="order-card-btn" onclick="openReserve('pro')" style="background:var(--accent);color:#060b10;">预约专业版</button>
+    </div>
+
+  </div>
+
+  <!-- 预约弹窗 -->
+  <div class="reserve-modal-overlay" id="reserveModalOverlay" style="display:none;">
+    <div class="reserve-modal">
+      <div class="reserve-modal-header">
+        <h3 id="reserveModalTitle">预约 VEILORA 标准版</h3>
+        <button class="reserve-modal-close" onclick="closeReserve()">&times;</button>
+      </div>
+      <div class="reserve-modal-body">
+        <div class="form-group">
+          <label>姓名</label>
+          <input type="text" id="reserveName" placeholder="请输入姓名">
+        </div>
+        <div class="form-group">
+          <label>手机号</label>
+          <input type="text" id="reservePhone" placeholder="请输入手机号">
+        </div>
+        <div class="form-group">
+          <label>邮箱（选填）</label>
+          <input type="email" id="reserveEmail" placeholder="请输入邮箱">
+        </div>
+        <button class="order-card-btn" onclick="submitReserve()" style="width:100%;margin-top:.5rem;">提交预约</button>
+      </div>
+      <div class="reserve-modal-success" id="reserveSuccess" style="display:none;">
+        <div class="check">&#10003;</div>
+        <div class="reserve-success-text">预约已提交</div>
+        <div style="font-size:.82rem;color:var(--text-dim);margin-top:.3rem;">我们将在产品上市后第一时间通知您</div>
+        <button class="order-card-btn ghost" onclick="closeReserve()" style="margin-top:1.5rem;">关闭</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+
+<!-- ===== 经销商门户 ===== -->
+<section class="dealer-section" id="dealerPortal">
+  <h2>经销商门户</h2>
+  <p class="sub">成为 VEILORA 授权经销商，自定义价格，获取专属经销页面</p>
+
+  <!-- 注册/登录表单 -->
+  <div id="dealerAuth">
+    <div class="auth-card">
+      <h3 id="authTitle">经销商登录</h3>
+      <div id="authFields">
+        <input type="email" class="form-input" id="dlEmail" placeholder="邮箱">
+        <input type="password" class="form-input" id="dlPassword" placeholder="密码">
+        <div id="regExtra" style="display:none">
+          <input type="text" class="form-input" id="dlName" placeholder="姓名">
+          <input type="text" class="form-input" id="dlCompany" placeholder="公司名称（选填）">
+          <input type="text" class="form-input" id="dlPhone" placeholder="手机号（选填）">
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" id="authBtn" onclick="dealerAuth()">登录</button>
+        <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:.5rem;text-align:center;display:none;"></div>
+      </div>
+      <div class="auth-switch">
+        <span id="switchText">还没有账号？</span> <a id="switchLink" onclick="toggleAuthMode()">立即注册</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 经销商后台（登录后显示） -->
+  <div class="dashboard" id="dealerDashboard">
+    <div class="dashboard-header">
+      <div class="dealer-info">
+        <h3 id="dashName">—</h3>
+        <div style="font-size:.82rem;color:var(--text-dim);"><span id="dashCompany">—</span> · <span id="dashEmail">—</span></div>
+        <div style="margin-top:.3rem"><span class="status-badge" id="dashStatus">—</span></div>
+      </div>
+      <button class="btn btn-ghost" onclick="dealerLogout()">退出登录</button>
+    </div>
+
+    <!-- pending 状态 -->
+    <div class="dash-card" id="pendingArea" style="display:none">
+      <h4>审核状态</h4>
+      <p style="color:var(--warn);margin-bottom:1rem;">您的经销商申请正在等待审核中，审核通过后即可使用全部功能。</p>
+      <button class="btn btn-primary" id="applyBtn" onclick="applyDealer()">提交申请</button>
+      <span id="applyMsg" style="font-size:.78rem;color:var(--text-dim);margin-left:.8rem;display:none;"></span>
+    </div>
+
+    <!-- approved 状态 -->
+    <div id="approvedArea" style="display:none">
+      <!-- 定价管理 -->
+      <div class="dash-card">
+        <h4>定价管理</h4>
+        <div class="pricing-row">
+          <div class="pricing-item"><label>标准版 (¥)</label><input type="number" id="priceStandard" placeholder="12888"></div>
+          <div class="pricing-item"><label>Pro版 (¥)</label><input type="number" id="pricePro" placeholder="15888"></div>
+          <div class="pricing-item"><label>安全软件 (¥)</label><input type="number" id="priceSoftware" placeholder="8888"></div>
+        </div>
+        <button class="btn btn-primary" onclick="updatePricing()">保存定价</button>
+        <span id="pricingMsg" style="font-size:.78rem;color:var(--text-dim);margin-left:.8rem;display:none;"></span>
+      </div>
+
+      <!-- 专属链接 -->
+      <div class="dash-card">
+        <h4>专属经销页面</h4>
+        <div class="dealer-public-link" id="dealerLink">—</div>
+        <p style="font-size:.78rem;color:var(--text-dim);">将以上链接分享给客户，客户可查看您的产品价格、提交留资和下单。</p>
+      </div>
+
+      <!-- 标签切换 -->
+      <div class="tab-nav" id="dashTabs">
+        <button class="tab-nav-btn active" onclick="switchDashTab('leads')">客户线索</button>
+        <button class="tab-nav-btn" onclick="switchDashTab('orders')">订单列表</button>
+      </div>
+
+      <!-- 客户线索 -->
+      <div class="dash-card" id="tabLeads">
+        <h4>客户线索</h4>
+        <div id="leadsContent"><div class="empty-state">加载中...</div></div>
+      </div>
+
+      <!-- 订单列表 -->
+      <div class="dash-card" id="tabOrders" style="display:none">
+        <h4>订单列表</h4>
+        <div id="ordersContent"><div class="empty-state">加载中...</div></div>
+      </div>
+    </div>
+
+    <!-- rejected 状态 -->
+    <div class="dash-card" id="rejectedArea" style="display:none">
+      <h4>审核被拒绝</h4>
+      <p style="color:var(--danger);">您的经销商申请未通过审核，如需了解更多信息请联系管理员。</p>
+    </div>
+  </div>
+
+  <!-- 经销商公开页面 -->
+  <div class="dashboard" id="dealerPublic" style="display:none">
+    <div class="dashboard-header">
+      <div class="dealer-info">
+        <h3 id="pubName">—</h3>
+        <div id="pubCompany" style="font-size:.82rem;color:var(--text-dim);">—</div>
+      </div>
+      <button class="btn btn-ghost" onclick="switchToDealerAuth()">返回经销商门户</button>
+    </div>
+
+    <!-- 价格表 -->
+    <div class="dash-card">
+      <h4>产品价格</h4>
+      <table class="data-table" id="pubPricing"></table>
+    </div>
+
+    <!-- 客户留资 -->
+    <div class="dash-card">
+      <h4>留下联系方式</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
+        <input type="text" class="form-input" id="leadName" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="text" class="form-input" id="leadPhone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="email" class="form-input" id="leadEmail" placeholder="邮箱" style="flex:1;min-width:180px;margin-bottom:0;">
+      </div>
+      <textarea class="form-input" id="leadMessage" placeholder="留言（选填）" style="margin-bottom:1rem;"></textarea>
+      <button class="btn btn-primary" onclick="submitLead()">提交</button>
+      <div id="leadMsg" style="font-size:.8rem;margin-top:.5rem;display:none;"></div>
+    </div>
+
+    <!-- 客户下单 -->
+    <div class="dash-card">
+      <h4>在线下单</h4>
+      <div class="form-group">
+        <label>选择产品</label>
+        <select id="pubProduct" style="width:100%;padding:.65rem .9rem;background:#080d14;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;outline:none;appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238899aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right .8rem center;padding-right:2.2rem;">
+          <option value="standard">标准版</option>
+          <option value="pro">Pro版</option>
+          <option value="software">安全软件</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
+        <input type="number" class="form-input" id="pubQty" value="1" min="1" placeholder="数量" style="flex:1;min-width:100px;margin-bottom:0;">
+        <input type="text" class="form-input" id="pubOrderName" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="text" class="form-input" id="pubOrderPhone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
+      </div>
+      <button class="btn btn-primary" onclick="submitPubOrder()">提交订单</button>
+      <div id="pubOrderMsg" style="font-size:.8rem;margin-top:.5rem;display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 管理后台 ===== -->
+<section class="dealer-section" id="adminPanel">
+  <h2>管理后台</h2>
+  <p class="sub">管理所有经销商、审核申请、查看线索与订单</p>
+
+  <!-- 管理员登录 -->
+  <div id="adminAuth">
+    <div class="auth-card">
+      <h3>管理员登录</h3>
+      <input type="password" class="form-input" id="adminPassword" placeholder="管理员密码" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="adminLogin()">登录</button>
+      <div id="adminError" style="color:var(--danger);font-size:.8rem;margin-top:.5rem;text-align:center;display:none;"></div>
+    </div>
+  </div>
+
+  <!-- 管理员后台 -->
+  <div class="dashboard" id="adminDashboard">
+    <div class="dashboard-header">
+      <h3>经销商管理</h3>
+      <button class="btn btn-ghost" onclick="adminLogout()">退出登录</button>
+    </div>
+
+    <div class="dash-card">
+      <h4>经销商列表</h4>
+      <div id="adminDealersContent"><div class="empty-state">加载中...</div></div>
+    </div>
+
+    <div class="tab-nav" id="adminTabs">
+      <button class="tab-nav-btn active" onclick="switchAdminTab('leads')">全部线索</button>
+      <button class="tab-nav-btn" onclick="switchAdminTab('orders')">全部订单</button>
+    </div>
+
+    <div class="dash-card" id="tabAdminLeads">
+      <h4>全部客户线索</h4>
+      <div id="adminLeadsContent"><div class="empty-state">加载中...</div></div>
+    </div>
+
+    <div class="dash-card" id="tabAdminOrders" style="display:none">
+      <h4>全部订单</h4>
+      <div id="adminOrdersContent"><div class="empty-state">加载中...</div></div>
+    </div>
+  </div>
+</section>
+
+
+  <p>VEILORA Security Phone — 真机功能演示 Demo &copy; 2026</p>
+</footer>
+
+<script>
+// ---------- 粒子背景 ----------
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize(); window.addEventListener('resize', resize);
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    r: Math.random() * 1.5 + 0.5,
+  });
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,229,160,0.15)';
+    ctx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+// 连线
+function drawLines() {
+  const connCtx = canvas.getContext('2d');
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        connCtx.beginPath();
+        connCtx.moveTo(particles[i].x, particles[i].y);
+        connCtx.lineTo(particles[j].x, particles[j].y);
+        connCtx.strokeStyle = `rgba(0,229,160,${0.04 * (1 - dist / 100)})`;
+        connCtx.lineWidth = 0.5;
+        connCtx.stroke();
+      }
+    }
+  }
+}
+setInterval(() => { drawLines(); }, 200);
+
+// ---------- Tab 切换 ----------
+document.querySelectorAll('.demo-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.demo-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- 导航高亮 ----------
+window.addEventListener('scroll', () => {
+  const sections = ['hero','modules','demo','order'];
+  let current = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 100) current = id;
+  });
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+// ---------- 1. 加密通信 ----------
+// 共享密钥（演示用 32 字节 AES-256）
+const SHARED_KEY_RAW = 'VEILORA-2026-DEMO-CIPHER-KEY!!!!';
+
+async function getCryptoKey() {
+  const enc = new TextEncoder();
+  const keyData = enc.encode(SHARED_KEY_RAW);
+  return await crypto.subtle.importKey('raw', keyData, 'AES-GCM', false, ['encrypt', 'decrypt']);
+}
+
+async function encryptAndCopy() {
+  const plaintext = document.getElementById('plaintextInput').value.trim();
+  if (!plaintext) return;
+
+  const btn = document.getElementById('encryptBtn');
+  btn.disabled = true;
+  btn.textContent = '加密中...';
+
+  try {
+    const key = await getCryptoKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+    const combined = new Uint8Array(iv.length + cipherBuf.byteLength);
+    combined.set(iv);
+    combined.set(new Uint8Array(cipherBuf), iv.length);
+    const base64 = btoa(String.fromCharCode(...combined));
+    await navigator.clipboard.writeText(base64);
+
+    const toast = document.getElementById('encryptToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  } catch(e) {
+    alert('加密失败：' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '加密并复制密文';
+}
+
+async function sendCipherMsg() {
+  const input = document.getElementById('chatInput');
+  const cipherB64 = input.value.trim();
+  if (!cipherB64) return;
+
+  input.value = '';
+  const container = document.getElementById('chatMessages');
+
+  // 尝试解密
+  let plaintext;
+  try {
+    const combined = Uint8Array.from(atob(cipherB64), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const key = await getCryptoKey();
+    const decBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    plaintext = new TextDecoder().decode(decBuf);
+  } catch(e) {
+    plaintext = null;
+  }
+
+  // 显示密文气泡
+  const encDiv = document.createElement('div');
+  encDiv.className = 'chat-bubble encrypted hoverable';
+  // 截断显示密文
+  const displayCipher = cipherB64.length > 48 ? cipherB64.slice(0, 48) + '...' : cipherB64;
+  encDiv.textContent = displayCipher;
+
+  if (plaintext !== null) {
+    encDiv.setAttribute('data-plaintext', plaintext);
+    encDiv.addEventListener('mouseenter', showCipherTooltip);
+    encDiv.addEventListener('mouseleave', hideCipherTooltip);
+  } else {
+    encDiv.style.opacity = '0.6';
+    encDiv.style.textDecoration = 'line-through';
+    encDiv.textContent = '[无效密文] ' + displayCipher;
+  }
+
+  container.appendChild(encDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+// --- 悬浮解密 tooltip ---
+let tooltipEl = null;
+function showCipherTooltip(e) {
+  hideCipherTooltip();
+  const plaintext = e.target.getAttribute('data-plaintext');
+  tooltipEl = document.createElement('div');
+  tooltipEl.className = 'cipher-tooltip';
+  tooltipEl.textContent = plaintext;
+  document.body.appendChild(tooltipEl);
+
+  const rect = e.target.getBoundingClientRect();
+  const x = Math.min(rect.left, window.innerWidth - 380);
+  const y = rect.top - tooltipEl.offsetHeight - 8;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = (y > 0 ? y : rect.bottom + 8) + 'px';
+}
+function hideCipherTooltip() {
+  if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+}
+
+// ---------- 2. 文件加密 (WeChat Mock) ----------
+let selectedFileType = null;
+
+function toggleFilePicker() {
+  const picker = document.getElementById('filePicker');
+  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectFile(el) {
+  document.querySelectorAll('.file-picker-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedFileType = el.getAttribute('data-file');
+  const doc = document.getElementById('wechatInputHint');
+  const names = { png: '产品原型图.png', xefc: '产品原型图.xefc' };
+  doc.value = selectedFileType ? '已选择: ' + names[selectedFileType] : '';
+  doc.style.color = '#07c160';
+}
+
+function sendSelectedFile() {
+  if (!selectedFileType) { alert('请先在文件选择器中点击选择文件'); return; }
+  const chat = document.getElementById('wechatChat');
+  const names = { png: '产品原型图.png', xefc: '产品原型图.xefc' };
+  const name = names[selectedFileType];
+  const isXefc = selectedFileType === 'xefc';
+  const bubbleClass = 'wx-bubble me' + (isXefc ? ' wx-file-bubble xefc' : ' wx-file-bubble');
+
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const icon = isXefc ? '&#x1F512;' : '&#x1F5BC;';
+  const badgeHtml = isXefc ? '<span class="wx-file-badge">.xefc</span>' : '';
+  const meta = isXefc ? 'VEILORA 加密文件 · ' + time : '5.1 MB · ' + time;
+
+  const div = document.createElement('div');
+  div.className = bubbleClass;
+  div.innerHTML = '<div class="wx-file-icon">' + icon + '</div>' +
+    '<div class="wx-file-info"><div class="wx-file-name">' + name + '</div>' +
+    '<div class="wx-file-meta">' + meta + '</div></div>' + badgeHtml;
+
+  if (isXefc) {
+    div.onclick = function() { showUnsupportedDialog(); };
+  } else {
+    div.onclick = function() { showImageViewer(); };
+  }
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+
+  // reset
+  selectedFileType = null;
+  document.querySelectorAll('.file-picker-item').forEach(i => i.classList.remove('selected'));
+  const doc = document.getElementById('wechatInputHint');
+  doc.value = '';
+  doc.style.color = '';
+  document.getElementById('filePicker').style.display = 'none';
+}
+
+// --- 对话框: 暂不支持打开此类文件 ---
+function showUnsupportedDialog() {
+  removeOverlays();
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay';
+  overlay.innerHTML = '<div class="dialog-box">' +
+    '<div class="dialog-title">暂不支持打开此类文件</div>' +
+    '<div class="dialog-desc">文件格式 .xefc 暂时无法在微信中直接查看</div>' +
+    '<div class="dialog-actions">' +
+    '<button class="dialog-btn cancel" id="dCancel">取消</button>' +
+    '<button class="dialog-btn veilora" id="dVeilora">用VEILORA密件查看</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('dCancel').onclick = function() { overlay.remove(); };
+  document.getElementById('dVeilora').onclick = function() {
+    overlay.remove();
+    showLeaveWechatDialog();
+  };
+}
+
+// --- 对话框: 即将离开微信 ---
+function showLeaveWechatDialog() {
+  removeOverlays();
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay';
+  overlay.innerHTML = '<div class="dialog-box">' +
+    '<div class="dialog-title">即将离开微信，打开VEILORA密件查看</div>' +
+    '<div class="dialog-desc">VEILORA 将解密并安全显示该文件内容</div>' +
+    '<div class="dialog-actions">' +
+    '<button class="dialog-btn cancel" id="dCancel2">取消</button>' +
+    '<button class="dialog-btn confirm" id="dAllow">允许</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('dCancel2').onclick = function() { overlay.remove(); };
+  document.getElementById('dAllow').onclick = function() {
+    overlay.remove();
+    showImageViewer();
+  };
+}
+
+// --- 图片查看器 ---
+function showImageViewer() {
+  removeOverlays();
+  const overlay = document.createElement('div');
+  overlay.className = 'img-viewer';
+  overlay.innerHTML = '<div class="img-viewer-header">' +
+    '<span></span>' +
+    '<span class="img-viewer-badge">VEILORA 密件查看</span>' +
+    '<button class="img-viewer-close" id="imgClose">&times;</button>' +
+    '</div>' +
+    '<div class="img-viewer-content">' +
+    '<img src="mock-image.png" alt="产品原型图">' +
+    '</div>' +
+    '<div class="img-viewer-caption">产品原型图.png · 5.1 MB · VEILORA 解密查看</div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('imgClose').onclick = function() { overlay.remove(); };
+}
+
+function removeOverlays() {
+  document.querySelectorAll('.dialog-overlay, .img-viewer').forEach(el => el.remove());
+}
+
+// ---------- 3. 网络隐身 ----------
+let stealthOn = false;
+function toggleStealth() {
+  stealthOn = !stealthOn;
+  const radar = document.getElementById('radar');
+  const label = document.getElementById('radarLabel');
+  const btn = document.getElementById('stealthBtn');
+  const note = document.getElementById('stealthNote');
+
+  radar.classList.toggle('stealth', stealthOn);
+  label.textContent = stealthOn ? '设备已隐身' : '设备可见';
+  btn.textContent = stealthOn ? '关闭隐身模式' : '开启隐身模式';
+  btn.classList.toggle('active', stealthOn);
+  note.textContent = stealthOn
+    ? '当前：设备已从网络中隐藏，无法被扫描发现'
+    : '当前：设备在网络中可被扫描发现';
+}
+
+// ---------- 3b. 真实局域网扫描 ----------
+async function startNetworkScan() {
+  const btn = document.getElementById('scanBtn');
+  const status = document.getElementById('scanStatus');
+  const resultsDiv = document.getElementById('scanResults');
+  const summary = document.getElementById('scanSummary');
+  const tbody = document.getElementById('deviceList');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 扫描中...';
+  status.textContent = '正在 Ping Sweep 扫描 254 个地址，约需 3-5 秒...';
+  resultsDiv.style.display = 'block';
+  summary.textContent = '';
+  tbody.innerHTML = '';
+
+  const port = document.location.port || '8443';
+  const apiUrl = `${document.location.protocol}//${document.location.hostname}:${port}/network-scan?timeout=2`;
+
+  try {
+    const resp = await fetch(apiUrl);
+    const data = await resp.json();
+
+    if (!data.success) {
+      status.textContent = '扫描失败: ' + (data.error || '未知错误');
+      btn.disabled = false;
+      btn.textContent = '🔍 重新扫描';
+      return;
+    }
+
+    status.textContent = '';
+    summary.textContent = `扫描完成：发现 ${data.count} 台设备（${data.subnet}）`;
+
+    data.devices.forEach(d => {
+      const tr = document.createElement('tr');
+      if (d.isGateway) tr.className = 'gateway-row';
+
+      const ipClass = d.isLocalDevice ? 'local' : '';
+      const typeLabel = d.isGateway ? '🛡 网关' : d.isLocalDevice ? '📱 本机' : (d.vendor || '设备');
+
+      tr.innerHTML = `
+        <td class="${ipClass}">${d.ip}${d.isLocalDevice ? ' ←' : ''}</td>
+        <td><code style="font-size:.78rem">${d.mac}</code></td>
+        <td><span class="vendor-tag">${d.vendor}</span></td>
+        <td>${typeLabel}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (e) {
+    status.textContent = '网络请求失败: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 重新扫描';
+}
+
+// ---------- 4. 超级隐私 ----------
+let superPrivacyOn = false;
+function toggleSuperPrivacy() {
+  superPrivacyOn = !superPrivacyOn;
+  ['Cam','Mic','Gps'].forEach(id => {
+    const card = document.getElementById('p' + id);
+    const state = card.querySelector('.pstate');
+    card.classList.toggle('on', !superPrivacyOn);
+    card.classList.toggle('off', superPrivacyOn);
+    state.textContent = superPrivacyOn ? '已禁用' : '正常';
+  });
+  const btn = document.getElementById('privacyMaster');
+  btn.textContent = superPrivacyOn ? '🔓 退出超级隐私模式' : '⚡ 一键启用超级隐私';
+  btn.classList.toggle('active', superPrivacyOn);
+}
+
+// ---------- 5. 双 PIN 空间切换 ----------
+const MAIN_PIN = '123456';
+const PRIV_PIN = '000000';
+let pinInput = '';
+
+// 应用列表
+const appsMain = [
+  { icon:'💬', label:'微信', color:'#07c160' },
+  { icon:'🏢', label:'企业微信', color:'#1890ff' },
+  { icon:'✉️', label:'邮件', color:'#ff6b6b' },
+  { icon:'📅', label:'日历', color:'#fa8c16' },
+  { icon:'📷', label:'相机', color:'#444' },
+  { icon:'🖼️', label:'相册', color:'#eb2f96' },
+  { icon:'⚙️', label:'设置', color:'#666' },
+  { icon:'⏰', label:'时钟', color:'#13c2c2' },
+  { icon:'📁', label:'文件管理', color:'#faad14' },
+  { icon:'🌍', label:'浏览器', color:'#2f54eb' },
+  { icon:'🧮', label:'计算器', color:'#555' },
+  { icon:'📝', label:'备忘录', color:'#722ed1' },
+];
+const appsPrivate = [
+  { icon:'📷', label:'相机', color:'#444' },
+  { icon:'🖼️', label:'相册', color:'#eb2f96' },
+  { icon:'⚙️', label:'设置', color:'#666' },
+  { icon:'📁', label:'文件管理', color:'#faad14' },
+  { icon:'📝', label:'备忘录', color:'#722ed1' },
+];
+
+function buildAppGrid(containerId, apps) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  apps.forEach(a => {
+    const wrap = document.createElement('div');
+    wrap.className = 'app-icon-wrap';
+    wrap.innerHTML = '<div class="app-icon-img" style="background:' + a.color + '">' +
+      a.icon + '</div><div class="app-icon-label">' + a.label + '</div>';
+    // 相册 app 特殊处理
+    if (a.label === '相册') {
+      wrap.style.cursor = 'pointer';
+      wrap.addEventListener('click', () => {
+        if (galleryHasImages) {
+          showImageViewer();
+        } else {
+          showToastInPhone('相册为空');
+        }
+      });
+    }
+    grid.appendChild(wrap);
+  });
+}
+
+function showToastInPhone(text) {
+  const toast = document.getElementById('phoneToast');
+  toast.textContent = text;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+// 初始化
+buildAppGrid('appGridMain', appsMain);
+buildAppGrid('appGridPrivate', appsPrivate);
+
+// 更新时钟
+function updateLockTime() { const now = new Date(); document.getElementById('lockTime').textContent = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0'); }
+updateLockTime();
+
+// PIN 输入
+document.querySelectorAll('#pinPad .pin-key[data-key]').forEach(key => {
+  key.addEventListener('click', () => {
+    if (pinInput.length >= 6) return;
+    pinInput += key.getAttribute('data-key');
+    updatePinDots();
+    if (pinInput.length === 6) setTimeout(checkPin, 150);
+  });
+});
+document.getElementById('pinDel').addEventListener('click', () => {
+  if (pinInput.length > 0) { pinInput = pinInput.slice(0,-1); updatePinDots(); }
+});
+document.getElementById('pinClear').addEventListener('click', () => {
+  pinInput = ''; updatePinDots();
+});
+
+function updatePinDots() {
+  const dots = document.querySelectorAll('#lockPinDots .lock-pin-dot');
+  dots.forEach((d,i) => d.classList.toggle('fill', i < pinInput.length));
+}
+
+function checkPin() {
+  const lockMsg = document.getElementById('lockMsg');
+  const dots = document.getElementById('lockPinDots');
+
+  if (pinInput === MAIN_PIN) { enterSpace('main'); }
+  else if (pinInput === PRIV_PIN) { enterSpace('private'); }
+  else {
+    lockMsg.textContent = 'PIN 码错误，请重试';
+    lockMsg.className = 'lock-msg error';
+    dots.classList.add('lock-pin-error');
+    setTimeout(() => { pinInput = ''; updatePinDots(); dots.classList.remove('lock-pin-error'); lockMsg.textContent = '请输入 6 位 PIN 码'; lockMsg.className = 'lock-msg'; }, 1200);
+  }
+}
+
+function enterSpace(space) {
+  document.getElementById('lockScreen').classList.add('hidden');
+  if (space === 'main') {
+    document.getElementById('homeMain').style.display = 'flex';
+    document.getElementById('homePrivate').style.display = 'none';
+    const t = document.getElementById('lockTime').textContent;
+    document.getElementById('mainTime').textContent = t;
+  } else {
+    document.getElementById('homePrivate').style.display = 'flex';
+    document.getElementById('homeMain').style.display = 'none';
+    const t = document.getElementById('lockTime').textContent;
+    document.getElementById('privateTime').textContent = t;
+  }
+  pinInput = ''; updatePinDots();
+  if (space === 'main') { galleryHasImages = true; }
+  document.getElementById('lockMsg').textContent = '请输入 6 位 PIN 码';
+  document.getElementById('lockMsg').className = 'lock-msg';
+}
+
+function lockPhone() {
+  updateLockTime();
+  document.getElementById('lockScreen').classList.remove('hidden');
+  document.getElementById('homeMain').style.display = 'none';
+  document.getElementById('homePrivate').style.display = 'none';
+  pinInput = ''; updatePinDots();
+}
+
+// ---------- 预约购买 ----------
+let reserveEdition = 'standard';
+
+function openReserve(edition) {
+  reserveEdition = edition;
+  document.getElementById('reserveModalOverlay').style.display = 'flex';
+  document.getElementById('reserveModalTitle').textContent = 
+    edition === 'standard' ? '预约 VEILORA 标准版' : '预约 VEILORA 专业版';
+  document.getElementById('reserveName').value = '';
+  document.getElementById('reservePhone').value = '';
+  document.getElementById('reserveEmail').value = '';
+  document.getElementById('reserveSuccess').style.display = 'none';
+  document.querySelector('.reserve-modal-body').style.display = 'block';
+}
+
+function closeReserve() {
+  document.getElementById('reserveModalOverlay').style.display = 'none';
+}
+
+function submitReserve() {
+  const name = document.getElementById('reserveName').value.trim();
+  const phone = document.getElementById('reservePhone').value.trim();
+  const email = document.getElementById('reserveEmail').value.trim();
+  if (!name || !phone) {
+    alert('请填写姓名和手机号');
+    return;
+  }
+  
+  // 发送到后台
+  fetch('http://localhost:9000/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      dealer_id: window.brandDealerId || null,
+      edition: reserveEdition,
+      name: name,
+      phone: phone,
+      email: email
+    })
+  }).then(r => r.json()).then(data => {
+    document.querySelector('.reserve-modal-body').style.display = 'none';
+    document.getElementById('reserveSuccess').style.display = 'flex';
+  }).catch(err => {
+    document.querySelector('.reserve-modal-body').style.display = 'none';
+    document.getElementById('reserveSuccess').style.display = 'flex';
+  });
+}
+
+// 点击遮罩关闭
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'reserveModalOverlay') closeReserve();
+});
+
+// ========== AI 智能问答（DeepSeek 风格） ==========
+async function sendAI() {
+  const input = document.getElementById('aiInput');
+  const question = input.value.trim();
+  if (!question) return;
+  const answers = document.getElementById('aiAnswers');
+
+  // 创建问答卡片
+  const card = document.createElement('div');
+  card.className = 'ai-answer-card';
+  card.innerHTML = '<div class="q-label">你的问题</div><div class="q-text">' + question + '</div><div class="a-loading">思考中...</div>';
+  answers.prepend(card);
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('aiSendBtn').disabled = true;
+
+  try {
+    const resp = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question}) });
+    const data = await resp.json();
+    card.querySelector('.a-loading').remove();
+    const aDiv = document.createElement('div');
+    aDiv.className = 'a-text';
+    aDiv.textContent = data.answer || '抱歉，暂时无法回答这个问题。';
+    card.appendChild(aDiv);
+  } catch(e) {
+    card.querySelector('.a-loading').remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'a-text';
+    errDiv.textContent = '请求失败：' + e.message;
+    card.appendChild(errDiv);
+  }
+  document.getElementById('aiSendBtn').disabled = false;
+}
+
+// textarea 自动调整高度
+(function(){
+  const ta = document.getElementById('aiInput');
+  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 160) + 'px'; });
+})();
+
+// ========== 页面切换 ==========
+const allSections = ['aiHero','aiAnswers','hero','modules','demo','order'];
+function hideMainSections() {
+  allSections.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+  document.querySelector('footer').style.display = 'none';
+}
+function showMainSections() {
+  allSections.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = ''; });
+  document.querySelector('footer').style.display = '';
+}
+function hideAllDealerSections() {
+  document.getElementById('dealerPortal').classList.remove('active');
+  document.getElementById('adminPanel').classList.remove('active');
+}
+function showSection(sectionId) {
+  hideMainSections();
+  hideAllDealerSections();
+  document.getElementById(sectionId).classList.add('active');
+  window.scrollTo(0, 0);
+  if (sectionId === 'dealerPortal') {
+    const token = localStorage.getItem('veilora_token');
+    if (token) { loadDealerDashboard(); } else { showDealerAuth(); }
+  }
+  if (sectionId === 'adminPanel') {
+    const token = localStorage.getItem('veilora_token');
+    if (token) {
+      document.getElementById('adminAuth').style.display = 'none';
+      document.getElementById('adminDashboard').classList.add('active');
+      loadAdminDashboard();
+    }
+  }
+}
+// 导航点击"概览/功能模块/真机演示/预约购买"恢复主页
+document.querySelectorAll('.nav-links a[href^="#"]').forEach(a => {
+  if (a.getAttribute('href') === '#dealer' || a.getAttribute('href') === '#admin') return;
+  a.addEventListener('click', () => {
+    showMainSections();
+    hideAllDealerSections();
+    window.scrollTo(0, 0);
+  });
+});
+
+// ========== Toast ==========
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ========== 经销商认证 ==========
+let authIsLogin = true;
+function toggleAuthMode() {
+  authIsLogin = !authIsLogin;
+  document.getElementById('authTitle').textContent = authIsLogin ? '经销商登录' : '经销商注册';
+  document.getElementById('authBtn').textContent = authIsLogin ? '登录' : '注册';
+  document.getElementById('regExtra').style.display = authIsLogin ? 'none' : 'block';
+  document.getElementById('switchText').textContent = authIsLogin ? '还没有账号？' : '已有账号？';
+  document.getElementById('switchLink').textContent = authIsLogin ? '立即注册' : '去登录';
+  document.getElementById('authError').style.display = 'none';
+}
+
+function showDealerAuth() {
+  document.getElementById('dealerAuth').style.display = 'block';
+  document.getElementById('dealerDashboard').classList.remove('active');
+  document.getElementById('dealerPublic').style.display = 'none';
+}
+
+async function dealerAuth() {
+  const email = document.getElementById('dlEmail').value.trim();
+  const password = document.getElementById('dlPassword').value.trim();
+  const errEl = document.getElementById('authError');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; errEl.style.display = 'block'; return; }
+
+  const url = authIsLogin ? '/api/login' : '/api/register';
+  const body = { email, password };
+  if (!authIsLogin) {
+    body.name = document.getElementById('dlName').value.trim();
+    body.company = document.getElementById('dlCompany').value.trim();
+    body.phone = document.getElementById('dlPhone').value.trim();
+    if (!body.name) { errEl.textContent = '请填写姓名'; errEl.style.display = 'block'; return; }
+  }
+
+  try {
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await resp.json();
+    if (!resp.ok) { errEl.textContent = data.error || '操作失败'; errEl.style.display = 'block'; return; }
+    localStorage.setItem('veilora_token', data.token);
+    loadDealerDashboard();
+  } catch(e) {
+    errEl.textContent = '网络错误：' + e.message; errEl.style.display = 'block';
+  }
+}
+
+async function loadDealerDashboard() {
+  const token = localStorage.getItem('veilora_token');
+  if (!token) { showDealerAuth(); return; }
+  document.getElementById('dealerAuth').style.display = 'none';
+  document.getElementById('dealerDashboard').classList.add('active');
+  document.getElementById('dealerPublic').style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/me', { headers:{'Authorization':'Bearer '+token} });
+    if (!resp.ok) { localStorage.removeItem('veilora_token'); showDealerAuth(); return; }
+    const dealer = await resp.json();
+    document.getElementById('dashName').textContent = dealer.name || '—';
+    document.getElementById('dashCompany').textContent = dealer.company || '—';
+    document.getElementById('dashEmail').textContent = dealer.email || '—';
+    const statusEl = document.getElementById('dashStatus');
+    statusEl.textContent = dealer.status === 'approved' ? '已通过' : dealer.status === 'rejected' ? '已拒绝' : '待审核';
+    statusEl.className = 'status-badge ' + (dealer.status === 'approved' ? 'approved' : dealer.status === 'rejected' ? 'rejected' : 'pending');
+
+    document.getElementById('pendingArea').style.display = (dealer.status === 'pending' && !dealer.applied) ? 'block' : 'none';
+    document.getElementById('approvedArea').style.display = (dealer.status === 'approved') ? 'block' : 'none';
+    document.getElementById('rejectedArea').style.display = (dealer.status === 'rejected') ? 'block' : 'none';
+
+    if (dealer.status === 'approved') {
+      document.getElementById('dealerLink').textContent = window.location.origin + window.location.pathname + '#dealer/' + dealer.id;
+      if (dealer.pricing) {
+        document.getElementById('priceStandard').value = dealer.pricing.standard || '';
+        document.getElementById('pricePro').value = dealer.pricing.pro || '';
+        document.getElementById('priceSoftware').value = dealer.pricing.software || '';
+      }
+      fetchLeads();
+    }
+  } catch(e) { showToast('加载失败', 'error'); }
+}
+
+function dealerLogout() {
+  localStorage.removeItem('veilora_token');
+  showMainSections();
+  hideAllDealerSections();
+  document.querySelector('footer').style.display = '';
+  window.scrollTo(0, 0);
+}
+
+async function applyDealer() {
+  const token = localStorage.getItem('veilora_token');
+  const msg = document.getElementById('applyMsg');
+  try {
+    const resp = await fetch('/api/dealer/apply', { method:'POST', headers:{'Authorization':'Bearer '+token} });
+    const data = await resp.json();
+    if (resp.ok) {
+      document.getElementById('applyBtn').disabled = true;
+      msg.textContent = '申请已提交，请等待审核。';
+      msg.style.display = 'inline';
+      msg.style.color = 'var(--accent)';
+    } else {
+      msg.textContent = data.error || '申请失败';
+      msg.style.display = 'inline';
+      msg.style.color = 'var(--danger)';
+    }
+  } catch(e) { showToast('申请失败', 'error'); }
+}
+
+async function updatePricing() {
+  const token = localStorage.getItem('veilora_token');
+  const standard = parseInt(document.getElementById('priceStandard').value) || 0;
+  const pro = parseInt(document.getElementById('pricePro').value) || 0;
+  const software = parseInt(document.getElementById('priceSoftware').value) || 0;
+  const msg = document.getElementById('pricingMsg');
+  try {
+    const resp = await fetch('/api/dealer/update-pricing', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({standard, pro, software})
+    });
+    if (resp.ok) {
+      msg.textContent = '定价已保存';
+      msg.style.color = 'var(--accent)';
+    } else {
+      const data = await resp.json();
+      msg.textContent = data.error || '保存失败';
+      msg.style.color = 'var(--danger)';
+    }
+    msg.style.display = 'inline';
+    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+  } catch(e) { showToast('保存失败', 'error'); }
+}
+
+async function fetchLeads() {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    const resp = await fetch('/api/leads', { headers:{'Authorization':'Bearer '+token} });
+    const data = await resp.json();
+    renderTable('leadsContent', ['姓名','手机','邮箱','留言','时间'], data.leads || [], ['name','phone','email','message','created_at']);
+  } catch(e) { document.getElementById('leadsContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+}
+
+async function fetchOrders() {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    const resp = await fetch('/api/orders', { headers:{'Authorization':'Bearer '+token} });
+    const data = await resp.json();
+    renderTable('ordersContent', ['产品','数量','姓名','手机','时间'], data.orders || [], ['product','quantity','name','phone','created_at']);
+  } catch(e) { document.getElementById('ordersContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+}
+
+function switchDashTab(tab) {
+  document.querySelectorAll('#dashTabs .tab-nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabLeads').style.display = tab === 'leads' ? 'block' : 'none';
+  document.getElementById('tabOrders').style.display = tab === 'orders' ? 'block' : 'none';
+  if (tab === 'orders') fetchOrders(); else fetchLeads();
+}
+
+function renderTable(containerId, headers, rows, fields) {
+  const container = document.getElementById(containerId);
+  if (!rows || rows.length === 0) { container.innerHTML = '<div class="empty-state">暂无数据</div>'; return; }
+  let html = '<table class="data-table"><thead><tr>';
+  headers.forEach(h => html += '<th>'+h+'</th>');
+  html += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += '<tr>';
+    fields.forEach(f => html += '<td>'+(r[f]||'—')+'</td>');
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ========== 经销商公开页面 ==========
+async function loadDealerPublic(dealerId) {
+  hideMainSections();
+  hideAllDealerSections();
+  document.getElementById('dealerPortal').classList.add('active');
+  document.getElementById('dealerAuth').style.display = 'none';
+  document.getElementById('dealerDashboard').classList.remove('active');
+  document.getElementById('dealerPublic').style.display = 'block';
+  window._pubDealerId = dealerId;
+
+  try {
+    const resp = await fetch('/api/dealer/' + dealerId);
+    if (!resp.ok) { document.getElementById('pubName').textContent = '经销商不存在'; return; }
+    const dealer = await resp.json();
+    document.getElementById('pubName').textContent = dealer.name || '—';
+    document.getElementById('pubCompany').textContent = dealer.company || '';
+
+    const pricing = dealer.pricing || {};
+    let priceHtml = '<thead><tr><th>产品</th><th>价格</th></tr></thead><tbody>';
+    priceHtml += '<tr><td>标准版</td><td>'+(pricing.standard ? '¥'+pricing.standard : '未设置')+'</td></tr>';
+    priceHtml += '<tr><td>Pro版</td><td>'+(pricing.pro ? '¥'+pricing.pro : '未设置')+'</td></tr>';
+    priceHtml += '<tr><td>安全软件</td><td>'+(pricing.software ? '¥'+pricing.software : '未设置')+'</td></tr>';
+    priceHtml += '</tbody>';
+    document.getElementById('pubPricing').innerHTML = priceHtml;
+  } catch(e) { document.getElementById('pubName').textContent = '加载失败'; }
+}
+
+async function submitLead() {
+  const dealerId = window._pubDealerId;
+  const msgEl = document.getElementById('leadMsg');
+  const body = {
+    dealer_id: dealerId,
+    name: document.getElementById('leadName').value.trim(),
+    phone: document.getElementById('leadPhone').value.trim(),
+    email: document.getElementById('leadEmail').value.trim(),
+    message: document.getElementById('leadMessage').value.trim()
+  };
+  if (!body.name || !body.phone) { msgEl.textContent = '请填写姓名和手机'; msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
+  try {
+    const resp = await fetch('/api/leads', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    if (resp.ok) {
+      msgEl.textContent = '留资成功！经销商将尽快与您联系。';
+      msgEl.style.color = 'var(--accent)';
+      document.getElementById('leadName').value = '';
+      document.getElementById('leadPhone').value = '';
+      document.getElementById('leadEmail').value = '';
+      document.getElementById('leadMessage').value = '';
+    } else { const d = await resp.json(); msgEl.textContent = d.error || '提交失败'; msgEl.style.color = 'var(--danger)'; }
+    msgEl.style.display = 'block';
+  } catch(e) { showToast('提交失败', 'error'); }
+}
+
+async function submitPubOrder() {
+  const dealerId = window._pubDealerId;
+  const msgEl = document.getElementById('pubOrderMsg');
+  const body = {
+    dealer_id: dealerId,
+    product: document.getElementById('pubProduct').value,
+    quantity: parseInt(document.getElementById('pubQty').value) || 1,
+    name: document.getElementById('pubOrderName').value.trim(),
+    phone: document.getElementById('pubOrderPhone').value.trim()
+  };
+  if (!body.name || !body.phone) { msgEl.textContent = '请填写姓名和手机'; msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
+  try {
+    const resp = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    if (resp.ok) {
+      msgEl.textContent = '下单成功！订单已提交至经销商后台。';
+      msgEl.style.color = 'var(--accent)';
+      document.getElementById('pubQty').value = '1';
+      document.getElementById('pubOrderName').value = '';
+      document.getElementById('pubOrderPhone').value = '';
+    } else { const d = await resp.json(); msgEl.textContent = d.error || '下单失败'; msgEl.style.color = 'var(--danger)'; }
+    msgEl.style.display = 'block';
+  } catch(e) { showToast('下单失败', 'error'); }
+}
+
+function switchToDealerAuth() {
+  document.getElementById('dealerPublic').style.display = 'none';
+  showDealerAuth();
+}
+
+// ========== 管理后台 ==========
+async function adminLogin() {
+  const password = document.getElementById('adminPassword').value.trim();
+  const errEl = document.getElementById('adminError');
+  errEl.style.display = 'none';
+  if (!password) { errEl.textContent = '请输入密码'; errEl.style.display = 'block'; return; }
+  try {
+    const resp = await fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password}) });
+    const data = await resp.json();
+    if (!resp.ok) { errEl.textContent = data.error || '登录失败'; errEl.style.display = 'block'; return; }
+    localStorage.setItem('veilora_token', data.token);
+    loadAdminDashboard();
+  } catch(e) { errEl.textContent = '网络错误：'+e.message; errEl.style.display = 'block'; }
+}
+
+async function loadAdminDashboard() {
+  const token = localStorage.getItem('veilora_token');
+  if (!token) return;
+  document.getElementById('adminAuth').style.display = 'none';
+  document.getElementById('adminDashboard').classList.add('active');
+
+  try {
+    const resp = await fetch('/api/admin/dealers', { headers:{'Authorization':'Bearer '+token} });
+    if (!resp.ok) { localStorage.removeItem('veilora_token'); return; }
+    const data = await resp.json();
+    const dealers = data.dealers || [];
+    const container = document.getElementById('adminDealersContent');
+    if (dealers.length === 0) { container.innerHTML = '<div class="empty-state">暂无经销商</div>'; }
+    else {
+      let html = '<table class="data-table"><thead><tr><th>ID</th><th>姓名</th><th>公司</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+      dealers.forEach(d => {
+        const statusMap = {pending:'待审核',approved:'已通过',rejected:'已拒绝'};
+        html += '<tr><td>'+d.id+'</td><td>'+d.name+'</td><td>'+(d.company||'—')+'</td><td>'+d.email+'</td><td>'+ (statusMap[d.status]||d.status) +'</td><td>';
+        if (d.status === 'pending') {
+          html += '<button class="btn-sm approve" onclick="approveDealer('+d.id+')">通过</button>';
+          html += '<button class="btn-sm reject" onclick="rejectDealer('+d.id+')">拒绝</button>';
+        }
+        html += '</td></tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+    fetchAdminLeads();
+  } catch(e) { showToast('加载失败', 'error'); }
+}
+
+async function approveDealer(id) {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    await fetch('/api/dealer/approve', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({dealer_id:id}) });
+    loadAdminDashboard();
+  } catch(e) { showToast('操作失败', 'error'); }
+}
+
+async function rejectDealer(id) {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    await fetch('/api/dealer/reject', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({dealer_id:id}) });
+    loadAdminDashboard();
+  } catch(e) { showToast('操作失败', 'error'); }
+}
+
+function adminLogout() {
+  localStorage.removeItem('veilora_token');
+  showMainSections();
+  hideAllDealerSections();
+  document.querySelector('footer').style.display = '';
+  window.scrollTo(0, 0);
+}
+
+async function fetchAdminLeads() {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    const resp = await fetch('/api/admin/leads', { headers:{'Authorization':'Bearer '+token} });
+    const data = await resp.json();
+    renderTable('adminLeadsContent', ['姓名','手机','邮箱','留言','经销商ID','时间'], data.leads || [], ['name','phone','email','message','dealer_id','created_at']);
+  } catch(e) { document.getElementById('adminLeadsContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+}
+
+async function fetchAdminOrders() {
+  const token = localStorage.getItem('veilora_token');
+  try {
+    const resp = await fetch('/api/admin/orders', { headers:{'Authorization':'Bearer '+token} });
+    const data = await resp.json();
+    renderTable('adminOrdersContent', ['产品','数量','姓名','手机','经销商ID','时间'], data.orders || [], ['product','quantity','name','phone','dealer_id','created_at']);
+  } catch(e) { document.getElementById('adminOrdersContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+}
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('#adminTabs .tab-nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabAdminLeads').style.display = tab === 'leads' ? 'block' : 'none';
+  document.getElementById('tabAdminOrders').style.display = tab === 'orders' ? 'block' : 'none';
+  if (tab === 'orders') fetchAdminOrders(); else fetchAdminLeads();
+}
+
+// ========== URL hash 路由：访问经销商公开页面 ==========
+function checkHash() {
+  const hash = location.hash;
+  if (hash.startsWith('#dealer/')) {
+    const dealerId = hash.replace('#dealer/', '');
+    if (dealerId && /^\d+$/.test(dealerId)) {
+      loadDealerPublic(parseInt(dealerId));
+    }
+  } else if (hash === '#dealer') {
+    showSection('dealerPortal');
+  } else if (hash === '#admin') {
+    showSection('adminPanel');
+    const token = localStorage.getItem('veilora_token');
+    // 检查是否 admin token
+    if (token) {
+      // 尝试加载 admin 面板
+      document.getElementById('adminAuth').style.display = 'none';
+      document.getElementById('adminDashboard').classList.add('active');
+      loadAdminDashboard();
+    }
+  }
+}
+window.addEventListener('hashchange', checkHash);
+checkHash();
+// ---------- 应急还原 Tab 独立演示 ----------
+let emPinInput2 = '';
+let emGalleryHasImages2 = true; // 模拟相册有图
+let emConfigStep2 = 1;
+
+// 初始化应急还原演示手机的相册应用
+function initEmGallery2() {
+  const grid = document.getElementById('emAppGrid');
+  if (!grid) return;
+  const apps = [
+    { icon: '📷', label: '相机' },
+    { icon: '🖼️', label: '相册' + (emGalleryHasImages2 ? ' (3)' : '') },
+    { icon: '📁', label: '文件' },
+    { icon: '⚙️', label: '设置' },
+    { icon: '📞', label: '电话' },
+    { icon: '💬', label: '短信' },
+    { icon: '🌐', label: '浏览器' },
+    { icon: '📧', label: '邮件' },
+  ];
+  grid.innerHTML = apps.map(a => `<div class="app-icon" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;"><span style="font-size:1.8rem;">${a.icon}</span><span style="font-size:.65rem;color:#8b949e;">${a.label}</span></div>`).join('');
+}
+
+function emUpdateLockTime2() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const days = ['日','一','二','三','四','五','六'];
+  const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
+  const lt = document.getElementById('emLockTime2');
+  const ld = document.getElementById('emLockDate2');
+  if (lt) lt.textContent = h + ':' + m;
+  if (ld) ld.textContent = dateStr;
+}
+
+function emUpdatePinDots2() {
+  const dots = document.querySelectorAll('#emLockPinDots2 .em-lock-dot');
+  dots.forEach((d,i) => d.classList.toggle('fill', i < emPinInput2.length));
+}
+
+function emLockPhone2() {
+  emUpdateLockTime2();
+  document.getElementById('emLockScreen2').style.display = 'flex';
+  document.getElementById('emHomeScreen2').style.display = 'none';
+  emPinInput2 = '';
+  emUpdatePinDots2();
+  document.getElementById('emLockMsg2').textContent = '输入 6 位应急还原密码（默认：999999）';
+  document.getElementById('emLockMsg2').className = 'lock-msg';
+}
+
+function emTriggerRestore2() {
+  const lockScreen = document.getElementById('emLockScreen2');
+  const overlay = document.getElementById('emRestoreOverlay2');
+  const text = document.getElementById('emRestoreText2');
+  const progress = document.getElementById('emRestoreProgress2');
+  const logo = document.getElementById('emRestoreLogo2');
+
+  lockScreen.style.display = 'none';
+  overlay.style.display = 'flex';
+  text.textContent = '正在擦除所有数据...';
+  text.style.display = 'block';
+  progress.style.display = 'block';
+  logo.style.display = 'none';
+
+  const newProgress = progress.cloneNode(true);
+  progress.parentNode.replaceChild(newProgress, progress);
+
+  setTimeout(() => {
+    text.textContent = '擦除完成，设备将在 3 秒后重启';
+  }, 3000);
+
+  setTimeout(() => {
+    emGalleryHasImages2 = false;
+    initEmGallery2();
+    text.style.display = 'none';
+    newProgress.style.display = 'none';
+    logo.style.display = 'block';
+  }, 6000);
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    text.style.display = 'block';
+    logo.style.display = 'none';
+    emShowConfigWizard2();
+  }, 8000);
+
+  emPinInput2 = '';
+  emUpdatePinDots2();
+}
+
+function emShowConfigWizard2() {
+  const configOverlay = document.getElementById('emConfigOverlay2');
+  configOverlay.style.display = 'flex';
+  emConfigStep2 = 1;
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('emConfigStep' + i + '_2').style.display = (i === 1) ? 'flex' : 'none';
+  }
+}
+
+function emNextConfigStep2() {
+  if (emConfigStep2 < 4) {
+    document.getElementById('emConfigStep' + emConfigStep2 + '_2').style.display = 'none';
+    emConfigStep2++;
+    document.getElementById('emConfigStep' + emConfigStep2 + '_2').style.display = 'flex';
+  }
+}
+
+function emSelectConfigLang2(el) {
+  document.querySelectorAll('#emConfigOverlay2 .config-lang-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function emFinishConfig2() {
+  document.getElementById('emConfigOverlay2').style.display = 'none';
+  emConfigStep2 = 1;
+  document.getElementById('emHomeScreen2').style.display = 'flex';
+  const t = document.getElementById('emLockTime2').textContent;
+  document.getElementById('emMainTime2').textContent = t;
+}
+
+// 绑定 PIN 键盘事件
+document.addEventListener('DOMContentLoaded', function() {
+  initEmGallery2();
+  emUpdateLockTime2();
+  setInterval(emUpdateLockTime2, 60000);
+
+  const pad = document.getElementById('emRestorePad');
+  if (pad) {
+    pad.querySelectorAll('.pin-key[data-key]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (emPinInput2.length >= 6) return;
+        emPinInput2 += btn.dataset.key;
+        emUpdatePinDots2();
+        if (emPinInput2.length === 6) {
+          setTimeout(() => {
+            if (emPinInput2 === '999999') {
+              emTriggerRestore2();
+            } else {
+              const msg = document.getElementById('emLockMsg2');
+              const dots = document.getElementById('emLockPinDots2');
+              msg.textContent = '密码错误，请重试';
+              msg.className = 'lock-msg error';
+              dots.classList.add('error');
+              setTimeout(() => {
+                emPinInput2 = '';
+                emUpdatePinDots2();
+                dots.classList.remove('error');
+                msg.textContent = '输入 6 位应急还原密码（默认：999999）';
+                msg.className = 'lock-msg';
+              }, 1200);
+            }
+          }, 200);
+        }
+      });
+    });
+  }
+
+  document.getElementById('emRestoreDel')?.addEventListener('click', () => {
+    if (emPinInput2.length > 0) { emPinInput2 = emPinInput2.slice(0,-1); emUpdatePinDots2(); }
+  });
+  document.getElementById('emRestoreClear')?.addEventListener('click', () => {
+    emPinInput2 = ''; emUpdatePinDots2();
+  });
+});
+</script>
+
+<script>
+// ===== 经销商品牌页检测 =====
+(function() {
+  var m = location.pathname.match(/^\/brand\/(\d+)/);
+  if (!m) return;
+  var dealerId = parseInt(m[1]);
+  window.brandDealerId = dealerId;
+
+  fetch('http://localhost:9000/api/brand/' + dealerId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) return;
+      // 覆盖顶部导航品牌名+Logo
+      var brandEl = document.querySelector('.logo');
+      if (brandEl && data.company_name) {
+        var logoHtml = '';
+        if (data.logo_url) {
+          logoHtml = '<img src="http://localhost:9000' + data.logo_url + '" style="height:28px;vertical-align:middle;margin-right:8px;border-radius:4px;">';
+        }
+        brandEl.innerHTML = logoHtml + data.company_name;
+      }
+
+      // 覆盖价格卡片
+      var standardCN = data.price_standard_cn || 12888;
+      var standardIntl = data.price_standard_intl || 2300;
+      var proCN = data.price_pro_cn || 15888;
+      var proIntl = data.price_pro_intl || 2868;
+
+      var cards = document.querySelectorAll('.order-card');
+      if (cards[0]) {
+        cards[0].querySelector('.price-cn').textContent = '¥' + standardCN.toLocaleString();
+        cards[0].querySelector('.price-intl').textContent = '$' + standardIntl.toLocaleString();
+      }
+      if (cards[1]) {
+        cards[1].querySelector('.price-cn').textContent = '¥' + proCN.toLocaleString();
+        cards[1].querySelector('.price-intl').textContent = '$' + proIntl.toLocaleString();
+      }
+    })
+    .catch(function() {});
+})();
+</script>
+
+</body>
+</html>

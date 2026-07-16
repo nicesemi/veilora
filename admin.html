@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEILORA 管理后台</title>
+<style>
+:root {
+  --bg: #0a0e17; --bg-card: #111827; --bg-card-hover: #1a2332;
+  --border: #1e2d3d; --accent: #00d4ff; --accent-dim: rgba(0,212,255,.1);
+  --accent-glow: rgba(0,212,255,.25); --text: #e2e8f0; --text-dim: #8899aa;
+  --text-muted: #556677; --danger: #ff5c6e; --warn: #f0a030; --success: #00e5a0;
+  --blue: #4da6ff; --radius: 12px; --radius-sm: 8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+  background: var(--bg); color: var(--text); line-height:1.6; min-height:100vh;
+}
+/* Login */
+.login-wrap {
+  display:flex; align-items:center; justify-content:center; min-height:100vh;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,.06) 0%, transparent 60%);
+}
+.login-card {
+  background: var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:2.5rem; width:100%; max-width:400px;
+}
+.login-card h1 { font-size:1.4rem; text-align:center; margin-bottom:.3rem; color:var(--accent); }
+.login-card .sub { text-align:center; color:var(--text-dim); font-size:.85rem; margin-bottom:1.8rem; }
+.login-card .form-group { margin-bottom:1rem; }
+.login-card label { display:block; font-size:.82rem; color:var(--text-dim); margin-bottom:.35rem; }
+.login-card input {
+  width:100%; padding:.65rem .9rem; border-radius:var(--radius-sm);
+  background:#0a0e17; border:1px solid var(--border); color:var(--text); font-size:.9rem;
+  outline:none; transition:border-color .2s;
+}
+.login-card input:focus { border-color:var(--accent); }
+.login-card .btn {
+  width:100%; margin-top:.5rem; padding:.7rem; border-radius:var(--radius-sm);
+  background:var(--accent); color:#0a0e17; font-weight:600; font-size:.9rem;
+  border:none; cursor:pointer; transition:all .25s;
+}
+.login-card .btn:hover { box-shadow:0 0 24px var(--accent-glow); }
+.login-card .err { color:var(--danger); font-size:.82rem; margin-top:.6rem; text-align:center; }
+/* Layout */
+.toolbar {
+  background:rgba(10,14,23,.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border); padding:.6rem 2rem; display:flex;
+  align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;
+}
+.toolbar .brand { font-weight:700; font-size:1rem; color:var(--accent); }
+.toolbar nav { display:flex; gap:1.5rem; }
+.toolbar nav a {
+  color:var(--text-dim); text-decoration:none; font-size:.85rem; cursor:pointer;
+  padding:.3rem 0; border-bottom:2px solid transparent; transition:all .2s;
+}
+.toolbar nav a:hover, .toolbar nav a.active { color:var(--accent); border-bottom-color:var(--accent); }
+.toolbar .logout { color:var(--text-dim); cursor:pointer; font-size:.85rem; }
+.toolbar .logout:hover { color:var(--danger); }
+.main { max-width:1200px; margin:0 auto; padding:2rem; }
+.page { display:none; }
+.page.active { display:block; }
+/* Cards */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.5rem; position:relative; overflow:hidden;
+}
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); opacity:.6; }
+.stat-card .num { font-size:2rem; font-weight:700; color:var(--accent); }
+.stat-card .label { font-size:.82rem; color:var(--text-dim); margin-top:.25rem; }
+/* Tables */
+.section-title { font-size:1.1rem; font-weight:600; margin-bottom:1rem; }
+table { width:100%; border-collapse:collapse; background:var(--bg-card); border-radius:var(--radius); overflow:hidden; }
+th, td { padding:.75rem 1rem; text-align:left; font-size:.85rem; }
+th { background:#0d1520; color:var(--text-dim); font-weight:600; border-bottom:1px solid var(--border); }
+td { border-bottom:1px solid rgba(30,45,61,.4); }
+tr:hover td { background:rgba(0,212,255,.03); }
+/* Buttons */
+.btn-sm {
+  padding:.3rem .75rem; border-radius:var(--radius-sm); font-size:.78rem; font-weight:500;
+  border:none; cursor:pointer; transition:all .2s;
+}
+.btn-sm.danger { background:rgba(255,92,110,.12); color:var(--danger); }
+.btn-sm.danger:hover { background:rgba(255,92,110,.22); }
+.btn-sm.primary { background:var(--accent); color:#0a0e17; }
+.btn-sm.primary:hover { box-shadow:0 0 16px var(--accent-glow); }
+.btn-sm.ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn-sm.ghost:hover { border-color:var(--accent); color:var(--accent); }
+/* Modal */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+  align-items:center; justify-content:center; z-index:200;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:2rem; width:100%; max-width:440px;
+}
+.modal h3 { margin-bottom:1rem; font-size:1rem; }
+.modal .form-group { margin-bottom:1rem; }
+.modal label { display:block; font-size:.82rem; color:var(--text-dim); margin-bottom:.3rem; }
+.modal input {
+  width:100%; padding:.55rem .8rem; border-radius:var(--radius-sm);
+  background:#0a0e17; border:1px solid var(--border); color:var(--text); font-size:.85rem; outline:none;
+}
+.modal input:focus { border-color:var(--accent); }
+.modal .actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.5rem; }
+.modal .err { color:var(--danger); font-size:.8rem; margin-top:.5rem; }
+/* Filter bar */
+.filter-bar { display:flex; gap:.75rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+.filter-bar select {
+  padding:.45rem .7rem; border-radius:var(--radius-sm); background:#0a0e17;
+  border:1px solid var(--border); color:var(--text); font-size:.85rem; outline:none;
+}
+.filter-bar select:focus { border-color:var(--accent); }
+.empty { text-align:center; color:var(--text-muted); padding:3rem 0; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1>VEILORA</h1>
+    <div class="sub">管理后台</div>
+    <div class="form-group">
+      <label>用户名</label>
+      <input type="text" id="loginUser" placeholder="admin">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="loginPass" placeholder="········">
+    </div>
+    <button class="btn" onclick="doLogin()">登 录</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="mainWrap" style="display:none;">
+  <div class="toolbar">
+    <div class="brand">VEILORA 管理后台</div>
+    <nav>
+      <a class="active" onclick="showPage('dashboard')">仪表盘</a>
+      <a onclick="showPage('dealers')">经销商管理</a>
+      <a onclick="showPage('leads')">预约留资</a>
+    </nav>
+    <span class="logout" onclick="doLogout()">退出</span>
+  </div>
+  <div class="main">
+    <!-- Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+    <!-- Dealers -->
+    <div class="page" id="page-dealers">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="section-title">经销商列表</div>
+        <button class="btn-sm primary" onclick="openDealerModal()">+ 创建经销商</button>
+      </div>
+      <div id="dealerTableWrap"><div class="empty">加载中...</div></div>
+    </div>
+    <!-- Leads -->
+    <div class="page" id="page-leads">
+      <div class="filter-bar">
+        <span style="color:var(--text-dim);font-size:.85rem;">按经销商筛选：</span>
+        <select id="leadFilter" onchange="loadLeads()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="section-title">预约留资</div>
+      <div id="leadTableWrap"><div class="empty">加载中...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Dealer Modal -->
+<div class="modal-overlay" id="dealerModal">
+  <div class="modal">
+    <h3>创建经销商账户</h3>
+    <div class="form-group"><label>公司名称</label><input type="text" id="dlCompany" placeholder="XX科技有限公司"></div>
+    <div class="form-group"><label>用户名</label><input type="text" id="dlUser" placeholder="登录用户名"></div>
+    <div class="form-group"><label>密码</label><input type="password" id="dlPass" placeholder="至少6位"></div>
+    <div class="err" id="dlErr"></div>
+    <div class="actions">
+      <button class="btn-sm ghost" onclick="closeDealerModal()">取消</button>
+      <button class="btn-sm primary" onclick="createDealer()">创建</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+
+let token = '';
+
+function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } }).then(r => r.json());
+}
+
+// ---- Login ----
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
+  try {
+    const data = await api('/api/admin/login', { method:'POST', body:JSON.stringify({username:u,password:p}) });
+    if (data.error) { document.getElementById('loginErr').textContent = data.error; return; }
+    token = data.token;
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('mainWrap').style.display = '';
+    loadDashboard();
+    loadDealers();
+    loadLeads();
+  } catch(e) { document.getElementById('loginErr').textContent = '网络错误'; }
+}
+
+function doLogout() {
+  token = '';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('mainWrap').style.display = 'none';
+}
+
+// ---- Page ----
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'dealers') loadDealers();
+  if (name === 'leads') loadLeads();
+}
+
+// ---- Dashboard ----
+async function loadDashboard() {
+  try {
+    const s = await api('/api/admin/stats');
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card"><div class="num">${s.dealer_count||0}</div><div class="label">经销商总数</div></div>
+      <div class="stat-card"><div class="num">${s.lead_count||0}</div><div class="label">总预约数</div></div>
+      <div class="stat-card"><div class="num">${s.standard_count||0}</div><div class="label">标准版预约</div></div>
+      <div class="stat-card"><div class="num">${s.pro_count||0}</div><div class="label">专业版预约</div></div>
+    `;
+  } catch(e) {}
+}
+
+// ---- Dealers ----
+async function loadDealers() {
+  try {
+    const list = await api('/api/admin/dealers');
+    if (!list.length) {
+      document.getElementById('dealerTableWrap').innerHTML = '<div class="empty">暂无经销商</div>';
+    } else {
+      let html = '<table><thead><tr><th>公司名称</th><th>用户名</th><th>创建时间</th><th>操作</th></tr></thead><tbody>';
+      list.forEach(d => {
+        html += `<tr><td>${esc(d.company_name)}</td><td>${esc(d.username)}</td><td>${esc(d.created_at||'')}</td>
+          <td><button class="btn-sm danger" onclick="deleteDealer(${d.id})">删除</button></td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('dealerTableWrap').innerHTML = html;
+    }
+  } catch(e) {}
+}
+
+function openDealerModal() { document.getElementById('dealerModal').classList.add('show'); }
+function closeDealerModal() {
+  document.getElementById('dealerModal').classList.remove('show');
+  document.getElementById('dlCompany').value = '';
+  document.getElementById('dlUser').value = '';
+  document.getElementById('dlPass').value = '';
+  document.getElementById('dlErr').textContent = '';
+}
+
+async function createDealer() {
+  const co = document.getElementById('dlCompany').value.trim();
+  const u = document.getElementById('dlUser').value.trim();
+  const p = document.getElementById('dlPass').value.trim();
+  if (!co || !u || !p) { document.getElementById('dlErr').textContent = '所有字段必填'; return; }
+  try {
+    const r = await api('/api/admin/dealers', { method:'POST', body:JSON.stringify({company_name:co,username:u,password:p}) });
+    if (r.error) { document.getElementById('dlErr').textContent = r.error; return; }
+    closeDealerModal();
+    loadDealers();
+    loadDashboard();
+    loadLeads(); // refresh filter
+  } catch(e) { document.getElementById('dlErr').textContent = '网络错误'; }
+}
+
+async function deleteDealer(id) {
+  if (!confirm('确定删除该经销商？')) return;
+  await api('/api/admin/dealers/' + id, { method:'DELETE' });
+  loadDealers();
+  loadDashboard();
+  loadLeads();
+}
+
+// ---- Leads ----
+async function loadLeads() {
+  try {
+    const sel = document.getElementById('leadFilter').value;
+    let url = '/api/admin/leads';
+    if (sel) url += '?dealer_id=' + sel;
+    const list = await api(url);
+    // refresh filter
+    const ds = await api('/api/admin/dealers');
+    let fhtml = '<option value="">全部</option>';
+    ds.forEach(d => { fhtml += `<option value="${d.id}" ${sel==d.id?'selected':''}>${esc(d.company_name)}</option>`; });
+    document.getElementById('leadFilter').innerHTML = fhtml;
+
+    if (!list.length) {
+      document.getElementById('leadTableWrap').innerHTML = '<div class="empty">暂无留资信息</div>';
+    } else {
+      let html = '<table><thead><tr><th>姓名</th><th>手机</th><th>邮箱</th><th>版本</th><th>经销商</th><th>时间</th></tr></thead><tbody>';
+      list.forEach(l => {
+        html += `<tr><td>${esc(l.name)}</td><td>${esc(l.phone)}</td><td>${esc(l.email||'')}</td>
+          <td>${l.edition==='pro'?'专业版':'标准版'}</td><td>${esc(l.company_name||'主站')}</td><td>${esc(l.created_at||'')}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('leadTableWrap').innerHTML = html;
+    }
+  } catch(e) {}
+}
+
+function esc(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// Enter login
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

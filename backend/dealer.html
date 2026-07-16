@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEILORA 经销商门户</title>
+<style>
+:root {
+  --bg: #0a0e17; --bg-card: #111827; --bg-card-hover: #1a2332;
+  --border: #1e2d3d; --accent: #00d4ff; --accent-dim: rgba(0,212,255,.1);
+  --accent-glow: rgba(0,212,255,.25); --text: #e2e8f0; --text-dim: #8899aa;
+  --text-muted: #556677; --danger: #ff5c6e; --warn: #f0a030; --success: #00e5a0;
+  --blue: #4da6ff; --radius: 12px; --radius-sm: 8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+  background: var(--bg); color: var(--text); line-height:1.6; min-height:100vh;
+}
+.login-wrap {
+  display:flex; align-items:center; justify-content:center; min-height:100vh;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,.06) 0%, transparent 60%);
+}
+.login-card {
+  background: var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:2.5rem; width:100%; max-width:400px;
+}
+.login-card h1 { font-size:1.4rem; text-align:center; margin-bottom:.3rem; color:var(--accent); }
+.login-card .sub { text-align:center; color:var(--text-dim); font-size:.85rem; margin-bottom:1.8rem; }
+.login-card .form-group { margin-bottom:1rem; }
+.login-card label { display:block; font-size:.82rem; color:var(--text-dim); margin-bottom:.35rem; }
+.login-card input {
+  width:100%; padding:.65rem .9rem; border-radius:var(--radius-sm);
+  background:#0a0e17; border:1px solid var(--border); color:var(--text); font-size:.9rem;
+  outline:none; transition:border-color .2s;
+}
+.login-card input:focus { border-color:var(--accent); }
+.login-card .btn {
+  width:100%; margin-top:.5rem; padding:.7rem; border-radius:var(--radius-sm);
+  background:var(--accent); color:#0a0e17; font-weight:600; font-size:.9rem;
+  border:none; cursor:pointer; transition:all .25s;
+}
+.login-card .btn:hover { box-shadow:0 0 24px var(--accent-glow); }
+.login-card .err { color:var(--danger); font-size:.82rem; margin-top:.6rem; text-align:center; }
+/* Layout */
+.toolbar {
+  background:rgba(10,14,23,.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border); padding:.6rem 2rem; display:flex;
+  align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;
+}
+.toolbar .brand { font-weight:700; font-size:1rem; color:var(--accent); }
+.toolbar nav { display:flex; gap:1.5rem; }
+.toolbar nav a {
+  color:var(--text-dim); text-decoration:none; font-size:.85rem; cursor:pointer;
+  padding:.3rem 0; border-bottom:2px solid transparent; transition:all .2s;
+}
+.toolbar nav a:hover, .toolbar nav a.active { color:var(--accent); border-bottom-color:var(--accent); }
+.toolbar .logout { color:var(--text-dim); cursor:pointer; font-size:.85rem; }
+.toolbar .logout:hover { color:var(--danger); }
+.main { max-width:1000px; margin:0 auto; padding:2rem; }
+.page { display:none; }
+.page.active { display:block; }
+.section-title { font-size:1.1rem; font-weight:600; margin-bottom:1.2rem; }
+/* Cards */
+.card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.5rem; margin-bottom:1.5rem;
+}
+.card h3 { font-size:.95rem; margin-bottom:1rem; color:var(--accent); }
+/* Form */
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; font-size:.82rem; color:var(--text-dim); margin-bottom:.35rem; }
+.form-group input {
+  width:100%; padding:.55rem .8rem; border-radius:var(--radius-sm);
+  background:#0a0e17; border:1px solid var(--border); color:var(--text); font-size:.85rem; outline:none;
+}
+.form-group input:focus { border-color:var(--accent); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.form-actions { margin-top:1rem; }
+/* Buttons */
+.btn {
+  padding:.55rem 1.2rem; border-radius:var(--radius-sm); font-size:.85rem; font-weight:500;
+  border:none; cursor:pointer; transition:all .2s;
+}
+.btn.primary { background:var(--accent); color:#0a0e17; }
+.btn.primary:hover { box-shadow:0 0 20px var(--accent-glow); }
+.btn.ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn.ghost:hover { border-color:var(--accent); color:var(--accent); }
+.msg { font-size:.82rem; margin-top:.5rem; }
+.msg.success { color:var(--success); }
+.msg.error { color:var(--danger); }
+/* Table */
+table { width:100%; border-collapse:collapse; background:var(--bg-card); border-radius:var(--radius); overflow:hidden; }
+th, td { padding:.7rem 1rem; text-align:left; font-size:.84rem; }
+th { background:#0d1520; color:var(--text-dim); font-weight:600; border-bottom:1px solid var(--border); }
+td { border-bottom:1px solid rgba(30,45,61,.4); }
+tr:hover td { background:rgba(0,212,255,.03); }
+.empty { text-align:center; color:var(--text-muted); padding:3rem 0; }
+/* Brand page link */
+.link-box {
+  display:flex; align-items:center; gap:.75rem; background:#0a0e17;
+  border:1px solid var(--border); border-radius:var(--radius-sm); padding:.5rem .8rem; margin-top:.5rem;
+}
+.link-box .url { flex:1; font-size:.85rem; color:var(--accent); word-break:break-all; }
+.link-box .copy-btn {
+  padding:.3rem .75rem; border-radius:var(--radius-sm); background:var(--accent-dim);
+  color:var(--accent); border:1px solid rgba(0,212,255,.25); font-size:.78rem; cursor:pointer; white-space:nowrap;
+}
+.link-box .copy-btn:hover { background:rgba(0,212,255,.18); }
+.preview { margin-top:.75rem; color:var(--text-dim); font-size:.82rem; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1>VEILORA</h1>
+    <div class="sub">经销商门户</div>
+    <div class="form-group">
+      <label>用户名</label>
+      <input type="text" id="loginUser" placeholder="经销商用户名">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="loginPass" placeholder="········">
+    </div>
+    <button class="btn primary" onclick="doLogin()">登 录</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="mainWrap" style="display:none;">
+  <div class="toolbar">
+    <div class="brand" id="headerBrand">经销商门户</div>
+    <nav>
+      <a class="active" onclick="showPage('profile')">我的信息</a>
+      <a onclick="showPage('price')">价格设置</a>
+      <a onclick="showPage('leads')">预约留资</a>
+      <a onclick="showPage('brand')">品牌页面</a>
+    </nav>
+    <span class="logout" onclick="doLogout()">退出</span>
+  </div>
+  <div class="main">
+    <!-- Profile -->
+    <div class="page active" id="page-profile">
+      <div class="card">
+        <h3>公司信息</h3>
+        <div class="form-group"><label>公司名称</label><input type="text" id="pfCompany"></div>
+        <div class="form-group">
+          <label>Logo</label>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <img id="pfLogoPreview" src="" alt="" style="max-width:120px;max-height:60px;display:none;border-radius:6px;border:1px solid var(--border);">
+            <div>
+              <input type="file" accept="image/*" id="pfLogoFile" style="font-size:.82rem;color:var(--text-dim);">
+              <button class="btn ghost" onclick="uploadLogo()" style="margin-left:.5rem;font-size:.78rem;padding:.35rem .8rem;">上传</button>
+              <div id="pfLogoMsg" class="msg" style="margin-top:.25rem;"></div>
+            </div>
+          </div>
+          <input type="hidden" id="pfLogo">
+        </div>
+        <div class="form-actions"><button class="btn primary" onclick="saveProfile()">保存</button> <span class="msg" id="pfMsg"></span></div>
+      </div>
+      <div class="card" style="margin-top:1.2rem;">
+        <h3>修改密码</h3>
+        <div class="form-group"><label>原密码</label><input type="password" id="pwOld" placeholder="输入当前密码"></div>
+        <div class="form-group"><label>新密码</label><input type="password" id="pwNew" placeholder="6位以上"></div>
+        <div class="form-group"><label>确认新密码</label><input type="password" id="pwNew2" placeholder="再次输入新密码"></div>
+        <div class="form-actions"><button class="btn primary" onclick="changePassword()">修改密码</button> <span class="msg" id="pwMsg"></span></div>
+      </div>
+    </div>
+    <!-- Price -->
+    <div class="page" id="page-price">
+      <div class="card">
+        <h3>国内价格（CNY）</h3>
+        <div class="form-row">
+          <div class="form-group"><label>标准版</label><input type="number" id="prStandardCN"></div>
+          <div class="form-group"><label>专业版</label><input type="number" id="prProCN"></div>
+        </div>
+        <h3 style="margin-top:1.5rem;">海外价格（USD）</h3>
+        <div class="form-row">
+          <div class="form-group"><label>标准版</label><input type="number" id="prStandardIntl"></div>
+          <div class="form-group"><label>专业版</label><input type="number" id="prProIntl"></div>
+        </div>
+        <div class="form-actions"><button class="btn primary" onclick="savePrice()">保存</button> <span class="msg" id="prMsg"></span></div>
+      </div>
+    </div>
+    <!-- Leads -->
+    <div class="page" id="page-leads">
+      <div class="section-title">我的预约留资</div>
+      <div id="leadTableWrap"><div class="empty">加载中...</div></div>
+    </div>
+    <!-- Brand Page -->
+    <div class="page" id="page-brand">
+      <div class="card">
+        <h3>品牌页面</h3>
+        <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:.75rem;">将此链接嵌入您的网站，客户即可通过您的专属页面预约购买：</p>
+        <div class="link-box">
+          <span class="url" id="brandUrl">加载中...</span>
+          <button class="copy-btn" onclick="copyBrandUrl()">复制链接</button>
+        </div>
+        <div class="preview">页面将展示：公司名称、Logo、国内/海外价格</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let token = '';
+let dealerId = '';
+
+function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } }).then(r => r.json());
+}
+
+// ---- Login ----
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
+  try {
+    const data = await api('/api/dealer/login', { method:'POST', body:JSON.stringify({username:u,password:p}) });
+    if (data.error) { document.getElementById('loginErr').textContent = data.error; return; }
+    token = data.token;
+    dealerId = data.dealer_id;
+    document.getElementById('headerBrand').textContent = (data.company_name||'经销商') + ' 经销商门户';
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('mainWrap').style.display = '';
+    loadProfile();
+    loadLeads();
+    loadBrandUrl();
+  } catch(e) { document.getElementById('loginErr').textContent = '网络错误'; }
+}
+
+function doLogout() {
+  token = ''; dealerId = '';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('mainWrap').style.display = 'none';
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name === 'profile') loadProfile();
+  if (name === 'leads') loadLeads();
+  if (name === 'brand') loadBrandUrl();
+}
+
+// ---- Profile ----
+async function loadProfile() {
+  try {
+    const p = await api('/api/dealer/profile');
+    if (p.error) return;
+    document.getElementById('pfCompany').value = p.company_name||'';
+    document.getElementById('pfLogo').value = p.logo_url||'';
+    updateLogoPreview(p.logo_url);
+    document.getElementById('prStandardCN').value = p.price_standard_cn||12888;
+    document.getElementById('prProCN').value = p.price_pro_cn||15888;
+    document.getElementById('prStandardIntl').value = p.price_standard_intl||2300;
+    document.getElementById('prProIntl').value = p.price_pro_intl||2868;
+  } catch(e) {}
+}
+
+function updateLogoPreview(url) {
+  const preview = document.getElementById('pfLogoPreview');
+  if (url) {
+    preview.src = url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function uploadLogo() {
+  const fileInput = document.getElementById('pfLogoFile');
+  const file = fileInput.files[0];
+  if (!file) { showMsg('pfLogoMsg', '请先选择文件', 'error'); return; }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const headers = {};
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const resp = await fetch('/api/dealer/logo', { method: 'POST', headers, body: formData });
+    const r = await resp.json();
+    if (r.error) { showMsg('pfLogoMsg', r.error, 'error'); return; }
+    document.getElementById('pfLogo').value = r.logo_url;
+    updateLogoPreview(r.logo_url);
+    fileInput.value = '';
+    showMsg('pfLogoMsg', '上传成功', 'success');
+  } catch(e) { showMsg('pfLogoMsg', '上传失败', 'error'); }
+}
+
+function showMsg(elId, text, cls) {
+  const el = document.getElementById(elId);
+  el.className = 'msg ' + cls;
+  el.textContent = text;
+}
+
+async function saveProfile() {
+  const co = document.getElementById('pfCompany').value.trim();
+  const lo = document.getElementById('pfLogo').value.trim();
+  try {
+    const r = await api('/api/dealer/profile', { method:'PUT', body:JSON.stringify({company_name:co, logo_url:lo}) });
+    const el = document.getElementById('pfMsg');
+    if (r.error) { el.className='msg error'; el.textContent=r.error; }
+    else { el.className='msg success'; el.textContent='保存成功'; document.getElementById('headerBrand').textContent = co + ' 经销商门户'; }
+  } catch(e) {}
+}
+
+async function changePassword() {
+  const el = document.getElementById('pwMsg');
+  const old_pw = document.getElementById('pwOld').value;
+  const new_pw = document.getElementById('pwNew').value;
+  const new_pw2 = document.getElementById('pwNew2').value;
+  if (!old_pw || !new_pw || !new_pw2) { el.className='msg error'; el.textContent='请填写所有字段'; return; }
+  if (new_pw.length < 6) { el.className='msg error'; el.textContent='新密码至少6位'; return; }
+  if (new_pw !== new_pw2) { el.className='msg error'; el.textContent='两次新密码不一致'; return; }
+  try {
+    const r = await api('/api/dealer/password', { method:'PUT', body:JSON.stringify({old_password:old_pw, new_password:new_pw}) });
+    if (r.error) { el.className='msg error'; el.textContent=r.error; }
+    else {
+      el.className='msg success'; el.textContent='密码修改成功';
+      document.getElementById('pwOld').value = '';
+      document.getElementById('pwNew').value = '';
+      document.getElementById('pwNew2').value = '';
+    }
+  } catch(e) {}
+}
+
+// ---- Price ----
+async function savePrice() {
+  const body = {
+    price_standard_cn: parseInt(document.getElementById('prStandardCN').value)||12888,
+    price_pro_cn: parseInt(document.getElementById('prProCN').value)||15888,
+    price_standard_intl: parseInt(document.getElementById('prStandardIntl').value)||2300,
+    price_pro_intl: parseInt(document.getElementById('prProIntl').value)||2868
+  };
+  try {
+    const r = await api('/api/dealer/profile', { method:'PUT', body:JSON.stringify(body) });
+    const el = document.getElementById('prMsg');
+    if (r.error) { el.className='msg error'; el.textContent=r.error; }
+    else { el.className='msg success'; el.textContent='保存成功'; }
+  } catch(e) {}
+}
+
+// ---- Leads ----
+async function loadLeads() {
+  try {
+    const list = await api('/api/dealer/leads');
+    if (!list.length) {
+      document.getElementById('leadTableWrap').innerHTML = '<div class="empty">暂无留资</div>';
+    } else {
+      let html = '<table><thead><tr><th>姓名</th><th>手机</th><th>邮箱</th><th>版本</th><th>时间</th></tr></thead><tbody>';
+      list.forEach(l => {
+        html += `<tr><td>${esc(l.name)}</td><td>${esc(l.phone)}</td><td>${esc(l.email||'')}</td>
+          <td>${l.edition==='pro'?'专业版':'标准版'}</td><td>${esc(l.created_at||'')}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('leadTableWrap').innerHTML = html;
+    }
+  } catch(e) {}
+}
+
+// ---- Brand ----
+async function loadBrandUrl() {
+  try {
+    const r = await api('/api/dealer/brand-page-url');
+    const url = window.location.origin + r.url;
+    document.getElementById('brandUrl').textContent = url;
+  } catch(e) {}
+}
+
+function copyBrandUrl() {
+  const url = document.getElementById('brandUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '已复制!';
+    setTimeout(() => btn.textContent = '复制链接', 1500);
+  });
+}
+
+function esc(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
