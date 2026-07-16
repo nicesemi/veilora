@@ -184,6 +184,19 @@ async def debug_auth_test():
         "python_version": sys.version,
     }
 
+@app.get("/api/debug/verify-token")
+async def debug_verify_token(token: str = ""):
+    """Verify a JWT token manually. Pass token as query param."""
+    payload = _jwt_verify(token)
+    return {
+        "valid": payload is not None,
+        "type": payload.get('type') if payload else None,
+        "username": payload.get('username') if payload else None,
+        "exp": payload.get('exp') if payload else None,
+        "now": int(time.time()),
+        "secret_len": len(_JWT_SECRET),
+    }
+
 @app.get("/api/debug/jwt-e2e")
 async def debug_jwt_e2e():
     """Full E2E: generate an admin JWT, then simulate _admin verification."""
