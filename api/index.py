@@ -128,18 +128,18 @@ def hash_pw(pw: str) -> str:
 
 async def _admin(auth: str = Header(None)):
     if not auth or not auth.startswith('Bearer '):
-        raise HTTPException(401, detail="未授权")
+        raise HTTPException(401, detail=f"未授权 auth={repr(auth)[:80]}")
     payload = _jwt_verify(auth[7:])
     if not payload or payload.get('type') != 'admin':
-        raise HTTPException(401, detail="未授权或已过期")
+        raise HTTPException(401, detail="token已过期或无效")
     return payload
 
 async def _dealer(auth: str = Header(None)):
     if not auth or not auth.startswith('Bearer '):
-        raise HTTPException(401, detail="未授权")
+        raise HTTPException(401, detail=f"未授权 auth={repr(auth)[:80]}")
     payload = _jwt_verify(auth[7:])
     if not payload or payload.get('type') != 'dealer':
-        raise HTTPException(401, detail="未授权或已过期")
+        raise HTTPException(401, detail="token已过期或无效")
     return payload
 
 async def fallback_admin_check():
