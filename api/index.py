@@ -126,7 +126,8 @@ async def kv_incr(key: str):
 def hash_pw(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
 
-async def _admin(auth: str = Header(None)):
+async def _admin(request: Request):
+    auth = request.headers.get('Authorization', '')
     if not auth or not auth.startswith('Bearer '):
         raise HTTPException(401, detail=f"未授权 auth={repr(auth)[:80]}")
     payload = _jwt_verify(auth[7:])
@@ -134,7 +135,8 @@ async def _admin(auth: str = Header(None)):
         raise HTTPException(401, detail="token已过期或无效")
     return payload
 
-async def _dealer(auth: str = Header(None)):
+async def _dealer(request: Request):
+    auth = request.headers.get('Authorization', '')
     if not auth or not auth.startswith('Bearer '):
         raise HTTPException(401, detail=f"未授权 auth={repr(auth)[:80]}")
     payload = _jwt_verify(auth[7:])
