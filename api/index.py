@@ -184,6 +184,30 @@ async def debug_auth_test():
         "python_version": sys.version,
     }
 
+@app.get("/api/debug/jwt-e2e")
+async def debug_jwt_e2e():
+    """Full E2E: generate an admin JWT, then simulate _admin verification."""
+    token = _jwt_sign({"type": "admin", "username": "test", "exp": int(time.time()) + 60})
+    auth_header = f"Bearer {token}"
+    
+    # Simulate what _admin does
+    if not auth_header or not auth_header.startswith('Bearer '):
+        admin_ok = False
+        admin_error = "no Bearer prefix"
+    else:
+        payload = _jwt_verify(auth_header[7:])
+        admin_ok = payload is not None and payload.get('type') == 'admin'
+        admin_error = None if admin_ok else ("verify returned None" if payload is None else f"wrong type: {payload.get('type')}")
+    
+    return {
+        "token_prefix": token[:30] + "...",
+        "token_len": len(token),
+        "bearer_prefix_ok": auth_header.startswith('Bearer '),
+        "admin_verify_ok": admin_ok,
+        "admin_error": admin_error,
+        "secret_len": len(_JWT_SECRET),
+    }
+
 # --- Auth routes ---
 @app.post("/api/admin/login")
 async def admin_login(req: Request):
