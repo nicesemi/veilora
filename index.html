@@ -2903,7 +2903,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (brandEl && data.company_name) {
         var logoHtml = '';
         if (data.logo_url) {
-          logoHtml = '<img src="http://localhost:9000' + data.logo_url + '" style="height:28px;vertical-align:middle;margin-right:8px;border-radius:4px;">';
+          logoHtml = '<img src="' + data.logo_url + '" style="height:28px;vertical-align:middle;margin-right:8px;border-radius:4px;">';
         }
         brandEl.innerHTML = logoHtml + data.company_name;
       }

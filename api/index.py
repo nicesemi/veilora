@@ -372,7 +372,9 @@ async def update_dealer_profile(req: Request, entry=Depends(_dealer)):
     for field in updatable:
         if field in d and d[field] is not None:
             dealer[field] = d[field]
-    await kv_set(f"dealer:{entry['id']}", dealer)
+    saved = await kv_set(f"dealer:{entry['id']}", dealer)
+    if not saved:
+        raise HTTPException(500, "保存失败，请稍后重试")
     return {k: v for k, v in dealer.items() if k != "password_hash"}
 
 @app.put("/api/dealer/password")

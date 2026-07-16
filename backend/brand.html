@@ -111,7 +111,7 @@ async function loadBrand() {
     
     if (data.logo_url) {
       const logo = document.getElementById('logoImg');
-      logo.src = data.logo_url;
+      logo.src = data.logo_url + '?t=' + Date.now();
       logo.style.display = 'block';
     }
     

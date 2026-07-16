@@ -270,7 +270,7 @@ async function loadProfile() {
 function updateLogoPreview(url) {
   const preview = document.getElementById('pfLogoPreview');
   if (url) {
-    preview.src = url;
+    preview.src = url + '?t=' + Date.now();
     preview.style.display = 'block';
   } else {
     preview.style.display = 'none';
