@@ -224,7 +224,9 @@ async def admin_login(req: Request):
     if entry.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
     token = _jwt_sign({"type": "admin", "username": u, "exp": int(time.time()) + 86400})
-    return {"token": token, "username": u}
+    # Self-test: verify the token immediately to catch secret mismatch
+    self_test = _jwt_verify(token)
+    return {"token": token, "username": u, "_self_test": self_test is not None}
 
 @app.post("/api/dealer/login")
 async def dealer_login(req: Request):
