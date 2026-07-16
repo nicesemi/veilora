@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
-"""VEILORA 预约购买管理后台 — FastAPI + SQLite (Vercel Serverless)"""
+"""VEILORA 预约购买管理后台 — FastAPI + Vercel KV (Serverless)"""
 
-import hashlib, os, secrets, sqlite3, uuid
+import hashlib, json, os, secrets, time, uuid
+from urllib.parse import quote
 from fastapi import FastAPI, Request, HTTPException, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+import httpx
 
 # config
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
-DB_PATH = os.path.join('/tmp', 'veilora.db')
 UPLOAD_DIR = os.path.join('/tmp', 'uploads')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+KV_URL = os.environ.get('KV_REST_API_URL', '')
+KV_TOKEN = os.environ.get('KV_REST_API_TOKEN', '')
 
 app = FastAPI()
 
@@ -20,241 +24,346 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
-# --- db ---
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA foreign_keys=ON")
-    return conn
+# --- Vercel KV helpers ---
+async def kv_get(key: str):
+    if not KV_URL:
+        return None
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(
+            f"{KV_URL}/get/{quote(key, safe='')}",
+            headers={"Authorization": f"Bearer {KV_TOKEN}"}
+        )
+    if r.status_code == 200:
+        data = r.json()
+        return json.loads(data['result']) if data.get('result') else None
+    return None
 
-def init_db():
-    db = get_db()
-    db.executescript("""
-        CREATE TABLE IF NOT EXISTS admins (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS dealers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL,
-            company_name TEXT NOT NULL DEFAULT '', logo_url TEXT DEFAULT '',
-            price_standard_cn INTEGER DEFAULT 12888, price_pro_cn INTEGER DEFAULT 15888,
-            price_standard_intl INTEGER DEFAULT 2300, price_pro_intl INTEGER DEFAULT 2868,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
-        CREATE TABLE IF NOT EXISTS leads (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, dealer_id INTEGER, edition TEXT,
-            name TEXT NOT NULL, phone TEXT NOT NULL, email TEXT DEFAULT '',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (dealer_id) REFERENCES dealers(id));
-    """)
-    c = db.execute("SELECT COUNT(*) FROM admins")
-    if c.fetchone()[0] == 0:
-        pw = hashlib.sha256('admin123'.encode()).hexdigest()
-        db.execute("INSERT INTO admins (username, password_hash) VALUES (?, ?)", ('admin', pw))
-    db.commit(); db.close()
+async def kv_set(key: str, value, ttl: int = None):
+    if not KV_URL:
+        return False
+    body = json.dumps(value)
+    url = f"{KV_URL}/set/{quote(key, safe='')}"
+    if ttl:
+        url += f"?ex={ttl}"
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.post(url, content=body, headers={"Authorization": f"Bearer {KV_TOKEN}"})
+    return r.status_code == 200
+
+async def kv_del(key: str):
+    if not KV_URL:
+        return False
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.post(
+            f"{KV_URL}/del/{quote(key, safe='')}",
+            headers={"Authorization": f"Bearer {KV_TOKEN}"}
+        )
+    return r.status_code == 200
+
+async def kv_keys(pattern: str):
+    if not KV_URL:
+        return []
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(
+            f"{KV_URL}/keys/{quote(pattern, safe='')}",
+            headers={"Authorization": f"Bearer {KV_TOKEN}"}
+        )
+    if r.status_code == 200:
+        data = r.json()
+        return data.get('result', [])
+    return []
+
+async def kv_incr(key: str):
+    """Increment counter, return new value"""
+    current = await kv_get(key) or 0
+    new_val = current + 1
+    await kv_set(key, new_val)
+    return new_val
+
+# --- Auth helpers ---
+def hash_pw(pw: str) -> str:
+    return hashlib.sha256(pw.encode()).hexdigest()
+
+async def _admin(auth: str = Header(None)):
+    if not auth:
+        raise HTTPException(401, detail="未授权")
+    token = auth.replace('Bearer ', '')
+    session = await kv_get(f"admin:token:{token}")
+    if not session:
+        raise HTTPException(401, detail="未授权或已过期")
+    return session
+
+async def _dealer(auth: str = Header(None)):
+    if not auth:
+        raise HTTPException(401, detail="未授权")
+    token = auth.replace('Bearer ', '')
+    session = await kv_get(f"dealer:token:{token}")
+    if not session:
+        raise HTTPException(401, detail="未授权或已过期")
+    return session
+
+async def fallback_admin_check():
+    """Ensure default admin exists if KV is empty"""
+    existing = await kv_get("admin:username:admin")
+    if not existing:
+        await kv_set("admin:username:admin", {"password_hash": hash_pw("admin123")})
 
 @app.on_event("startup")
-def startup():
-    init_db()
+async def startup():
+    await fallback_admin_check()
 
-# --- auth ---
-tokens = {}
-def hash_pw(pw): return hashlib.sha256(pw.encode()).hexdigest()
-
-def _admin(auth: str = Header(None)):
-    if not auth: raise HTTPException(401, detail="未授权")
-    tk = auth.replace('Bearer ', '')
-    e = tokens.get(tk)
-    if not e or e['type'] != 'admin': raise HTTPException(401, detail="未授权")
-    return e
-
-def _dealer(auth: str = Header(None)):
-    if not auth: raise HTTPException(401, detail="未授权")
-    tk = auth.replace('Bearer ', '')
-    e = tokens.get(tk)
-    if not e or e['type'] != 'dealer': raise HTTPException(401, detail="未授权")
-    return e
-
-# --- auth routes ---
+# --- Auth routes ---
 @app.post("/api/admin/login")
 async def admin_login(req: Request):
     d = await req.json()
-    u = d.get('username','').strip(); p = d.get('password','').strip()
-    if not u or not p: raise HTTPException(400, "用户名和密码不能为空")
-    db = get_db()
-    row = db.execute("SELECT * FROM admins WHERE username = ?", (u,)).fetchone(); db.close()
-    if not row or row['password_hash'] != hash_pw(p): raise HTTPException(401, "用户名或密码错误")
-    tk = secrets.token_hex(24)
-    tokens[tk] = {'type': 'admin', 'id': row['id']}
-    return {'token': tk, 'username': row['username']}
+    u = d.get('username', '').strip()
+    p = d.get('password', '').strip()
+    if not u or not p:
+        raise HTTPException(400, "用户名和密码不能为空")
+    entry = await kv_get(f"admin:username:{u}")
+    if not entry or entry.get('password_hash') != hash_pw(p):
+        raise HTTPException(401, "用户名或密码错误")
+    token = secrets.token_hex(24)
+    await kv_set(f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
+    return {"token": token, "username": u}
 
 @app.post("/api/dealer/login")
 async def dealer_login(req: Request):
     d = await req.json()
-    u = d.get('username','').strip(); p = d.get('password','').strip()
-    if not u or not p: raise HTTPException(400, "用户名和密码不能为空")
-    db = get_db()
-    row = db.execute("SELECT * FROM dealers WHERE username = ?", (u,)).fetchone(); db.close()
-    if not row or row['password_hash'] != hash_pw(p): raise HTTPException(401, "用户名或密码错误")
-    tk = secrets.token_hex(24)
-    tokens[tk] = {'type': 'dealer', 'id': row['id']}
-    return {'token': tk, 'dealer_id': row['id'], 'company_name': row['company_name']}
+    u = d.get('username', '').strip()
+    p = d.get('password', '').strip()
+    if not u or not p:
+        raise HTTPException(400, "用户名和密码不能为空")
+    dealer_id = await kv_get(f"dealer:username:{u}")
+    if not dealer_id:
+        raise HTTPException(401, "用户名或密码错误")
+    dealer = await kv_get(f"dealer:{dealer_id}")
+    if not dealer or dealer.get('password_hash') != hash_pw(p):
+        raise HTTPException(401, "用户名或密码错误")
+    token = secrets.token_hex(24)
+    await kv_set(f"dealer:token:{token}", {"type": "dealer", "id": dealer_id}, ttl=86400)
+    return {"token": token, "dealer_id": dealer_id, "company_name": dealer.get('company_name', '')}
 
-# --- admin: dealers ---
+# --- Admin: dealer management ---
 @app.post("/api/admin/dealers")
 async def create_dealer(req: Request, _=Depends(_admin)):
     d = await req.json()
-    u = d.get('username','').strip(); p = d.get('password','').strip()
-    cn = d.get('company_name','').strip()
-    if not u or not p or not cn: raise HTTPException(400, "用户名、密码、公司名不能为空")
-    db = get_db()
-    if db.execute("SELECT id FROM dealers WHERE username = ?", (u,)).fetchone():
-        db.close(); raise HTTPException(409, "用户名已存在")
-    db.execute("INSERT INTO dealers (username, password_hash, company_name) VALUES (?, ?, ?)", (u, hash_pw(p), cn))
-    db.commit(); db.close()
-    return {'ok': True, 'message': '经销商账户创建成功'}
+    u = d.get('username', '').strip()
+    p = d.get('password', '').strip()
+    cn = d.get('company_name', '').strip()
+    if not u or not p or not cn:
+        raise HTTPException(400, "用户名、密码、公司名不能为空")
+    existing = await kv_get(f"dealer:username:{u}")
+    if existing:
+        raise HTTPException(409, "用户名已存在")
+    dealer_id = await kv_incr("counter:dealer")
+    dealer = {
+        "id": dealer_id,
+        "username": u,
+        "password_hash": hash_pw(p),
+        "company_name": cn,
+        "logo_url": "",
+        "price_standard_cn": 12888,
+        "price_pro_cn": 15888,
+        "price_standard_intl": 2300,
+        "price_pro_intl": 2868,
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    await kv_set(f"dealer:{dealer_id}", dealer)
+    await kv_set(f"dealer:username:{u}", dealer_id)
+    # Add to dealer list
+    dealer_list = await kv_get("dealer:list") or []
+    dealer_list.append(dealer_id)
+    await kv_set("dealer:list", dealer_list)
+    return {"ok": True, "message": "经销商账户创建成功"}
 
 @app.get("/api/admin/dealers")
 async def list_dealers(_=Depends(_admin)):
-    db = get_db()
-    rows = db.execute("SELECT id, username, company_name, logo_url, created_at FROM dealers ORDER BY id DESC").fetchall()
-    db.close()
-    return [dict(r) for r in rows]
+    dealer_ids = await kv_get("dealer:list") or []
+    result = []
+    for did in reversed(dealer_ids):
+        d = await kv_get(f"dealer:{did}")
+        if d:
+            result.append({
+                "id": d["id"], "username": d["username"],
+                "company_name": d["company_name"], "logo_url": d.get("logo_url", ""),
+                "created_at": d.get("created_at", "")
+            })
+    return result
 
 @app.delete("/api/admin/dealers/{dealer_id}")
 async def delete_dealer(dealer_id: int, _=Depends(_admin)):
-    db = get_db()
-    db.execute("DELETE FROM dealers WHERE id = ?", (dealer_id,))
-    db.commit(); db.close()
-    return {'ok': True, 'message': '已删除'}
+    dealer = await kv_get(f"dealer:{dealer_id}")
+    if dealer:
+        await kv_del(f"dealer:username:{dealer['username']}")
+    await kv_del(f"dealer:{dealer_id}")
+    dealer_list = await kv_get("dealer:list") or []
+    if dealer_id in dealer_list:
+        dealer_list.remove(dealer_id)
+        await kv_set("dealer:list", dealer_list)
+    return {"ok": True, "message": "已删除"}
 
-# --- admin: leads ---
+# --- Admin: leads ---
 @app.get("/api/admin/leads")
 async def admin_leads(dealer_id: int = None, _=Depends(_admin)):
-    db = get_db()
-    if dealer_id:
-        rows = db.execute("SELECT l.*, d.company_name FROM leads l LEFT JOIN dealers d ON l.dealer_id = d.id WHERE l.dealer_id = ? ORDER BY l.created_at DESC", (dealer_id,)).fetchall()
-    else:
-        rows = db.execute("SELECT l.*, d.company_name FROM leads l LEFT JOIN dealers d ON l.dealer_id = d.id ORDER BY l.created_at DESC").fetchall()
-    db.close()
-    return [dict(r) for r in rows]
+    lead_ids = await kv_get("lead:list") or []
+    result = []
+    for lid in reversed(lead_ids):
+        lead = await kv_get(f"lead:{lid}")
+        if lead:
+            if dealer_id and lead.get("dealer_id") != dealer_id:
+                continue
+            d = await kv_get(f"dealer:{lead.get('dealer_id', 0)}")
+            lead["company_name"] = d["company_name"] if d else ""
+            result.append(lead)
+    return result
 
-# --- admin: stats ---
+# --- Admin: stats ---
 @app.get("/api/admin/stats")
 async def admin_stats(_=Depends(_admin)):
-    db = get_db()
-    dc = db.execute("SELECT COUNT(*) FROM dealers").fetchone()[0]
-    lc = db.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
-    sc = db.execute("SELECT COUNT(*) FROM leads WHERE edition='standard'").fetchone()[0]
-    pc = db.execute("SELECT COUNT(*) FROM leads WHERE edition='pro'").fetchone()[0]
-    db.close()
-    return {'dealer_count': dc, 'lead_count': lc, 'standard_count': sc, 'pro_count': pc}
+    dealer_list = await kv_get("dealer:list") or []
+    lead_ids = await kv_get("lead:list") or []
+    sc = 0
+    pc = 0
+    for lid in lead_ids:
+        lead = await kv_get(f"lead:{lid}")
+        if lead:
+            if lead.get("edition") == "standard":
+                sc += 1
+            elif lead.get("edition") == "pro":
+                pc += 1
+    return {"dealer_count": len(dealer_list), "lead_count": len(lead_ids),
+            "standard_count": sc, "pro_count": pc}
 
-# --- dealer: profile ---
+# --- Dealer: profile ---
 @app.get("/api/dealer/profile")
 async def dealer_profile(entry=Depends(_dealer)):
-    db = get_db()
-    row = db.execute("SELECT * FROM dealers WHERE id = ?", (entry['id'],)).fetchone(); db.close()
-    if not row: raise HTTPException(404, "经销商不存在")
-    return dict(row)
+    dealer = await kv_get(f"dealer:{entry['id']}")
+    if not dealer:
+        raise HTTPException(404, "经销商不存在")
+    # Remove sensitive fields
+    return {k: v for k, v in dealer.items() if k != "password_hash"}
 
 @app.put("/api/dealer/profile")
 async def update_dealer_profile(req: Request, entry=Depends(_dealer)):
     d = await req.json()
-    upd = []; vals = []
-    for k, col in [('company_name','company_name'), ('logo_url','logo_url'),
-                    ('price_standard_cn','price_standard_cn'), ('price_pro_cn','price_pro_cn'),
-                    ('price_standard_intl','price_standard_intl'), ('price_pro_intl','price_pro_intl')]:
-        if k in d and d[k] is not None:
-            upd.append(f"{col} = ?"); vals.append(d[k])
-    if upd:
-        db = get_db()
-        vals.append(entry['id'])
-        db.execute(f"UPDATE dealers SET {', '.join(upd)} WHERE id = ?", vals)
-        db.commit()
-        row = db.execute("SELECT * FROM dealers WHERE id = ?", (entry['id'],)).fetchone()
-        db.close()
-        return dict(row)
-    else:
-        db = get_db()
-        row = db.execute("SELECT * FROM dealers WHERE id = ?", (entry['id'],)).fetchone()
-        db.close()
-        return dict(row)
-
-# --- dealer: leads ---
-@app.get("/api/dealer/leads")
-async def dealer_leads(entry=Depends(_dealer)):
-    db = get_db()
-    rows = db.execute("SELECT * FROM leads WHERE dealer_id = ? ORDER BY created_at DESC", (entry['id'],)).fetchall()
-    db.close()
-    return [dict(r) for r in rows]
-
-@app.get("/api/dealer/brand-page-url")
-async def brand_page_url(entry=Depends(_dealer)):
-    return {'url': f'/brand/{entry["id"]}'}
+    dealer = await kv_get(f"dealer:{entry['id']}")
+    if not dealer:
+        raise HTTPException(404, "经销商不存在")
+    updatable = ['company_name', 'logo_url', 'price_standard_cn',
+                  'price_pro_cn', 'price_standard_intl', 'price_pro_intl']
+    for field in updatable:
+        if field in d and d[field] is not None:
+            dealer[field] = d[field]
+    await kv_set(f"dealer:{entry['id']}", dealer)
+    return {k: v for k, v in dealer.items() if k != "password_hash"}
 
 @app.put("/api/dealer/password")
 async def change_dealer_password(req: Request, entry=Depends(_dealer)):
     d = await req.json()
-    old = d.get('old_password','').strip(); new = d.get('new_password','').strip()
-    if not old or not new: raise HTTPException(400, "新旧密码不能为空")
-    if len(new) < 6: raise HTTPException(400, "新密码至少6位")
-    db = get_db()
-    row = db.execute("SELECT password_hash FROM dealers WHERE id = ?", (entry['id'],)).fetchone()
-    if not row or row['password_hash'] != hash_pw(old):
-        db.close(); raise HTTPException(401, "原密码错误")
-    db.execute("UPDATE dealers SET password_hash = ? WHERE id = ?", (hash_pw(new), entry['id']))
-    db.commit(); db.close()
-    return {'ok': True, 'message': '密码修改成功'}
+    old = d.get('old_password', '').strip()
+    new = d.get('new_password', '').strip()
+    if not old or not new:
+        raise HTTPException(400, "新旧密码不能为空")
+    if len(new) < 6:
+        raise HTTPException(400, "新密码至少6位")
+    dealer = await kv_get(f"dealer:{entry['id']}")
+    if not dealer or dealer.get('password_hash') != hash_pw(old):
+        raise HTTPException(401, "原密码错误")
+    dealer['password_hash'] = hash_pw(new)
+    await kv_set(f"dealer:{entry['id']}", dealer)
+    return {"ok": True, "message": "密码修改成功"}
 
-# --- dealer: logo upload ---
+# --- Dealer: leads ---
+@app.get("/api/dealer/leads")
+async def dealer_leads(entry=Depends(_dealer)):
+    dealer_leads_key = f"lead:dealer:{entry['id']}"
+    lead_ids = await kv_get(dealer_leads_key) or []
+    result = []
+    for lid in reversed(lead_ids):
+        lead = await kv_get(f"lead:{lid}")
+        if lead:
+            result.append(lead)
+    return result
+
+# --- Dealer: logo upload ---
 @app.post("/api/dealer/logo")
 async def upload_logo(file: UploadFile = File(...), entry=Depends(_dealer)):
     ext = os.path.splitext(file.filename or 'logo')[1] or '.png'
-    fname = f'{uuid.uuid4().hex}{ext}'
+    fname = f"{uuid.uuid4().hex}{ext}"
     fpath = os.path.join(UPLOAD_DIR, fname)
     content = await file.read()
-    with open(fpath, 'wb') as f: f.write(content)
-    logo_url = f'/uploads/{fname}'
-    db = get_db()
-    db.execute("UPDATE dealers SET logo_url = ? WHERE id = ?", (logo_url, entry['id']))
-    db.commit(); db.close()
-    return {'ok': True, 'logo_url': logo_url}
+    with open(fpath, 'wb') as f:
+        f.write(content)
+    logo_url = f"/uploads/{fname}"
+    dealer = await kv_get(f"dealer:{entry['id']}")
+    if dealer:
+        dealer['logo_url'] = logo_url
+        await kv_set(f"dealer:{entry['id']}", dealer)
+    return {"ok": True, "logo_url": logo_url}
 
 @app.get("/uploads/{path:path}")
 async def serve_upload(path: str):
     fp = os.path.join(UPLOAD_DIR, path)
-    if not os.path.isfile(fp): raise HTTPException(404)
+    if not os.path.isfile(fp):
+        raise HTTPException(404)
     return FileResponse(fp)
 
-# --- public ---
+# --- Public: brand page ---
 @app.get("/api/brand/{dealer_id}")
 async def brand_config(dealer_id: int):
-    db = get_db()
-    row = db.execute("SELECT id, company_name, logo_url, price_standard_cn, price_pro_cn, price_standard_intl, price_pro_intl FROM dealers WHERE id = ?", (dealer_id,)).fetchone()
-    db.close()
-    if not row: raise HTTPException(404, "经销商不存在")
-    return dict(row)
+    dealer = await kv_get(f"dealer:{dealer_id}")
+    if not dealer:
+        raise HTTPException(404, "经销商不存在")
+    return {
+        "id": dealer["id"],
+        "company_name": dealer["company_name"],
+        "logo_url": dealer.get("logo_url", ""),
+        "price_standard_cn": dealer.get("price_standard_cn", 12888),
+        "price_pro_cn": dealer.get("price_pro_cn", 15888),
+        "price_standard_intl": dealer.get("price_standard_intl", 2300),
+        "price_pro_intl": dealer.get("price_pro_intl", 2868)
+    }
 
+# --- Public: submit lead ---
 @app.post("/api/leads")
 async def submit_lead(req: Request):
     d = await req.json()
     dealer_id = d.get('dealer_id')
-    edition = d.get('edition','standard')
-    name = d.get('name','').strip(); phone = d.get('phone','').strip()
-    email = d.get('email','').strip()
-    if not name or not phone: raise HTTPException(400, "姓名和手机号不能为空")
-    db = get_db()
-    db.execute("INSERT INTO leads (dealer_id, edition, name, phone, email) VALUES (?, ?, ?, ?, ?)",
-               (dealer_id, edition, name, phone, email))
-    db.commit(); db.close()
-    return {'ok': True, 'message': '预约成功'}
+    edition = d.get('edition', 'standard')
+    name = d.get('name', '').strip()
+    phone = d.get('phone', '').strip()
+    email = d.get('email', '').strip()
+    if not name or not phone:
+        raise HTTPException(400, "姓名和手机号不能为空")
+    lead_id = await kv_incr("counter:lead")
+    lead = {
+        "id": lead_id,
+        "dealer_id": dealer_id,
+        "edition": edition,
+        "name": name,
+        "phone": phone,
+        "email": email,
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    await kv_set(f"lead:{lead_id}", lead)
+    # Global lead list
+    lead_list = await kv_get("lead:list") or []
+    lead_list.append(lead_id)
+    await kv_set("lead:list", lead_list)
+    # Dealer-specific lead list
+    if dealer_id:
+        dl_key = f"lead:dealer:{dealer_id}"
+        dl_list = await kv_get(dl_key) or []
+        dl_list.append(lead_id)
+        await kv_set(dl_key, dl_list)
+    return {"ok": True, "message": "预约成功"}
 
-# --- brand page & static pages ---
+# --- Static pages ---
 @app.get("/brand/{dealer_id}")
 async def brand_page(dealer_id: int):
-    db = get_db()
-    row = db.execute("SELECT id FROM dealers WHERE id = ?", (dealer_id,)).fetchone()
-    db.close()
-    if not row: return HTMLResponse('<h1 style="text-align:center;margin-top:100px;color:#666;">经销商不存在</h1>', 404)
+    dealer = await kv_get(f"dealer:{dealer_id}")
+    if not dealer:
+        return HTMLResponse('<h1 style="text-align:center;margin-top:100px;color:#666;">经销商不存在</h1>', 404)
     return FileResponse(os.path.join(PROJECT_ROOT, 'index.html'))
 
 @app.get("/admin")
