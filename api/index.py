@@ -26,7 +26,7 @@ app.add_middleware(
 
 # --- Vercel KV helpers ---
 
-async def _kv_retry(fn, *args, max_retries=3, **kwargs):
+async def _kv_retry(fn, *args, max_retries=5, **kwargs):
     """Retry KV operations with exponential backoff for transient failures."""
     for attempt in range(max_retries):
         try:
@@ -34,10 +34,10 @@ async def _kv_retry(fn, *args, max_retries=3, **kwargs):
             if result is not None and result is not False:
                 return result
             if attempt < max_retries - 1:
-                await asyncio.sleep(0.2 * (2 ** attempt))
+                await asyncio.sleep(0.3 * (2 ** attempt))
         except Exception:
             if attempt < max_retries - 1:
-                await asyncio.sleep(0.2 * (2 ** attempt))
+                await asyncio.sleep(0.3 * (2 ** attempt))
     return None
 
 async def kv_get(key: str):
@@ -100,20 +100,30 @@ def hash_pw(pw: str) -> str:
 
 async def _admin(auth: str = Header(None)):
     if not auth:
+        print("[AUTH] No auth header")
         raise HTTPException(401, detail="未授权")
     token = auth.replace('Bearer ', '')
-    session = await _kv_retry(kv_get, f"admin:token:{token}")
+    key = f"admin:token:{token}"
+    print(f"[AUTH] Looking up key: {key[:30]}... (token prefix: {token[:8]}...)")
+    session = await _kv_retry(kv_get, key)
     if not session:
+        print(f"[AUTH] Session NOT FOUND for key: {key[:30]}...")
         raise HTTPException(401, detail="未授权或已过期")
+    print(f"[AUTH] Session OK")
     return session
 
 async def _dealer(auth: str = Header(None)):
     if not auth:
+        print("[AUTH-DEALER] No auth header")
         raise HTTPException(401, detail="未授权")
     token = auth.replace('Bearer ', '')
-    session = await _kv_retry(kv_get, f"dealer:token:{token}")
+    key = f"dealer:token:{token}"
+    print(f"[AUTH-DEALER] Looking up key: {key[:30]}...")
+    session = await _kv_retry(kv_get, key)
     if not session:
+        print(f"[AUTH-DEALER] Session NOT FOUND")
         raise HTTPException(401, detail="未授权或已过期")
+    print(f"[AUTH-DEALER] Session OK")
     return session
 
 async def fallback_admin_check():
@@ -186,7 +196,9 @@ async def admin_login(req: Request):
     token = secrets.token_hex(24)
     ok = await _kv_retry(kv_set, f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
     if not ok:
+        print(f"[LOGIN] kv_set FAILED for token prefix: {token[:8]}...")
         raise HTTPException(503, "会话创建失败，请重试")
+    print(f"[LOGIN] Token stored OK, prefix: {token[:8]}...")
     return {"token": token, "username": u}
 
 @app.post("/api/dealer/login")
