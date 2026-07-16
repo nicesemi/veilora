@@ -404,6 +404,10 @@ async def dealer_leads(entry=Depends(_dealer)):
     return result
 
 # --- Dealer: logo upload ---
+@app.get("/api/dealer/brand-page-url")
+async def brand_page_url(entry=Depends(_dealer)):
+    return {"url": f"/brand/{entry['id']}"}
+
 @app.post("/api/dealer/logo")
 async def upload_logo(file: UploadFile = File(...), entry=Depends(_dealer)):
     ext = os.path.splitext(file.filename or 'logo')[1] or '.png'
