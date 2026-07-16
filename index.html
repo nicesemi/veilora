@@ -779,6 +779,40 @@ footer {
   border-top:1px solid var(--border);
 }
 
+
+html[dir="rtl"] .spec-item { text-align: right; }
+html[dir="rtl"] .reserve-modal-close { right: auto; left: 1rem; }
+html[dir="rtl"] .form-group input { text-align: right; }
+html[dir="rtl"] .lang-switch { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .order-card-price { flex-direction: row-reverse; }
+html[dir="rtl"] nav .nav-links { flex-direction: row-reverse; }
+html[dir="rtl"] .nav-inner { direction: rtl; }
+html[dir="rtl"] .order-layout { direction: rtl; }
+html[dir="rtl"] .reserve-modal { direction: rtl; }
+html[dir="rtl"] .reserve-modal-body { direction: rtl; }
+html[dir="rtl"] .reserve-modal-body label { text-align: right; }
+html[dir="rtl"] .reserve-modal-body input { direction: rtl; }
+html[dir="rtl"] .ai-input-wrap textarea { direction: rtl; text-align: right; }
+html[dir="rtl"] .ai-hero-title { direction: rtl; }
+html[dir="rtl"] .ai-hero-desc { direction: rtl; }
+html[dir="rtl"] .chat-bubble.sent { margin-left: 0; margin-right: auto; text-align: left; }
+html[dir="rtl"] .chat-bubble.received { margin-right: 0; margin-left: auto; }
+html[dir="rtl"] .chat-bubble.encrypted { text-align: right; }
+html[dir="rtl"] .chat-bubble.decrypted { text-align: right; }
+html[dir="rtl"] .encrypt-area textarea { direction: rtl; text-align: right; }
+
+.lang-switch { 
+  display: flex; gap: 4px; margin-left: 1.5rem; 
+}
+.lang-switch button {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-dim); font-size: .72rem; padding: 2px 8px;
+  border-radius: 4px; cursor: pointer;
+}
+.lang-switch button.active { 
+  background: var(--accent-dim); color: var(--accent); border-color: var(--accent); 
+}
+
 @media (max-width:768px) {
   nav .nav-links { display:none; }
   .module-grid { grid-template-columns:1fr; }
@@ -936,26 +970,31 @@ textarea.form-input { resize:vertical; min-height:80px; }
 <nav>
   <div class="nav-inner">
     <div class="logo">VEILORA</div>
+    <div class="lang-switch" id="langSwitch">
+      <button data-lang="zh" class="active">中</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ar">ع</button>
+    </div>
     <ul class="nav-links">
-      <li><a href="#hero" class="active">概览</a></li>
-      <li><a href="#modules">功能模块</a></li>
-      <li><a href="#demo">真机演示</a></li>
-      <li><a href="#order">预约购买</a></li>
-      <li><a href="/dealer">经销商门户</a></li>
-      <li><a href="/admin">管理后台</a></li>
+      <li><a href="#hero" class="active" data-i18n="nav_overview">概览</a></li>
+      <li><a href="#modules" data-i18n="nav_modules">功能模块</a></li>
+      <li><a href="#demo" data-i18n="nav_demo">真机演示</a></li>
+      <li><a href="#order" data-i18n="nav_order">预约购买</a></li>
+      <li><a href="/dealer" data-i18n="nav_dealer">经销商门户</a></li>
+      <li><a href="/admin" data-i18n="nav_admin">管理后台</a></li>
     </ul>
   </div>
 </nav>
 
 <!-- AI 智能问答（DeepSeek 风格） -->
 <section class="ai-hero" id="aiHero">
-  <div class="ai-hero-title">有任何问题，尽管问我</div>
-  <div class="ai-hero-desc">基于 VEILORA 安全手机用户使用手册，快速为你解答</div>
+  <div class="ai-hero-title" data-i18n="ai_title">有任何问题，尽管问我</div>
+  <div class="ai-hero-desc" data-i18n="ai_desc">基于 VEILORA 安全手机用户使用手册，快速为你解答</div>
   <div class="ai-input-wrap">
-    <textarea id="aiInput" placeholder="输入你的问题，例如：隐私空间如何创建？" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
+    <textarea id="aiInput" data-i18n-placeholder="ai_placeholder" placeholder="输入你的问题，例如：隐私空间如何创建？" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
     <div class="ai-input-actions">
-      <span class="ai-input-hint">换行按 Shift+Enter，发送按 Enter</span>
-      <button class="ai-send-btn" id="aiSendBtn" onclick="sendAI()">发送</button>
+      <span class="ai-input-hint" data-i18n="ai_hint">换行按 Shift+Enter，发送按 Enter</span>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="sendAI()" data-i18n="ai_send">发送</button>
     </div>
   </div>
 </section>
@@ -964,91 +1003,91 @@ textarea.form-input { resize:vertical; min-height:80px; }
 <!-- Hero -->
 <section class="hero" id="hero">
   <div class="hero-badge">REAL DEVICE DEMO</div>
-  <h1>VEILORA 安全手机</h1>
-  <p>8 大安全模块 · 22 项核心防护能力 — 从端到端加密通信到硬件级空间隔离，重新定义移动安全边界。</p>
+  <h1 data-i18n="hero_title">VEILORA 安全手机</h1>
+  <p data-i18n="hero_desc">8 大安全模块 · 22 项核心防护能力 — 从端到端加密通信到硬件级空间隔离，重新定义移动安全边界。</p>
   <div class="cta">
-    <a href="#demo" class="btn btn-primary">进入真机演示</a>
-    <a href="#modules" class="btn btn-ghost">查看功能矩阵</a>
+    <a href="#demo" class="btn btn-primary" data-i18n="hero_btn_demo">进入真机演示</a>
+    <a href="#modules" class="btn btn-ghost" data-i18n="hero_btn_matrix">查看功能矩阵</a>
   </div>
 </section>
 
 <!-- 功能模块总览 -->
 <section class="section" id="modules">
   <div class="section-header">
-    <h2>安全功能矩阵</h2>
-    <p class="sub">8 大安全模块覆盖通信加密、隐私空间、网络隐身、应急还原等全方位防护场景</p>
+    <h2 data-i18n="modules_title">安全功能矩阵</h2>
+    <p class="sub" data-i18n="modules_sub">8 大安全模块覆盖通信加密、隐私空间、网络隐身、应急还原等全方位防护场景</p>
   </div>
   <div class="module-grid">
 
     <div class="module-card">
-      <div class="card-num">模块 01</div>
-      <h3>隐私空间</h3>
-      <p class="card-desc">物理级多空间隔离 + 应用沙箱 + 文件级加密，双 PIN 码无感切换，独立 UID / 独立密钥。</p>
+      <div class="card-num" data-i18n="module_01_num">模块 01</div>
+      <h3 data-i18n="module_01_title">隐私空间</h3>
+      <p class="card-desc" data-i18n="module_01_desc">物理级多空间隔离 + 应用沙箱 + 文件级加密，双 PIN 码无感切换，独立 UID / 独立密钥。</p>
       <div class="tag-list">
-        <span class="tag">双PIN切换</span><span class="tag">文件同步</span><span class="tag">独立加密</span>
+        <span class="tag" data-i18n="module_01_tag1">双PIN切换</span><span class="tag" data-i18n="module_01_tag2">文件同步</span><span class="tag" data-i18n="module_01_tag3">独立加密</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 02</div>
-      <h3>网络隐身与防追踪</h3>
-      <p class="card-desc">设备隐身规避嗅探与端口扫描，流量防火墙按应用级精准管控网络访问。</p>
+      <div class="card-num" data-i18n="module_02_num">模块 02</div>
+      <h3 data-i18n="module_02_title">网络隐身与防追踪</h3>
+      <p class="card-desc" data-i18n="module_02_desc">设备隐身规避嗅探与端口扫描，流量防火墙按应用级精准管控网络访问。</p>
       <div class="tag-list">
-        <span class="tag">设备隐身</span><span class="tag">流量管控</span><span class="tag warn">反追踪</span>
+        <span class="tag" data-i18n="module_02_tag1">设备隐身</span><span class="tag" data-i18n="module_02_tag2">流量管控</span><span class="tag warn" data-i18n="module_02_tag3">反追踪</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 03</div>
-      <h3>应用权限管控</h3>
-      <p class="card-desc">实时审计所有 APP 对通讯录/相册/麦克风/定位等敏感资源的调用，超级隐私模式一键断联。</p>
+      <div class="card-num" data-i18n="module_03_num">模块 03</div>
+      <h3 data-i18n="module_03_title">应用权限管控</h3>
+      <p class="card-desc" data-i18n="module_03_desc">实时审计所有 APP 对通讯录/相册/麦克风/定位等敏感资源的调用，超级隐私模式一键断联。</p>
       <div class="tag-list">
-        <span class="tag">权限审计</span><span class="tag">行为监控</span><span class="tag danger">超级隐私</span>
+        <span class="tag" data-i18n="module_03_tag1">权限审计</span><span class="tag" data-i18n="module_03_tag2">行为监控</span><span class="tag danger" data-i18n="module_03_tag3">超级隐私</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 04</div>
-      <h3>即时通信加密</h3>
-      <p class="card-desc">悬浮安全锁唤出密写工具，文字语音文件端到端加密，第三方服务器仅见无法破解的乱码。</p>
+      <div class="card-num" data-i18n="module_04_num">模块 04</div>
+      <h3 data-i18n="module_04_title">即时通信加密</h3>
+      <p class="card-desc" data-i18n="module_04_desc">悬浮安全锁唤出密写工具，文字语音文件端到端加密，第三方服务器仅见无法破解的乱码。</p>
       <div class="tag-list">
-        <span class="tag">密文聊天</span><span class="tag">.xefc 加密文件</span><span class="tag">加密语音</span>
+        <span class="tag" data-i18n="module_04_tag1">密文聊天</span><span class="tag" data-i18n="module_04_tag2">.xefc 加密文件</span><span class="tag" data-i18n="module_04_tag3">加密语音</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 05</div>
-      <h3>私有云加密备份</h3>
-      <p class="card-desc">支持 WebDAV 自建 NAS / 个人服务器，离屏即加密，端到端保护，全自主数据主权。</p>
+      <div class="card-num" data-i18n="module_05_num">模块 05</div>
+      <h3 data-i18n="module_05_title">私有云加密备份</h3>
+      <p class="card-desc" data-i18n="module_05_desc">支持 WebDAV 自建 NAS / 个人服务器，离屏即加密，端到端保护，全自主数据主权。</p>
       <div class="tag-list">
-        <span class="tag">WebDAV</span><span class="tag">自动备份</span><span class="tag">端到端加密</span>
+        <span class="tag" data-i18n="module_05_tag1">WebDAV</span><span class="tag" data-i18n="module_05_tag2">自动备份</span><span class="tag" data-i18n="module_05_tag3">端到端加密</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 06</div>
-      <h3>具身安全智能体</h3>
-      <p class="card-desc">本地 AI 主动防御：智能识别零日攻击、禁止远控、多维度风险审计、USB-C 端口防护。</p>
+      <div class="card-num" data-i18n="module_06_num">模块 06</div>
+      <h3 data-i18n="module_06_title">具身安全智能体</h3>
+      <p class="card-desc" data-i18n="module_06_desc">本地 AI 主动防御：智能识别零日攻击、禁止远控、多维度风险审计、USB-C 端口防护。</p>
       <div class="tag-list">
-        <span class="tag">AI 防御</span><span class="tag">禁止远控</span><span class="tag danger">漏洞防护</span>
+        <span class="tag" data-i18n="module_06_tag1">AI 防御</span><span class="tag" data-i18n="module_06_tag2">禁止远控</span><span class="tag danger" data-i18n="module_06_tag3">漏洞防护</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 07</div>
-      <h3>三级密钥应急体系</h3>
-      <p class="card-desc">日常密钥 → 隐私还原密钥 → 手机还原密钥，支持远程锁定 / 轨迹追踪 / 远程抹除。</p>
+      <div class="card-num" data-i18n="module_07_num">模块 07</div>
+      <h3 data-i18n="module_07_title">三级密钥应急体系</h3>
+      <p class="card-desc" data-i18n="module_07_desc">日常密钥 → 隐私还原密钥 → 手机还原密钥，支持远程锁定 / 轨迹追踪 / 远程抹除。</p>
       <div class="tag-list">
-        <span class="tag">还原密码</span><span class="tag">远程锁定</span><span class="tag danger">远程抹除</span>
+        <span class="tag" data-i18n="module_07_tag1">还原密码</span><span class="tag" data-i18n="module_07_tag2">远程锁定</span><span class="tag danger" data-i18n="module_07_tag3">远程抹除</span>
       </div>
     </div>
 
     <div class="module-card">
-      <div class="card-num">模块 08</div>
-      <h3>账号安全体系</h3>
-      <p class="card-desc">设备硬件唯一强绑定，恢复密语离线保管云端不留存，关键操作强制身份验证。</p>
+      <div class="card-num" data-i18n="module_08_num">模块 08</div>
+      <h3 data-i18n="module_08_title">账号安全体系</h3>
+      <p class="card-desc" data-i18n="module_08_desc">设备硬件唯一强绑定，恢复密语离线保管云端不留存，关键操作强制身份验证。</p>
       <div class="tag-list">
-        <span class="tag">恢复密语</span><span class="tag">设备绑定</span><span class="tag danger">身份验证</span>
+        <span class="tag" data-i18n="module_08_tag1">恢复密语</span><span class="tag" data-i18n="module_08_tag2">设备绑定</span><span class="tag danger" data-i18n="module_08_tag3">身份验证</span>
       </div>
     </div>
 
@@ -1058,54 +1097,54 @@ textarea.form-input { resize:vertical; min-height:80px; }
 <!-- 真机演示 -->
 <section class="section" id="demo">
   <div class="section-header">
-    <h2>真机交互演示</h2>
-    <p class="sub">以下每个 Tab 对应真机上的一项核心安全功能，可直接操作体验</p>
+    <h2 data-i18n="demo_title">真机交互演示</h2>
+    <p class="sub" data-i18n="demo_sub">以下每个 Tab 对应真机上的一项核心安全功能，可直接操作体验</p>
   </div>
 
   <div class="demo-block">
     <div class="demo-tabs" id="demoTabs">
-      <button class="demo-tab active" data-tab="encrypt-chat">加密通信</button>
-      <button class="demo-tab" data-tab="encrypt-file">文件加密</button>
-      <button class="demo-tab" data-tab="stealth">网络隐身</button>
-      <button class="demo-tab" data-tab="super-privacy">超级隐私</button>
-      <button class="demo-tab" data-tab="dual-pin">双 PIN 空间切换</button>
-      <button class="demo-tab" data-tab="emergency">应急还原</button>
+      <button class="demo-tab active" data-tab="encrypt-chat" data-i18n="demo_tab1">加密通信</button>
+      <button class="demo-tab" data-tab="encrypt-file" data-i18n="demo_tab2">文件加密</button>
+      <button class="demo-tab" data-tab="stealth" data-i18n="demo_tab3">网络隐身</button>
+      <button class="demo-tab" data-tab="super-privacy" data-i18n="demo_tab4">超级隐私</button>
+      <button class="demo-tab" data-tab="dual-pin" data-i18n="demo_tab5">双 PIN 空间切换</button>
+      <button class="demo-tab" data-tab="emergency" data-i18n="demo_tab6">应急还原</button>
     </div>
 
     <!-- 1. 加密通信 -->
     <div class="demo-content active" id="encrypt-chat">
-      <h4>端到端加密通信演示</h4>
-      <p>在下方输入明文，点击加密生成密文并自动复制到剪贴板。将密文粘贴到聊天输入框发送，悬浮在密文气泡上即可查看解密后的明文。全程使用 AES-256-GCM 真加密。</p>
+      <h4 data-i18n="encrypt_chat_title">端到端加密通信演示</h4>
+      <p data-i18n="encrypt_chat_desc">在下方输入明文，点击加密生成密文并自动复制到剪贴板。将密文粘贴到聊天输入框发送，悬浮在密文气泡上即可查看解密后的明文。全程使用 AES-256-GCM 真加密。</p>
 
       <!-- 加密区域 -->
       <div class="encrypt-area">
-        <div class="encrypt-label">明文输入</div>
-        <textarea id="plaintextInput" placeholder="在此输入要加密的明文消息..."></textarea>
+        <div class="encrypt-label" data-i18n="encrypt_label">明文输入</div>
+        <textarea id="plaintextInput" data-i18n-placeholder="encrypt_placeholder" placeholder="在此输入要加密的明文消息..."></textarea>
         <div class="encrypt-actions">
-          <button class="encrypt-btn" id="encryptBtn" onclick="encryptAndCopy()">加密并复制密文</button>
-          <span class="encrypt-toast" id="encryptToast">密文已复制到剪贴板，快去粘贴发送吧</span>
+          <button class="encrypt-btn" id="encryptBtn" onclick="encryptAndCopy()" data-i18n="encrypt_btn">加密并复制密文</button>
+          <span class="encrypt-toast" id="encryptToast" data-i18n="encrypt_toast">密文已复制到剪贴板，快去粘贴发送吧</span>
         </div>
       </div>
 
       <!-- 聊天区域 -->
       <div class="chat-box">
         <div class="chat-toggle" style="margin-bottom:.8rem">
-          <span style="color:var(--accent);font-size:.76rem;">AES-256-GCM 端到端加密 | 共享密钥已协商</span>
+          <span style="color:var(--accent);font-size:.76rem;" data-i18n="encrypt_chat_status">AES-256-GCM 端到端加密 | 共享密钥已协商</span>
         </div>
         <div id="chatMessages">
-          <div class="chat-bubble info">会话已建立（AES-256-GCM），请在加密区域生成密文后粘贴到此发送</div>
+          <div class="chat-bubble info" data-i18n="encrypt_chat_info">会话已建立（AES-256-GCM），请在加密区域生成密文后粘贴到此发送</div>
         </div>
         <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="在此粘贴密文，按 Enter 发送..." onkeydown="if(event.key==='Enter')sendCipherMsg()">
-          <button onclick="sendCipherMsg()">发送</button>
+          <input type="text" id="chatInput" data-i18n-placeholder="encrypt_input_placeholder" placeholder="在此粘贴密文，按 Enter 发送..." onkeydown="if(event.key==='Enter')sendCipherMsg()">
+          <button onclick="sendCipherMsg()" data-i18n="encrypt_send">发送</button>
         </div>
       </div>
     </div>
 
     <!-- 2. 文件加密 -->
     <div class="demo-content" id="encrypt-file">
-      <h4>文件加密传输 (.xefc)</h4>
-      <p>模拟微信发送加密文件：选择 .xefc 文件 → 发送到聊天 → 点击文件体验 VEILORA 解密流程。</p>
+      <h4 data-i18n="encrypt_file_title">文件加密传输 (.xefc)</h4>
+      <p data-i18n="encrypt_file_desc">模拟微信发送加密文件：选择 .xefc 文件 → 发送到聊天 → 点击文件体验 VEILORA 解密流程。</p>
 
       <!-- 微信 Mock -->
       <div class="wechat-mock">
@@ -1119,26 +1158,26 @@ textarea.form-input { resize:vertical; min-height:80px; }
         </div>
         <div class="wechat-input">
           <button onclick="toggleFilePicker()">+</button>
-          <input type="text" placeholder="选择文件后点击发送" readonly id="wechatInputHint">
-          <button id="wechatSendBtn" onclick="sendSelectedFile()">发送</button>
+          <input type="text" data-i18n-placeholder="wechat_hint" placeholder="选择文件后点击发送" readonly id="wechatInputHint">
+          <button id="wechatSendBtn" onclick="sendSelectedFile()" data-i18n="wechat_send">发送</button>
         </div>
       </div>
 
       <!-- 文件选择器 -->
       <div class="file-picker" id="filePicker" style="display:none;">
-        <div class="file-picker-header">选择文件</div>
+        <div class="file-picker-header" data-i18n="file_picker_title">选择文件</div>
         <div class="file-picker-item" data-file="png" onclick="selectFile(this)">
           <div class="file-picker-icon">&#x1F5BC;</div>
           <div class="file-picker-info">
             <div class="file-picker-name">产品原型图.png</div>
-            <div class="file-picker-meta">5.1 MB</div>
+            <div class="file-picker-meta" data-i18n="file_picker_png_meta">5.1 MB</div>
           </div>
         </div>
         <div class="file-picker-item" data-file="xefc" onclick="selectFile(this)">
           <div class="file-picker-icon">&#x1F512;</div>
           <div class="file-picker-info">
             <div class="file-picker-name">产品原型图.xefc</div>
-            <div class="file-picker-meta">VEILORA 加密文件</div>
+            <div class="file-picker-meta" data-i18n="file_picker_xefc_meta">VEILORA 加密文件</div>
           </div>
         </div>
       </div>
@@ -1146,29 +1185,29 @@ textarea.form-input { resize:vertical; min-height:80px; }
 
     <!-- 3. 网络隐身 -->
     <div class="demo-content" id="stealth">
-      <h4>设备网络隐身</h4>
-      <p>开启后将设备从局域网/互联网扫描中隐藏，规避嗅探与端口扫描。关闭 GPS 与基站连接，动态收敛攻击面。</p>
+      <h4 data-i18n="stealth_title">设备网络隐身</h4>
+      <p data-i18n="stealth_desc">开启后将设备从局域网/互联网扫描中隐藏，规避嗅探与端口扫描。关闭 GPS 与基站连接，动态收敛攻击面。</p>
       <div class="radar-area">
         <div class="radar" id="radar">
           <div class="radar-dot" style="top:30%;left:40%"></div>
           <div class="radar-dot" style="top:55%;left:65%"></div>
           <div class="radar-dot" style="top:70%;left:30%"></div>
-          <div class="radar-label" id="radarLabel">设备可见</div>
+          <div class="radar-label" id="radarLabel" data-i18n="stealth_visible">设备可见</div>
         </div>
-        <div class="stealth-toggle" id="stealthBtn" onclick="toggleStealth()">开启隐身模式</div>
-        <p style="margin-top:1rem;font-size:.78rem;color:var(--text-muted)" id="stealthNote">当前：设备在网络中可被扫描发现</p>
+        <div class="stealth-toggle" id="stealthBtn" onclick="toggleStealth()" data-i18n="stealth_btn_on">开启隐身模式</div>
+        <p style="margin-top:1rem;font-size:.78rem;color:var(--text-muted)" id="stealthNote" data-i18n="stealth_note_off">当前：设备在网络中可被扫描发现</p>
       </div>
 
       <hr style="border-color:rgba(255,255,255,.06);margin:1.8rem 0 1.2rem">
 
-      <h4 style="margin-bottom:.6rem">⚡ 真实局域网设备扫描</h4>
-      <p style="color:var(--text-muted);font-size:.8rem;margin-bottom:1rem;">对当前局域网执行真实 Ping Sweep + ARP 表扫描，发现所有接入设备。</p>
+      <h4 style="margin-bottom:.6rem" data-i18n="scan_title">⚡ 真实局域网设备扫描</h4>
+      <p style="color:var(--text-muted);font-size:.8rem;margin-bottom:1rem;" data-i18n="scan_desc">对当前局域网执行真实 Ping Sweep + ARP 表扫描，发现所有接入设备。</p>
       <div style="background:linear-gradient(135deg,#0f0f1a,#1a1a2e);border:1px solid var(--accent);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem">
-        <p style="color:#ffd700;font-weight:600;margin:0 0 .4rem">此功能需在本地运行</p>
-        <p style="color:var(--text-muted);font-size:.8rem;margin:0 0 1rem">Vercel 云端无法访问您的局域网。请将项目克隆到本地后使用。</p>
+        <p style="color:#ffd700;font-weight:600;margin:0 0 .4rem" data-i18n="scan_local_only">此功能需在本地运行</p>
+        <p style="color:var(--text-muted);font-size:.8rem;margin:0 0 1rem" data-i18n="scan_local_desc">Vercel 云端无法访问您的局域网。请将项目克隆到本地后使用。</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-          <button class="scan-btn" onclick="copyCloneCmd()" title="复制克隆命令">📋 复制克隆命令</button>
-          <button class="scan-btn" onclick="downloadSetupScript()" title="下载一键安装脚本">⚡ 下载一键脚本</button>
+          <button class="scan-btn" onclick="copyCloneCmd()" title="复制克隆命令" data-i18n="scan_copy_cmd">📋 复制克隆命令</button>
+          <button class="scan-btn" onclick="downloadSetupScript()" title="下载一键安装脚本" data-i18n="scan_download_script">⚡ 下载一键脚本</button>
         </div>
         <div id="cloneCmdCopied" style="color:#4caf50;font-size:.75rem;margin-top:.6rem;display:none">已复制，粘贴到终端即可</div>
         <details style="margin-top:.8rem">
@@ -1190,20 +1229,20 @@ python3 server.py</pre>
 
     <!-- 4. 超级隐私 -->
     <div class="demo-content" id="super-privacy">
-      <h4>超级隐私模式</h4>
-      <p>一键触发驱动层强制禁用相机、麦克风及 GPS 定位模块，彻底切断所有数据交互。适用于涉密会议等场景。</p>
+      <h4 data-i18n="privacy_title">超级隐私模式</h4>
+      <p data-i18n="privacy_desc">一键触发驱动层强制禁用相机、麦克风及 GPS 定位模块，彻底切断所有数据交互。适用于涉密会议等场景。</p>
       <div class="privacy-grid">
-        <div class="pcard on" id="pCam"><div class="picon">📷</div><div class="plabel">相机</div><div class="pstate">正常</div></div>
-        <div class="pcard on" id="pMic"><div class="picon">🎤</div><div class="plabel">麦克风</div><div class="pstate">正常</div></div>
-        <div class="pcard on" id="pGps"><div class="picon">📍</div><div class="plabel">GPS 定位</div><div class="pstate">正常</div></div>
+        <div class="pcard on" id="pCam"><div class="picon">📷</div><div class="plabel" data-i18n="privacy_camera">相机</div><div class="pstate" data-i18n="privacy_normal">正常</div></div>
+        <div class="pcard on" id="pMic"><div class="picon">🎤</div><div class="plabel" data-i18n="privacy_mic">麦克风</div><div class="pstate" data-i18n="privacy_normal">正常</div></div>
+        <div class="pcard on" id="pGps"><div class="picon">📍</div><div class="plabel" data-i18n="privacy_gps">GPS 定位</div><div class="pstate" data-i18n="privacy_normal">正常</div></div>
       </div>
-      <button class="pmaster-btn" id="privacyMaster" onclick="toggleSuperPrivacy()">⚡ 一键启用超级隐私</button>
+      <button class="pmaster-btn" id="privacyMaster" onclick="toggleSuperPrivacy()" data-i18n="privacy_master_on">⚡ 一键启用超级隐私</button>
     </div>
 
     <!-- 5. 双 PIN 空间切换 -->
     <div class="demo-content" id="dual-pin">
-      <h4>双 PIN 码空间切换</h4>
-      <p>两套独立 PIN，触发完全隔离的桌面环境。在锁屏输入 <b>123456</b> 进入主空间（应用更多），输入 <b>000000</b> 进入隐私空间（仅保留最基本应用）。</p>
+      <h4 data-i18n="dualpin_title">双 PIN 码空间切换</h4>
+      <p data-i18n="dualpin_desc">两套独立 PIN，触发完全隔离的桌面环境。在锁屏输入 <b>123456</b> 进入主空间（应用更多），输入 <b>000000</b> 进入隐私空间（仅保留最基本应用）。</p>
 
       <div class="dual-pin-phone">
         <div class="dual-pin-notch"></div>
@@ -1231,7 +1270,7 @@ python3 server.py</pre>
             <button class="pin-key" data-key="0">0</button>
             <button class="pin-key del" id="pinClear">清空</button>
           </div>
-          <div class="lock-msg" id="lockMsg">请输入 6 位 PIN 码</div>
+          <div class="lock-msg" id="lockMsg" data-i18n="dualpin_enter_pin">请输入 6 位 PIN 码</div>
         </div>
 
         <!-- 主屏幕（主空间 123456） -->
@@ -1271,14 +1310,14 @@ python3 server.py</pre>
       </div>
 
       <div style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-muted)">
-        提示：123456 触发主空间（含 12 个应用） · 000000 触发隐私空间（含 5 个应用）
+        <span data-i18n="dualpin_hint">提示：123456 触发主空间（含 12 个应用） · 000000 触发隐私空间（含 5 个应用）</span>
       </div>
     </div>
 
     <!-- 6. 应急还原 -->
     <div class="demo-content" id="emergency">
-      <h4>应急还原</h4>
-      <p>在锁屏界面输入应急还原密码 <b>999999</b>，模拟设备远程抹除与恢复出厂设置。相册中的图片将被清除。</p>
+      <h4 data-i18n="emergency_title">应急还原</h4>
+      <p data-i18n="emergency_desc">在锁屏界面输入应急还原密码 <b>999999</b>，模拟设备远程抹除与恢复出厂设置。相册中的图片将被清除。</p>
 
       <div class="emergency-phone" id="emDemoPhone">
         <div class="emergency-notch"></div>
@@ -1306,7 +1345,7 @@ python3 server.py</pre>
             <button class="pin-key" data-key="0">0</button>
             <button class="pin-key del" id="emRestoreClear">清空</button>
           </div>
-          <div class="lock-msg" id="emLockMsg2">输入 6 位应急还原密码（默认：999999）</div>
+          <div class="lock-msg" id="emLockMsg2" data-i18n="emergency_enter_pin">输入 6 位应急还原密码（默认：999999）</div>
         </div>
 
         <!-- 主屏幕（含相册） -->
@@ -1336,42 +1375,42 @@ python3 server.py</pre>
         <div class="config-overlay" id="emConfigOverlay2">
           <div class="config-step" id="emConfigStep1_2">
             <div class="config-done-icon">🛡️</div>
-            <h2>欢迎使用 VEILORA 安全手机</h2>
-            <p>设备已恢复出厂设置，请跟随向导完成初始配置</p>
-            <button class="config-btn primary" onclick="emNextConfigStep2()">开始配置</button>
+            <h2 data-i18n="emergency_welcome">欢迎使用 VEILORA 安全手机</h2>
+            <p data-i18n="emergency_welcome_desc">设备已恢复出厂设置，请跟随向导完成初始配置</p>
+            <button class="config-btn primary" onclick="emNextConfigStep2()" data-i18n="emergency_start_config">开始配置</button>
           </div>
           <div class="config-step" id="emConfigStep2_2" style="display:none;">
-            <h2>选择语言</h2>
-            <p>请选择系统显示语言</p>
+            <h2 data-i18n="emergency_select_lang">选择语言</h2>
+            <p data-i18n="emergency_select_lang_desc">请选择系统显示语言</p>
             <div class="config-lang-list">
               <div class="config-lang-item selected" data-lang="zh-CN" onclick="emSelectConfigLang2(this)">简体中文</div>
               <div class="config-lang-item" data-lang="en" onclick="emSelectConfigLang2(this)">English</div>
               <div class="config-lang-item" data-lang="ja" onclick="emSelectConfigLang2(this)">日本語</div>
             </div>
-            <button class="config-btn primary" onclick="emNextConfigStep2()" style="margin-top:1.5rem;">下一步</button>
+            <button class="config-btn primary" onclick="emNextConfigStep2()" style="margin-top:1.5rem;" data-i18n="emergency_next">下一步</button>
           </div>
           <div class="config-step" id="emConfigStep3_2" style="display:none;">
-            <h2>网络设置</h2>
-            <p>选择 Wi-Fi 网络或稍后设置</p>
+            <h2 data-i18n="emergency_network">网络设置</h2>
+            <p data-i18n="emergency_network_desc">选择 Wi-Fi 网络或稍后设置</p>
             <div class="config-net-list">
               <div class="config-net-item"><span>VEILORA-Secure</span><span class="net-lock">🔒</span></div>
               <div class="config-net-item"><span>Office-Guest</span></div>
               <div class="config-net-item"><span>Home-5G</span><span class="net-lock">🔒</span></div>
             </div>
-            <button class="config-btn primary" onclick="emNextConfigStep2()">连接</button>
-            <button class="config-btn ghost" onclick="emNextConfigStep2()">跳过</button>
+            <button class="config-btn primary" onclick="emNextConfigStep2()" data-i18n="emergency_connect">连接</button>
+            <button class="config-btn ghost" onclick="emNextConfigStep2()" data-i18n="emergency_skip">跳过</button>
           </div>
           <div class="config-step" id="emConfigStep4_2" style="display:none;">
             <div class="config-done-icon">✅</div>
-            <h2>配置完成</h2>
-            <p>所有设置已完成，欢迎开始使用</p>
-            <button class="config-btn primary" onclick="emFinishConfig2()">进入主空间</button>
+            <h2 data-i18n="emergency_done">配置完成</h2>
+            <p data-i18n="emergency_done_desc">所有设置已完成，欢迎开始使用</p>
+            <button class="config-btn primary" onclick="emFinishConfig2()" data-i18n="emergency_enter">进入主空间</button>
           </div>
         </div>
       </div>
 
       <div style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-muted)">
-        提示：输入 <b>999999</b> 触发应急还原 · 还原后相册图片将被清空
+        <span data-i18n="emergency_hint">提示：输入 <b>999999</b> 触发应急还原 · 还原后相册图片将被清空</span>
       </div>
     </div>
   </div>
@@ -1380,46 +1419,46 @@ python3 server.py</pre>
 <!-- 预约购买 -->
 <section class="section" id="order">
   <div class="section-header">
-    <h2>预约购买</h2>
-    <p class="sub">VEILORA 安全手机现支持预约，选择版本后提交联系方式即可</p>
+    <h2 data-i18n="order_title">预约购买</h2>
+    <p class="sub" data-i18n="order_sub">VEILORA 安全手机现支持预约，选择版本后提交联系方式即可</p>
   </div>
 
   <div class="order-layout" style="max-width:900px;margin:0 auto;display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;">
 
     <!-- 标准版 -->
     <div class="order-card" data-edition="standard">
-      <div class="order-card-badge">标准版</div>
+      <div class="order-card-badge" data-i18n="order_standard">标准版</div>
       <div class="order-card-price">
         <span class="price-cn">¥12,888</span>
         <span class="price-divider">|</span>
         <span class="price-intl">$2,300</span>
       </div>
-      <div class="order-card-specs">
+      <div class="order-card-specs" id="specs-standard">
         <div class="spec-item">VEILORA OS 3.0</div>
         <div class="spec-item">安全芯片 SE-200</div>
         <div class="spec-item">6.7" AMOLED</div>
         <div class="spec-item">16GB + 128GB</div>
         <div class="spec-item">基础安全套件</div>
       </div>
-      <button class="order-card-btn" onclick="openReserve('standard')">预约标准版</button>
+      <button class="order-card-btn" onclick="openReserve('standard')" data-i18n="order_reserve_standard">预约标准版</button>
     </div>
 
     <!-- 专业版 -->
     <div class="order-card" data-edition="pro" style="border-color:var(--accent);">
-      <div class="order-card-badge" style="background:var(--accent);color:#060b10;">专业版</div>
+      <div class="order-card-badge" style="background:var(--accent);color:#060b10;" data-i18n="order_pro">专业版</div>
       <div class="order-card-price">
         <span class="price-cn">¥15,888</span>
         <span class="price-divider">|</span>
         <span class="price-intl">$2,868</span>
       </div>
-      <div class="order-card-specs">
+      <div class="order-card-specs" id="specs-pro">
         <div class="spec-item">VEILORA OS 3.0 Pro</div>
         <div class="spec-item">安全芯片 SE-300</div>
         <div class="spec-item">6.9" LTPO AMOLED</div>
         <div class="spec-item">16GB + 512GB</div>
         <div class="spec-item">高级安全套件 + 应急保护</div>
       </div>
-      <button class="order-card-btn" onclick="openReserve('pro')" style="background:var(--accent);color:#060b10;">预约专业版</button>
+      <button class="order-card-btn" onclick="openReserve('pro')" style="background:var(--accent);color:#060b10;" data-i18n="order_reserve_pro">预约专业版</button>
     </div>
 
   </div>
@@ -1428,29 +1467,29 @@ python3 server.py</pre>
   <div class="reserve-modal-overlay" id="reserveModalOverlay" style="display:none;">
     <div class="reserve-modal">
       <div class="reserve-modal-header">
-        <h3 id="reserveModalTitle">预约 VEILORA 标准版</h3>
+        <h3 id="reserveModalTitle" data-i18n="reserve_title">预约 VEILORA 标准版</h3>
         <button class="reserve-modal-close" onclick="closeReserve()">&times;</button>
       </div>
       <div class="reserve-modal-body">
         <div class="form-group">
-          <label>姓名</label>
-          <input type="text" id="reserveName" placeholder="请输入姓名">
+          <label data-i18n="reserve_name">姓名</label>
+          <input type="text" id="reserveName" data-i18n-placeholder="reserve_name_placeholder" placeholder="请输入姓名">
         </div>
         <div class="form-group">
-          <label>手机号</label>
-          <input type="text" id="reservePhone" placeholder="请输入手机号">
+          <label data-i18n="reserve_phone">手机号</label>
+          <input type="text" id="reservePhone" data-i18n-placeholder="reserve_phone_placeholder" placeholder="请输入手机号">
         </div>
         <div class="form-group">
-          <label>邮箱（选填）</label>
-          <input type="email" id="reserveEmail" placeholder="请输入邮箱">
+          <label data-i18n="reserve_email">邮箱（选填）</label>
+          <input type="email" id="reserveEmail" data-i18n-placeholder="reserve_email_placeholder" placeholder="请输入邮箱">
         </div>
-        <button class="order-card-btn" onclick="submitReserve()" style="width:100%;margin-top:.5rem;">提交预约</button>
+        <button class="order-card-btn" onclick="submitReserve()" style="width:100%;margin-top:.5rem;" data-i18n="reserve_submit">提交预约</button>
       </div>
       <div class="reserve-modal-success" id="reserveSuccess" style="display:none;">
         <div class="check">&#10003;</div>
-        <div class="reserve-success-text">预约已提交</div>
-        <div style="font-size:.82rem;color:var(--text-dim);margin-top:.3rem;">我们将在产品上市后第一时间通知您</div>
-        <button class="order-card-btn ghost" onclick="closeReserve()" style="margin-top:1.5rem;">关闭</button>
+        <div class="reserve-success-text" data-i18n="reserve_success">预约已提交</div>
+        <div style="font-size:.82rem;color:var(--text-dim);margin-top:.3rem;" data-i18n="reserve_success_desc">我们将在产品上市后第一时间通知您</div>
+        <button class="order-card-btn ghost" onclick="closeReserve()" style="margin-top:1.5rem;" data-i18n="reserve_close">关闭</button>
       </div>
     </div>
   </div>
@@ -1460,26 +1499,26 @@ python3 server.py</pre>
 
 <!-- ===== 经销商门户 ===== -->
 <section class="dealer-section" id="dealerPortal">
-  <h2>经销商门户</h2>
-  <p class="sub">成为 VEILORA 授权经销商，自定义价格，获取专属经销页面</p>
+  <h2 data-i18n="dealer_title">经销商门户</h2>
+  <p class="sub" data-i18n="dealer_sub">成为 VEILORA 授权经销商，自定义价格，获取专属经销页面</p>
 
   <!-- 注册/登录表单 -->
   <div id="dealerAuth">
     <div class="auth-card">
-      <h3 id="authTitle">经销商登录</h3>
+      <h3 id="authTitle" data-i18n="dealer_login">经销商登录</h3>
       <div id="authFields">
-        <input type="email" class="form-input" id="dlEmail" placeholder="邮箱">
-        <input type="password" class="form-input" id="dlPassword" placeholder="密码">
+        <input type="email" class="form-input" id="dlEmail" data-i18n-placeholder="dealer_email" placeholder="邮箱">
+        <input type="password" class="form-input" id="dlPassword" data-i18n-placeholder="dealer_password" placeholder="密码">
         <div id="regExtra" style="display:none">
-          <input type="text" class="form-input" id="dlName" placeholder="姓名">
-          <input type="text" class="form-input" id="dlCompany" placeholder="公司名称（选填）">
-          <input type="text" class="form-input" id="dlPhone" placeholder="手机号（选填）">
+          <input type="text" class="form-input" id="dlName" data-i18n-placeholder="dealer_name" placeholder="姓名">
+          <input type="text" class="form-input" id="dlCompany" data-i18n-placeholder="dealer_company" placeholder="公司名称（选填）">
+          <input type="text" class="form-input" id="dlPhone" data-i18n-placeholder="dealer_phone" placeholder="手机号（选填）">
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;" id="authBtn" onclick="dealerAuth()">登录</button>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" id="authBtn" onclick="dealerAuth()" data-i18n="dealer_login_btn">登录</button>
         <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:.5rem;text-align:center;display:none;"></div>
       </div>
       <div class="auth-switch">
-        <span id="switchText">还没有账号？</span> <a id="switchLink" onclick="toggleAuthMode()">立即注册</a>
+        <span id="switchText" data-i18n="dealer_no_account">还没有账号？</span> <a id="switchLink" onclick="toggleAuthMode()" data-i18n="dealer_register_link">立即注册</a>
       </div>
     </div>
   </div>
@@ -1492,14 +1531,14 @@ python3 server.py</pre>
         <div style="font-size:.82rem;color:var(--text-dim);"><span id="dashCompany">—</span> · <span id="dashEmail">—</span></div>
         <div style="margin-top:.3rem"><span class="status-badge" id="dashStatus">—</span></div>
       </div>
-      <button class="btn btn-ghost" onclick="dealerLogout()">退出登录</button>
+      <button class="btn btn-ghost" onclick="dealerLogout()" data-i18n="dealer_logout">退出登录</button>
     </div>
 
     <!-- pending 状态 -->
     <div class="dash-card" id="pendingArea" style="display:none">
-      <h4>审核状态</h4>
-      <p style="color:var(--warn);margin-bottom:1rem;">您的经销商申请正在等待审核中，审核通过后即可使用全部功能。</p>
-      <button class="btn btn-primary" id="applyBtn" onclick="applyDealer()">提交申请</button>
+      <h4 data-i18n="dealer_audit_status">审核状态</h4>
+      <p style="color:var(--warn);margin-bottom:1rem;" data-i18n="dealer_pending_desc">您的经销商申请正在等待审核中，审核通过后即可使用全部功能。</p>
+      <button class="btn btn-primary" id="applyBtn" onclick="applyDealer()" data-i18n="dealer_apply">提交申请</button>
       <span id="applyMsg" style="font-size:.78rem;color:var(--text-dim);margin-left:.8rem;display:none;"></span>
     </div>
 
@@ -1507,46 +1546,46 @@ python3 server.py</pre>
     <div id="approvedArea" style="display:none">
       <!-- 定价管理 -->
       <div class="dash-card">
-        <h4>定价管理</h4>
+        <h4 data-i18n="dealer_pricing">定价管理</h4>
         <div class="pricing-row">
-          <div class="pricing-item"><label>标准版 (¥)</label><input type="number" id="priceStandard" placeholder="12888"></div>
-          <div class="pricing-item"><label>Pro版 (¥)</label><input type="number" id="pricePro" placeholder="15888"></div>
-          <div class="pricing-item"><label>安全软件 (¥)</label><input type="number" id="priceSoftware" placeholder="8888"></div>
+          <div class="pricing-item"><label data-i18n="dealer_standard_price">标准版 (¥)</label><input type="number" id="priceStandard" placeholder="12888"></div>
+          <div class="pricing-item"><label data-i18n="dealer_pro_price">Pro版 (¥)</label><input type="number" id="pricePro" placeholder="15888"></div>
+          <div class="pricing-item"><label data-i18n="dealer_software_price">安全软件 (¥)</label><input type="number" id="priceSoftware" placeholder="8888"></div>
         </div>
-        <button class="btn btn-primary" onclick="updatePricing()">保存定价</button>
+        <button class="btn btn-primary" onclick="updatePricing()" data-i18n="dealer_save_pricing">保存定价</button>
         <span id="pricingMsg" style="font-size:.78rem;color:var(--text-dim);margin-left:.8rem;display:none;"></span>
       </div>
 
       <!-- 专属链接 -->
       <div class="dash-card">
-        <h4>专属经销页面</h4>
+        <h4 data-i18n="dealer_link_title">专属经销页面</h4>
         <div class="dealer-public-link" id="dealerLink">—</div>
-        <p style="font-size:.78rem;color:var(--text-dim);">将以上链接分享给客户，客户可查看您的产品价格、提交留资和下单。</p>
+        <p style="font-size:.78rem;color:var(--text-dim);" data-i18n="dealer_link_desc">将以上链接分享给客户，客户可查看您的产品价格、提交留资和下单。</p>
       </div>
 
       <!-- 标签切换 -->
       <div class="tab-nav" id="dashTabs">
-        <button class="tab-nav-btn active" onclick="switchDashTab('leads')">客户线索</button>
-        <button class="tab-nav-btn" onclick="switchDashTab('orders')">订单列表</button>
+        <button class="tab-nav-btn active" onclick="switchDashTab('leads')" data-i18n="dealer_tab_leads">客户线索</button>
+        <button class="tab-nav-btn" onclick="switchDashTab('orders')" data-i18n="dealer_tab_orders">订单列表</button>
       </div>
 
       <!-- 客户线索 -->
       <div class="dash-card" id="tabLeads">
-        <h4>客户线索</h4>
+        <h4 data-i18n="dealer_leads_title">客户线索</h4>
         <div id="leadsContent"><div class="empty-state">加载中...</div></div>
       </div>
 
       <!-- 订单列表 -->
       <div class="dash-card" id="tabOrders" style="display:none">
-        <h4>订单列表</h4>
+        <h4 data-i18n="dealer_orders_title">订单列表</h4>
         <div id="ordersContent"><div class="empty-state">加载中...</div></div>
       </div>
     </div>
 
     <!-- rejected 状态 -->
     <div class="dash-card" id="rejectedArea" style="display:none">
-      <h4>审核被拒绝</h4>
-      <p style="color:var(--danger);">您的经销商申请未通过审核，如需了解更多信息请联系管理员。</p>
+      <h4 data-i18n="dealer_rejected">审核被拒绝</h4>
+      <p style="color:var(--danger);" data-i18n="dealer_rejected_desc">您的经销商申请未通过审核，如需了解更多信息请联系管理员。</p>
     </div>
   </div>
 
@@ -1557,45 +1596,45 @@ python3 server.py</pre>
         <h3 id="pubName">—</h3>
         <div id="pubCompany" style="font-size:.82rem;color:var(--text-dim);">—</div>
       </div>
-      <button class="btn btn-ghost" onclick="switchToDealerAuth()">返回经销商门户</button>
+      <button class="btn btn-ghost" onclick="switchToDealerAuth()" data-i18n="dealer_back">返回经销商门户</button>
     </div>
 
     <!-- 价格表 -->
     <div class="dash-card">
-      <h4>产品价格</h4>
+      <h4 data-i18n="dealer_pub_pricing">产品价格</h4>
       <table class="data-table" id="pubPricing"></table>
     </div>
 
     <!-- 客户留资 -->
     <div class="dash-card">
-      <h4>留下联系方式</h4>
+      <h4 data-i18n="dealer_pub_contact">留下联系方式</h4>
       <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
-        <input type="text" class="form-input" id="leadName" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
-        <input type="text" class="form-input" id="leadPhone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
-        <input type="email" class="form-input" id="leadEmail" placeholder="邮箱" style="flex:1;min-width:180px;margin-bottom:0;">
+        <input type="text" class="form-input" id="leadName" data-i18n-placeholder="dealer_lead_name" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="text" class="form-input" id="leadPhone" data-i18n-placeholder="dealer_lead_phone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="email" class="form-input" id="leadEmail" data-i18n-placeholder="dealer_lead_email" placeholder="邮箱" style="flex:1;min-width:180px;margin-bottom:0;">
       </div>
-      <textarea class="form-input" id="leadMessage" placeholder="留言（选填）" style="margin-bottom:1rem;"></textarea>
-      <button class="btn btn-primary" onclick="submitLead()">提交</button>
+      <textarea class="form-input" id="leadMessage" data-i18n-placeholder="dealer_lead_message" placeholder="留言（选填）" style="margin-bottom:1rem;"></textarea>
+      <button class="btn btn-primary" onclick="submitLead()" data-i18n="dealer_submit">提交</button>
       <div id="leadMsg" style="font-size:.8rem;margin-top:.5rem;display:none;"></div>
     </div>
 
     <!-- 客户下单 -->
     <div class="dash-card">
-      <h4>在线下单</h4>
+      <h4 data-i18n="dealer_pub_order">在线下单</h4>
       <div class="form-group">
-        <label>选择产品</label>
+        <label data-i18n="dealer_select_product">选择产品</label>
         <select id="pubProduct" style="width:100%;padding:.65rem .9rem;background:#080d14;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;outline:none;appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238899aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right .8rem center;padding-right:2.2rem;">
-          <option value="standard">标准版</option>
-          <option value="pro">Pro版</option>
-          <option value="software">安全软件</option>
+          <option value="standard" data-i18n="order_standard">标准版</option>
+          <option value="pro" data-i18n="order_pro">Pro版</option>
+          <option value="software" data-i18n="dealer_software">安全软件</option>
         </select>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
-        <input type="number" class="form-input" id="pubQty" value="1" min="1" placeholder="数量" style="flex:1;min-width:100px;margin-bottom:0;">
-        <input type="text" class="form-input" id="pubOrderName" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
-        <input type="text" class="form-input" id="pubOrderPhone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="number" class="form-input" id="pubQty" value="1" min="1" data-i18n-placeholder="dealer_quantity" placeholder="数量" style="flex:1;min-width:100px;margin-bottom:0;">
+        <input type="text" class="form-input" id="pubOrderName" data-i18n-placeholder="dealer_order_name" placeholder="姓名" style="flex:1;min-width:150px;margin-bottom:0;">
+        <input type="text" class="form-input" id="pubOrderPhone" data-i18n-placeholder="dealer_order_phone" placeholder="手机" style="flex:1;min-width:150px;margin-bottom:0;">
       </div>
-      <button class="btn btn-primary" onclick="submitPubOrder()">提交订单</button>
+      <button class="btn btn-primary" onclick="submitPubOrder()" data-i18n="dealer_submit_order">提交订单</button>
       <div id="pubOrderMsg" style="font-size:.8rem;margin-top:.5rem;display:none;"></div>
     </div>
   </div>
@@ -1603,15 +1642,15 @@ python3 server.py</pre>
 
 <!-- ===== 管理后台 ===== -->
 <section class="dealer-section" id="adminPanel">
-  <h2>管理后台</h2>
-  <p class="sub">管理所有经销商、审核申请、查看线索与订单</p>
+  <h2 data-i18n="admin_title">管理后台</h2>
+  <p class="sub" data-i18n="admin_sub">管理所有经销商、审核申请、查看线索与订单</p>
 
   <!-- 管理员登录 -->
   <div id="adminAuth">
     <div class="auth-card">
-      <h3>管理员登录</h3>
-      <input type="password" class="form-input" id="adminPassword" placeholder="管理员密码" onkeydown="if(event.key==='Enter')adminLogin()">
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="adminLogin()">登录</button>
+      <h3 data-i18n="admin_login">管理员登录</h3>
+      <input type="password" class="form-input" id="adminPassword" data-i18n-placeholder="admin_password" placeholder="管理员密码" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="adminLogin()" data-i18n="admin_login_btn">登录</button>
       <div id="adminError" style="color:var(--danger);font-size:.8rem;margin-top:.5rem;text-align:center;display:none;"></div>
     </div>
   </div>
@@ -1619,34 +1658,34 @@ python3 server.py</pre>
   <!-- 管理员后台 -->
   <div class="dashboard" id="adminDashboard">
     <div class="dashboard-header">
-      <h3>经销商管理</h3>
-      <button class="btn btn-ghost" onclick="adminLogout()">退出登录</button>
+      <h3 data-i18n="admin_dealer_mgmt">经销商管理</h3>
+      <button class="btn btn-ghost" onclick="adminLogout()" data-i18n="admin_logout">退出登录</button>
     </div>
 
     <div class="dash-card">
-      <h4>经销商列表</h4>
+      <h4 data-i18n="admin_dealer_list">经销商列表</h4>
       <div id="adminDealersContent"><div class="empty-state">加载中...</div></div>
     </div>
 
     <div class="tab-nav" id="adminTabs">
-      <button class="tab-nav-btn active" onclick="switchAdminTab('leads')">全部线索</button>
-      <button class="tab-nav-btn" onclick="switchAdminTab('orders')">全部订单</button>
+      <button class="tab-nav-btn active" onclick="switchAdminTab('leads')" data-i18n="admin_tab_leads">全部线索</button>
+      <button class="tab-nav-btn" onclick="switchAdminTab('orders')" data-i18n="admin_tab_orders">全部订单</button>
     </div>
 
     <div class="dash-card" id="tabAdminLeads">
-      <h4>全部客户线索</h4>
+      <h4 data-i18n="admin_leads_title">全部客户线索</h4>
       <div id="adminLeadsContent"><div class="empty-state">加载中...</div></div>
     </div>
 
     <div class="dash-card" id="tabAdminOrders" style="display:none">
-      <h4>全部订单</h4>
+      <h4 data-i18n="admin_orders_title">全部订单</h4>
       <div id="adminOrdersContent"><div class="empty-state">加载中...</div></div>
     </div>
   </div>
 </section>
 
 
-  <p>VEILORA Security Phone — 真机功能演示 Demo &copy; 2026</p>
+  <p data-i18n="footer_text">VEILORA Security Phone — 真机功能演示 Demo &copy; 2026</p>
 </footer>
 
 <script>
@@ -1744,7 +1783,7 @@ async function encryptAndCopy() {
 
   const btn = document.getElementById('encryptBtn');
   btn.disabled = true;
-  btn.textContent = '加密中...';
+  btn.textContent = (currentLang==='zh'?'加密中...':currentLang==='ar'?'جار التشفير...':'Encrypting...');
 
   try {
     const key = await getCryptoKey();
@@ -1764,7 +1803,7 @@ async function encryptAndCopy() {
     alert('加密失败：' + e.message);
   }
   btn.disabled = false;
-  btn.textContent = '加密并复制密文';
+  btn.textContent = t('encrypt_btn');
 }
 
 async function sendCipherMsg() {
@@ -1802,7 +1841,7 @@ async function sendCipherMsg() {
   } else {
     encDiv.style.opacity = '0.6';
     encDiv.style.textDecoration = 'line-through';
-    encDiv.textContent = '[无效密文] ' + displayCipher;
+    encDiv.textContent = (currentLang==='en'?'[Invalid Cipher] ':currentLang==='ar'?'[نص مشفر غير صالح] ':'[无效密文] ') + displayCipher;
   }
 
   container.appendChild(encDiv);
@@ -1848,7 +1887,7 @@ function selectFile(el) {
 }
 
 function sendSelectedFile() {
-  if (!selectedFileType) { alert('请先在文件选择器中点击选择文件'); return; }
+  if (!selectedFileType) { alert(currentLang==='en'?'Please select a file first':currentLang==='ar'?'يرجى اختيار ملف أولاً':'请先在文件选择器中点击选择文件'); return; }
   const chat = document.getElementById('wechatChat');
   const names = { png: '产品原型图.png', xefc: '产品原型图.xefc' };
   const name = names[selectedFileType];
@@ -1891,11 +1930,11 @@ function showUnsupportedDialog() {
   const overlay = document.createElement('div');
   overlay.className = 'dialog-overlay';
   overlay.innerHTML = '<div class="dialog-box">' +
-    '<div class="dialog-title">暂不支持打开此类文件</div>' +
-    '<div class="dialog-desc">文件格式 .xefc 暂时无法在微信中直接查看</div>' +
+    '<div class="dialog-title" data-i18n="dialog_unsupported_title">暂不支持打开此类文件</div>' +
+    '<div class="dialog-desc" data-i18n="dialog_unsupported_desc">文件格式 .xefc 暂时无法在微信中直接查看</div>' +
     '<div class="dialog-actions">' +
-    '<button class="dialog-btn cancel" id="dCancel">取消</button>' +
-    '<button class="dialog-btn veilora" id="dVeilora">用VEILORA密件查看</button>' +
+    '<button class="dialog-btn cancel" id="dCancel" data-i18n="cancel">取消</button>' +
+    '<button class="dialog-btn veilora" id="dVeilora" data-i18n="dialog_open_veilora">用VEILORA密件查看</button>' +
     '</div></div>';
   document.body.appendChild(overlay);
 
@@ -1912,11 +1951,11 @@ function showLeaveWechatDialog() {
   const overlay = document.createElement('div');
   overlay.className = 'dialog-overlay';
   overlay.innerHTML = '<div class="dialog-box">' +
-    '<div class="dialog-title">即将离开微信，打开VEILORA密件查看</div>' +
-    '<div class="dialog-desc">VEILORA 将解密并安全显示该文件内容</div>' +
+    '<div class="dialog-title" data-i18n="dialog_leave_title">即将离开微信，打开VEILORA密件查看</div>' +
+    '<div class="dialog-desc" data-i18n="dialog_leave_desc">VEILORA 将解密并安全显示该文件内容</div>' +
     '<div class="dialog-actions">' +
-    '<button class="dialog-btn cancel" id="dCancel2">取消</button>' +
-    '<button class="dialog-btn confirm" id="dAllow">允许</button>' +
+    '<button class="dialog-btn cancel" id="dCancel2" data-i18n="cancel">取消</button>' +
+    '<button class="dialog-btn confirm" id="dAllow" data-i18n="allow">允许</button>' +
     '</div></div>';
   document.body.appendChild(overlay);
 
@@ -1934,7 +1973,7 @@ function showImageViewer() {
   overlay.className = 'img-viewer';
   overlay.innerHTML = '<div class="img-viewer-header">' +
     '<span></span>' +
-    '<span class="img-viewer-badge">VEILORA 密件查看</span>' +
+    '<span class="img-viewer-badge" data-i18n="img_viewer_badge">VEILORA 密件查看</span>' +
     '<button class="img-viewer-close" id="imgClose">&times;</button>' +
     '</div>' +
     '<div class="img-viewer-content">' +
@@ -1960,12 +1999,10 @@ function toggleStealth() {
   const note = document.getElementById('stealthNote');
 
   radar.classList.toggle('stealth', stealthOn);
-  label.textContent = stealthOn ? '设备已隐身' : '设备可见';
-  btn.textContent = stealthOn ? '关闭隐身模式' : '开启隐身模式';
+  label.textContent = stealthOn ? t('stealth_hidden') : t('stealth_visible');
+  btn.textContent = stealthOn ? t('stealth_btn_off') : t('stealth_btn_on');
   btn.classList.toggle('active', stealthOn);
-  note.textContent = stealthOn
-    ? '当前：设备已从网络中隐藏，无法被扫描发现'
-    : '当前：设备在网络中可被扫描发现';
+  note.textContent = stealthOn ? t('stealth_note_on') : t('stealth_note_off');
 }
 
 // ---------- 3b. 真实局域网扫描 ----------
@@ -2015,8 +2052,8 @@ async function startNetworkScan() {
   const tbody = document.getElementById('deviceList');
 
   btn.disabled = true;
-  btn.textContent = '⏳ 扫描中...';
-  status.textContent = '正在 Ping Sweep 扫描 254 个地址，约需 3-5 秒...';
+  btn.textContent = currentLang==='en'?'⏳ Scanning...':currentLang==='ar'?'⏳ جار المسح...':'⏳ 扫描中...';
+  status.textContent = currentLang==='en'?'Ping Sweep scanning 254 addresses, ~3-5 seconds...':currentLang==='ar'?'جار مسح 254 عنواناً، حوالي 3-5 ثوان...':'正在 Ping Sweep 扫描 254 个地址，约需 3-5 秒...';
   resultsDiv.style.display = 'block';
   summary.textContent = '';
   tbody.innerHTML = '';
@@ -2028,21 +2065,21 @@ async function startNetworkScan() {
     const data = await resp.json();
 
     if (!data.success) {
-      status.textContent = '扫描失败: ' + (data.error || '未知错误');
+      status.textContent = (currentLang==='en'?'Scan failed: ':currentLang==='ar'?'فشل المسح: ':'扫描失败: ') + (data.error || (currentLang==='en'?'Unknown error':currentLang==='ar'?'خطأ غير معروف':'未知错误'));
       btn.disabled = false;
-      btn.textContent = '🔍 重新扫描';
+      btn.textContent = currentLang==='en'?'🔍 Rescan':currentLang==='ar'?'🔍 إعادة المسح':'🔍 重新扫描';
       return;
     }
 
     status.textContent = '';
-    summary.textContent = `扫描完成：发现 ${data.count} 台设备（${data.subnet}）`;
+    summary.textContent = (currentLang==='en'?'Scan complete: ':currentLang==='ar'?'اكتمل المسح: ':'扫描完成：') + '发现 ' + data.count + ' 台设备（' + data.subnet + '）';
 
     data.devices.forEach(d => {
       const tr = document.createElement('tr');
       if (d.isGateway) tr.className = 'gateway-row';
 
       const ipClass = d.isLocalDevice ? 'local' : '';
-      const typeLabel = d.isGateway ? '🛡 网关' : d.isLocalDevice ? '📱 本机' : (d.vendor || '设备');
+      const typeLabel = d.isGateway ? (currentLang==='en'?'🛡 Gateway':currentLang==='ar'?'🛡 بوابة':'🛡 网关') : d.isLocalDevice ? (currentLang==='en'?'📱 Local':currentLang==='ar'?'📱 محلي':'📱 本机') : (d.vendor || (currentLang==='en'?'Device':currentLang==='ar'?'جهاز':'设备'));
 
       tr.innerHTML = `
         <td class="${ipClass}">${d.ip}${d.isLocalDevice ? ' ←' : ''}</td>
@@ -2054,11 +2091,11 @@ async function startNetworkScan() {
     });
 
   } catch (e) {
-    status.textContent = '网络请求失败: ' + e.message;
+    status.textContent = (currentLang==='en'?'Network request failed: ':currentLang==='ar'?'فشل طلب الشبكة: ':'网络请求失败: ') + e.message;
   }
 
   btn.disabled = false;
-  btn.textContent = '🔍 重新扫描';
+  btn.textContent = currentLang==='en'?'🔍 Rescan':currentLang==='ar'?'🔍 إعادة المسح':'🔍 重新扫描';
 }
 
 // ---------- 4. 超级隐私 ----------
@@ -2070,10 +2107,10 @@ function toggleSuperPrivacy() {
     const state = card.querySelector('.pstate');
     card.classList.toggle('on', !superPrivacyOn);
     card.classList.toggle('off', superPrivacyOn);
-    state.textContent = superPrivacyOn ? '已禁用' : '正常';
+    state.textContent = superPrivacyOn ? t('privacy_disabled') : t('privacy_normal');
   });
   const btn = document.getElementById('privacyMaster');
-  btn.textContent = superPrivacyOn ? '🔓 退出超级隐私模式' : '⚡ 一键启用超级隐私';
+  btn.textContent = superPrivacyOn ? t('privacy_master_off') : t('privacy_master_on');
   btn.classList.toggle('active', superPrivacyOn);
 }
 
@@ -2171,10 +2208,10 @@ function checkPin() {
   if (pinInput === MAIN_PIN) { enterSpace('main'); }
   else if (pinInput === PRIV_PIN) { enterSpace('private'); }
   else {
-    lockMsg.textContent = 'PIN 码错误，请重试';
+    lockMsg.textContent = t('dualpin_pin_error');
     lockMsg.className = 'lock-msg error';
     dots.classList.add('lock-pin-error');
-    setTimeout(() => { pinInput = ''; updatePinDots(); dots.classList.remove('lock-pin-error'); lockMsg.textContent = '请输入 6 位 PIN 码'; lockMsg.className = 'lock-msg'; }, 1200);
+    setTimeout(() => { pinInput = ''; updatePinDots(); dots.classList.remove('lock-pin-error'); lockMsg.textContent = t('dualpin_enter_pin'); lockMsg.className = 'lock-msg'; }, 1200);
   }
 }
 
@@ -2193,7 +2230,7 @@ function enterSpace(space) {
   }
   pinInput = ''; updatePinDots();
   if (space === 'main') { galleryHasImages = true; }
-  document.getElementById('lockMsg').textContent = '请输入 6 位 PIN 码';
+  document.getElementById('lockMsg').textContent = t('dualpin_enter_pin');
   document.getElementById('lockMsg').className = 'lock-msg';
 }
 
@@ -2212,7 +2249,7 @@ function openReserve(edition) {
   reserveEdition = edition;
   document.getElementById('reserveModalOverlay').style.display = 'flex';
   document.getElementById('reserveModalTitle').textContent = 
-    edition === 'standard' ? '预约 VEILORA 标准版' : '预约 VEILORA 专业版';
+    edition === 'standard' ? t('reserve_title_standard') : t('reserve_title_pro');
   document.getElementById('reserveName').value = '';
   document.getElementById('reservePhone').value = '';
   document.getElementById('reserveEmail').value = '';
@@ -2229,7 +2266,7 @@ function submitReserve() {
   const phone = document.getElementById('reservePhone').value.trim();
   const email = document.getElementById('reserveEmail').value.trim();
   if (!name || !phone) {
-    alert('请填写姓名和手机号');
+    alert(currentLang==='en'?'Please fill in name and phone':currentLang==='ar'?'يرجى ملء الاسم ورقم الهاتف':'请填写姓名和手机号');
     return;
   }
   
@@ -2268,7 +2305,7 @@ async function sendAI() {
   // 创建问答卡片
   const card = document.createElement('div');
   card.className = 'ai-answer-card';
-  card.innerHTML = '<div class="q-label">你的问题</div><div class="q-text">' + question + '</div><div class="a-loading">思考中...</div>';
+  card.innerHTML = '" + (currentLang==='en'?'<div class="q-label">Your Question</div>':currentLang==='ar'?'<div class="q-label">سؤالك</div>':'<div class="q-label">你的问题</div>') + "<div class="q-text">' + question + '</div><div class="a-loading">思考中...</div>';
   answers.prepend(card);
 
   input.value = '';
@@ -2287,7 +2324,7 @@ async function sendAI() {
     card.querySelector('.a-loading').remove();
     const errDiv = document.createElement('div');
     errDiv.className = 'a-text';
-    errDiv.textContent = '请求失败：' + e.message;
+    errDiv.textContent = (currentLang==='en'?'Request failed: ':currentLang==='ar'?'فشل الطلب: ':'请求失败：') + e.message;
     card.appendChild(errDiv);
   }
   document.getElementById('aiSendBtn').disabled = false;
@@ -2353,11 +2390,11 @@ function showToast(msg, type) {
 let authIsLogin = true;
 function toggleAuthMode() {
   authIsLogin = !authIsLogin;
-  document.getElementById('authTitle').textContent = authIsLogin ? '经销商登录' : '经销商注册';
-  document.getElementById('authBtn').textContent = authIsLogin ? '登录' : '注册';
+  document.getElementById('authTitle').textContent = authIsLogin ? t('dealer_login') : t('dealer_register');
+  document.getElementById('authBtn').textContent = authIsLogin ? t('dealer_login_btn') : t('dealer_register_btn');
   document.getElementById('regExtra').style.display = authIsLogin ? 'none' : 'block';
-  document.getElementById('switchText').textContent = authIsLogin ? '还没有账号？' : '已有账号？';
-  document.getElementById('switchLink').textContent = authIsLogin ? '立即注册' : '去登录';
+  document.getElementById('switchText').textContent = authIsLogin ? t('dealer_no_account') : t('dealer_has_account');
+  document.getElementById('switchLink').textContent = authIsLogin ? t('dealer_register_link') : t('dealer_login_link');
   document.getElementById('authError').style.display = 'none';
 }
 
@@ -2372,7 +2409,7 @@ async function dealerAuth() {
   const password = document.getElementById('dlPassword').value.trim();
   const errEl = document.getElementById('authError');
   errEl.style.display = 'none';
-  if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; errEl.style.display = 'block'; return; }
+  if (!email || !password) { errEl.textContent = currentLang==='en'?'Please fill in email and password':currentLang==='ar'?'يرجى ملء البريد الإلكتروني وكلمة المرور':'请填写邮箱和密码'; errEl.style.display = 'block'; return; }
 
   const url = authIsLogin ? '/api/login' : '/api/register';
   const body = { email, password };
@@ -2380,17 +2417,17 @@ async function dealerAuth() {
     body.name = document.getElementById('dlName').value.trim();
     body.company = document.getElementById('dlCompany').value.trim();
     body.phone = document.getElementById('dlPhone').value.trim();
-    if (!body.name) { errEl.textContent = '请填写姓名'; errEl.style.display = 'block'; return; }
+    if (!body.name) { errEl.textContent = currentLang==='en'?'Please fill in name':currentLang==='ar'?'يرجى ملء الاسم':'请填写姓名'; errEl.style.display = 'block'; return; }
   }
 
   try {
     const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const data = await resp.json();
-    if (!resp.ok) { errEl.textContent = data.error || '操作失败'; errEl.style.display = 'block'; return; }
+    if (!resp.ok) { errEl.textContent = data.error || (currentLang==='en'?'Operation failed':currentLang==='ar'?'فشلت العملية':'操作失败'); errEl.style.display = 'block'; return; }
     localStorage.setItem('veilora_token', data.token);
     loadDealerDashboard();
   } catch(e) {
-    errEl.textContent = '网络错误：' + e.message; errEl.style.display = 'block';
+    errEl.textContent = (currentLang==='en'?'Network error: ':currentLang==='ar'?'خطأ في الشبكة: ':'网络错误：') + e.message; errEl.style.display = 'block';
   }
 }
 
@@ -2409,7 +2446,7 @@ async function loadDealerDashboard() {
     document.getElementById('dashCompany').textContent = dealer.company || '—';
     document.getElementById('dashEmail').textContent = dealer.email || '—';
     const statusEl = document.getElementById('dashStatus');
-    statusEl.textContent = dealer.status === 'approved' ? '已通过' : dealer.status === 'rejected' ? '已拒绝' : '待审核';
+    statusEl.textContent = dealer.status === 'approved' ? t('dealer_status_approved') : dealer.status === 'rejected' ? t('dealer_status_rejected') : t('dealer_status_pending');
     statusEl.className = 'status-badge ' + (dealer.status === 'approved' ? 'approved' : dealer.status === 'rejected' ? 'rejected' : 'pending');
 
     document.getElementById('pendingArea').style.display = (dealer.status === 'pending' && !dealer.applied) ? 'block' : 'none';
@@ -2425,7 +2462,7 @@ async function loadDealerDashboard() {
       }
       fetchLeads();
     }
-  } catch(e) { showToast('加载失败', 'error'); }
+  } catch(e) { showToast(currentLang==='en'?'Load failed':currentLang==='ar'?'فشل التحميل':'加载失败', 'error'); }
 }
 
 function dealerLogout() {
@@ -2444,11 +2481,11 @@ async function applyDealer() {
     const data = await resp.json();
     if (resp.ok) {
       document.getElementById('applyBtn').disabled = true;
-      msg.textContent = '申请已提交，请等待审核。';
+      msg.textContent = (currentLang==='en'?'Application submitted. Please wait for review.':currentLang==='ar'?'تم تقديم الطلب. يرجى انتظار المراجعة.':'申请已提交，请等待审核。');
       msg.style.display = 'inline';
       msg.style.color = 'var(--accent)';
     } else {
-      msg.textContent = data.error || '申请失败';
+      msg.textContent = data.error || (currentLang==='en'?'Application failed':currentLang==='ar'?'فشل الطلب':'申请失败');
       msg.style.display = 'inline';
       msg.style.color = 'var(--danger)';
     }
@@ -2467,11 +2504,11 @@ async function updatePricing() {
       body:JSON.stringify({standard, pro, software})
     });
     if (resp.ok) {
-      msg.textContent = '定价已保存';
+      msg.textContent = (currentLang==='en'?'Pricing saved':currentLang==='ar'?'تم حفظ الأسعار':'定价已保存');
       msg.style.color = 'var(--accent)';
     } else {
       const data = await resp.json();
-      msg.textContent = data.error || '保存失败';
+      msg.textContent = data.error || (currentLang==='en'?'Save failed':currentLang==='ar'?'فشل الحفظ':'保存失败');
       msg.style.color = 'var(--danger)';
     }
     msg.style.display = 'inline';
@@ -2484,8 +2521,8 @@ async function fetchLeads() {
   try {
     const resp = await fetch('/api/leads', { headers:{'Authorization':'Bearer '+token} });
     const data = await resp.json();
-    renderTable('leadsContent', ['姓名','手机','邮箱','留言','时间'], data.leads || [], ['name','phone','email','message','created_at']);
-  } catch(e) { document.getElementById('leadsContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+    renderTable('leadsContent', [t('dealer_lead_name'),t('dealer_lead_phone'),t('dealer_lead_email'),t('dealer_lead_message'),currentLang==='en'?'Time':currentLang==='ar'?'الوقت':'时间'], data.leads || [], ['name','phone','email','message','created_at']);
+  } catch(e) { document.getElementById('leadsContent').innerHTML = '<div class="empty-state">'+t('empty_load_fail')+'</div>'; }
 }
 
 async function fetchOrders() {
@@ -2493,8 +2530,8 @@ async function fetchOrders() {
   try {
     const resp = await fetch('/api/orders', { headers:{'Authorization':'Bearer '+token} });
     const data = await resp.json();
-    renderTable('ordersContent', ['产品','数量','姓名','手机','时间'], data.orders || [], ['product','quantity','name','phone','created_at']);
-  } catch(e) { document.getElementById('ordersContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+    renderTable('ordersContent', [currentLang==='en'?'Product':currentLang==='ar'?'المنتج':'产品',t('dealer_quantity'),t('dealer_order_name'),t('dealer_order_phone'),currentLang==='en'?'Time':currentLang==='ar'?'الوقت':'时间'], data.orders || [], ['product','quantity','name','phone','created_at']);
+  } catch(e) { document.getElementById('ordersContent').innerHTML = '<div class="empty-state">'+t('empty_load_fail')+'</div>'; }
 }
 
 function switchDashTab(tab) {
@@ -2507,7 +2544,7 @@ function switchDashTab(tab) {
 
 function renderTable(containerId, headers, rows, fields) {
   const container = document.getElementById(containerId);
-  if (!rows || rows.length === 0) { container.innerHTML = '<div class="empty-state">暂无数据</div>'; return; }
+  if (!rows || rows.length === 0) { container.innerHTML = '<div class="empty-state">'+t('empty_no_data')+'</div>'; return; }
   let html = '<table class="data-table"><thead><tr>';
   headers.forEach(h => html += '<th>'+h+'</th>');
   html += '</tr></thead><tbody>';
@@ -2532,19 +2569,19 @@ async function loadDealerPublic(dealerId) {
 
   try {
     const resp = await fetch('/api/dealer/' + dealerId);
-    if (!resp.ok) { document.getElementById('pubName').textContent = '经销商不存在'; return; }
+    if (!resp.ok) { document.getElementById('pubName').textContent = (currentLang==='en'?'Dealer not found':currentLang==='ar'?'الوكيل غير موجود':'经销商不存在'); return; }
     const dealer = await resp.json();
     document.getElementById('pubName').textContent = dealer.name || '—';
     document.getElementById('pubCompany').textContent = dealer.company || '';
 
     const pricing = dealer.pricing || {};
-    let priceHtml = '<thead><tr><th>产品</th><th>价格</th></tr></thead><tbody>';
-    priceHtml += '<tr><td>标准版</td><td>'+(pricing.standard ? '¥'+pricing.standard : '未设置')+'</td></tr>';
-    priceHtml += '<tr><td>Pro版</td><td>'+(pricing.pro ? '¥'+pricing.pro : '未设置')+'</td></tr>';
-    priceHtml += '<tr><td>安全软件</td><td>'+(pricing.software ? '¥'+pricing.software : '未设置')+'</td></tr>';
+    var priceProductLabel = currentLang==='en'?'Product':currentLang==='ar'?'المنتج':'产品'; var pricePriceLabel = currentLang==='en'?'Price':currentLang==='ar'?'السعر':'价格'; let priceHtml = '<thead><tr><th>'+priceProductLabel+'</th><th>'+pricePriceLabel+'</th></tr></thead><tbody>';
+    priceHtml += '<tr><td>'+t('order_standard')+'</td><td>'+(pricing.standard ? '¥'+pricing.standard : (currentLang==='en'?'Not set':currentLang==='ar'?'غير محدد':'未设置'))+'</td></tr>';
+    priceHtml += '<tr><td>'+t('order_pro')+'</td><td>'+(pricing.pro ? '¥'+pricing.pro : (currentLang==='en'?'Not set':currentLang==='ar'?'غير محدد':'未设置'))+'</td></tr>';
+    priceHtml += '<tr><td>'+t('dealer_software')+'</td><td>'+(pricing.software ? '¥'+pricing.software : (currentLang==='en'?'Not set':currentLang==='ar'?'غير محدد':'未设置'))+'</td></tr>';
     priceHtml += '</tbody>';
     document.getElementById('pubPricing').innerHTML = priceHtml;
-  } catch(e) { document.getElementById('pubName').textContent = '加载失败'; }
+  } catch(e) { document.getElementById('pubName').textContent = (currentLang==='en'?'Load failed':currentLang==='ar'?'فشل التحميل':'加载失败'); }
 }
 
 async function submitLead() {
@@ -2557,17 +2594,17 @@ async function submitLead() {
     email: document.getElementById('leadEmail').value.trim(),
     message: document.getElementById('leadMessage').value.trim()
   };
-  if (!body.name || !body.phone) { msgEl.textContent = '请填写姓名和手机'; msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
+  if (!body.name || !body.phone) { msgEl.textContent = (currentLang==='en'?'Please fill in name and phone':currentLang==='ar'?'يرجى ملء الاسم ورقم الهاتف':'请填写姓名和手机'); msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
   try {
     const resp = await fetch('/api/leads', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     if (resp.ok) {
-      msgEl.textContent = '留资成功！经销商将尽快与您联系。';
+      msgEl.textContent = (currentLang==='en'?'Submitted! Dealer will contact you soon.':currentLang==='ar'?'تم الإرسال! سيتصل بك الوكيل قريباً.':'留资成功！经销商将尽快与您联系。');
       msgEl.style.color = 'var(--accent)';
       document.getElementById('leadName').value = '';
       document.getElementById('leadPhone').value = '';
       document.getElementById('leadEmail').value = '';
       document.getElementById('leadMessage').value = '';
-    } else { const d = await resp.json(); msgEl.textContent = d.error || '提交失败'; msgEl.style.color = 'var(--danger)'; }
+    } else { const d = await resp.json(); msgEl.textContent = d.error || (currentLang==='en'?'Submission failed':currentLang==='ar'?'فشل الإرسال':'提交失败'); msgEl.style.color = 'var(--danger)'; }
     msgEl.style.display = 'block';
   } catch(e) { showToast('提交失败', 'error'); }
 }
@@ -2582,16 +2619,16 @@ async function submitPubOrder() {
     name: document.getElementById('pubOrderName').value.trim(),
     phone: document.getElementById('pubOrderPhone').value.trim()
   };
-  if (!body.name || !body.phone) { msgEl.textContent = '请填写姓名和手机'; msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
+  if (!body.name || !body.phone) { msgEl.textContent = (currentLang==='en'?'Please fill in name and phone':currentLang==='ar'?'يرجى ملء الاسم ورقم الهاتف':'请填写姓名和手机'); msgEl.style.color = 'var(--danger)'; msgEl.style.display = 'block'; return; }
   try {
     const resp = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     if (resp.ok) {
-      msgEl.textContent = '下单成功！订单已提交至经销商后台。';
+      msgEl.textContent = (currentLang==='en'?'Order placed! Submitted to dealer backend.':currentLang==='ar'?'تم تقديم الطلب! تم إرساله إلى لوحة الوكيل.':'下单成功！订单已提交至经销商后台。');
       msgEl.style.color = 'var(--accent)';
       document.getElementById('pubQty').value = '1';
       document.getElementById('pubOrderName').value = '';
       document.getElementById('pubOrderPhone').value = '';
-    } else { const d = await resp.json(); msgEl.textContent = d.error || '下单失败'; msgEl.style.color = 'var(--danger)'; }
+    } else { const d = await resp.json(); msgEl.textContent = d.error || (currentLang==='en'?'Order failed':currentLang==='ar'?'فشل الطلب':'下单失败'); msgEl.style.color = 'var(--danger)'; }
     msgEl.style.display = 'block';
   } catch(e) { showToast('下单失败', 'error'); }
 }
@@ -2606,14 +2643,14 @@ async function adminLogin() {
   const password = document.getElementById('adminPassword').value.trim();
   const errEl = document.getElementById('adminError');
   errEl.style.display = 'none';
-  if (!password) { errEl.textContent = '请输入密码'; errEl.style.display = 'block'; return; }
+  if (!password) { errEl.textContent = (currentLang==='en'?'Please enter password':currentLang==='ar'?'يرجى إدخال كلمة المرور':'请输入密码'); errEl.style.display = 'block'; return; }
   try {
     const resp = await fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password}) });
     const data = await resp.json();
-    if (!resp.ok) { errEl.textContent = data.error || '登录失败'; errEl.style.display = 'block'; return; }
+    if (!resp.ok) { errEl.textContent = data.error || (currentLang==='en'?'Login failed':currentLang==='ar'?'فشل تسجيل الدخول':'登录失败'); errEl.style.display = 'block'; return; }
     localStorage.setItem('veilora_token', data.token);
     loadAdminDashboard();
-  } catch(e) { errEl.textContent = '网络错误：'+e.message; errEl.style.display = 'block'; }
+  } catch(e) { errEl.textContent = (currentLang==='en'?'Network error: ':currentLang==='ar'?'خطأ في الشبكة: ':'网络错误：')+e.message; errEl.style.display = 'block'; }
 }
 
 async function loadAdminDashboard() {
@@ -2628,12 +2665,12 @@ async function loadAdminDashboard() {
     const data = await resp.json();
     const dealers = data.dealers || [];
     const container = document.getElementById('adminDealersContent');
-    if (dealers.length === 0) { container.innerHTML = '<div class="empty-state">暂无经销商</div>'; }
+    if (dealers.length === 0) { container.innerHTML = '<div class="empty-state">'+(currentLang==='en'?'No dealers':currentLang==='ar'?'لا يوجد وكلاء':'暂无经销商')+'</div>'; }
     else {
       let html = '<table class="data-table"><thead><tr><th>ID</th><th>姓名</th><th>公司</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead><tbody>';
       dealers.forEach(d => {
-        const statusMap = {pending:'待审核',approved:'已通过',rejected:'已拒绝'};
-        html += '<tr><td>'+d.id+'</td><td>'+d.name+'</td><td>'+(d.company||'—')+'</td><td>'+d.email+'</td><td>'+ (statusMap[d.status]||d.status) +'</td><td>';
+        const statusMapDealer = {pending: currentLang==='en'?'Pending':currentLang==='ar'?'قيد المراجعة':'待审核',approved: currentLang==='en'?'Approved':currentLang==='ar'?'تمت الموافقة':'已通过',rejected: currentLang==='en'?'Rejected':currentLang==='ar'?'مرفوض':'已拒绝'};
+        html += '<tr><td>'+d.id+'</td><td>'+d.name+'</td><td>'+(d.company||'—')+'</td><td>'+d.email+'</td><td>'+ (statusMapDealer[d.status]||d.status) +'</td><td>';
         if (d.status === 'pending') {
           html += '<button class="btn-sm approve" onclick="approveDealer('+d.id+')">通过</button>';
           html += '<button class="btn-sm reject" onclick="rejectDealer('+d.id+')">拒绝</button>';
@@ -2644,7 +2681,7 @@ async function loadAdminDashboard() {
       container.innerHTML = html;
     }
     fetchAdminLeads();
-  } catch(e) { showToast('加载失败', 'error'); }
+  } catch(e) { showToast(currentLang==='en'?'Load failed':currentLang==='ar'?'فشل التحميل':'加载失败', 'error'); }
 }
 
 async function approveDealer(id) {
@@ -2676,8 +2713,8 @@ async function fetchAdminLeads() {
   try {
     const resp = await fetch('/api/admin/leads', { headers:{'Authorization':'Bearer '+token} });
     const data = await resp.json();
-    renderTable('adminLeadsContent', ['姓名','手机','邮箱','留言','经销商ID','时间'], data.leads || [], ['name','phone','email','message','dealer_id','created_at']);
-  } catch(e) { document.getElementById('adminLeadsContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+    renderTable('adminLeadsContent', [t('dealer_lead_name'),t('dealer_lead_phone'),t('dealer_lead_email'),t('dealer_lead_message'),currentLang==='en'?'Dealer ID':currentLang==='ar'?'معرف الوكيل':'经销商ID',currentLang==='en'?'Time':currentLang==='ar'?'الوقت':'时间'], data.leads || [], ['name','phone','email','message','dealer_id','created_at']);
+  } catch(e) { document.getElementById('adminLeadsContent').innerHTML = '<div class="empty-state">'+t('empty_load_fail')+'</div>'; }
 }
 
 async function fetchAdminOrders() {
@@ -2685,8 +2722,8 @@ async function fetchAdminOrders() {
   try {
     const resp = await fetch('/api/admin/orders', { headers:{'Authorization':'Bearer '+token} });
     const data = await resp.json();
-    renderTable('adminOrdersContent', ['产品','数量','姓名','手机','经销商ID','时间'], data.orders || [], ['product','quantity','name','phone','dealer_id','created_at']);
-  } catch(e) { document.getElementById('adminOrdersContent').innerHTML = '<div class="empty-state">加载失败</div>'; }
+    renderTable('adminOrdersContent', [currentLang==='en'?'Product':currentLang==='ar'?'المنتج':'产品',t('dealer_quantity'),t('dealer_order_name'),t('dealer_order_phone'),currentLang==='en'?'Dealer ID':currentLang==='ar'?'معرف الوكيل':'经销商ID',currentLang==='en'?'Time':currentLang==='ar'?'الوقت':'时间'], data.orders || [], ['product','quantity','name','phone','dealer_id','created_at']);
+  } catch(e) { document.getElementById('adminOrdersContent').innerHTML = '<div class="empty-state">'+t('empty_load_fail')+'</div>'; }
 }
 
 function switchAdminTab(tab) {
@@ -2766,7 +2803,7 @@ function emLockPhone2() {
   document.getElementById('emHomeScreen2').style.display = 'none';
   emPinInput2 = '';
   emUpdatePinDots2();
-  document.getElementById('emLockMsg2').textContent = '输入 6 位应急还原密码（默认：999999）';
+  document.getElementById('emLockMsg2').textContent = t('emergency_enter_pin');
   document.getElementById('emLockMsg2').className = 'lock-msg';
 }
 
@@ -2779,7 +2816,7 @@ function emTriggerRestore2() {
 
   lockScreen.style.display = 'none';
   overlay.style.display = 'flex';
-  text.textContent = '正在擦除所有数据...';
+  text.textContent = currentLang==='en'?'Wiping all data...':currentLang==='ar'?'جار مسح جميع البيانات...':'正在擦除所有数据...';
   text.style.display = 'block';
   progress.style.display = 'block';
   logo.style.display = 'none';
@@ -2788,7 +2825,7 @@ function emTriggerRestore2() {
   progress.parentNode.replaceChild(newProgress, progress);
 
   setTimeout(() => {
-    text.textContent = '擦除完成，设备将在 3 秒后重启';
+    text.textContent = currentLang==='en'?'Wipe complete, device will restart in 3 seconds':currentLang==='ar'?'اكتمل المسح، سيتم إعادة تشغيل الجهاز خلال 3 ثوان':'擦除完成，设备将在 3 秒后重启';
   }, 3000);
 
   setTimeout(() => {
@@ -2860,14 +2897,14 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
               const msg = document.getElementById('emLockMsg2');
               const dots = document.getElementById('emLockPinDots2');
-              msg.textContent = '密码错误，请重试';
+              msg.textContent = t('dualpin_pin_error');
               msg.className = 'lock-msg error';
               dots.classList.add('error');
               setTimeout(() => {
                 emPinInput2 = '';
                 emUpdatePinDots2();
                 dots.classList.remove('error');
-                msg.textContent = '输入 6 位应急还原密码（默认：999999）';
+                msg.textContent = t('emergency_enter_pin');
                 msg.className = 'lock-msg';
               }, 1200);
             }
@@ -2887,6 +2924,780 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+
+// ========== I18N 多语言支持 ==========
+const I18N = {
+  zh: {
+    nav_overview: '概览', nav_modules: '功能模块', nav_demo: '真机演示',
+    nav_order: '预约购买', nav_dealer: '经销商门户', nav_admin: '管理后台',
+
+    ai_title: '有任何问题，尽管问我',
+    ai_desc: '基于 VEILORA 安全手机用户使用手册，快速为你解答',
+    ai_placeholder: '输入你的问题，例如：隐私空间如何创建？',
+    ai_hint: '换行按 Shift+Enter，发送按 Enter',
+    ai_send: '发送',
+
+    hero_title: 'VEILORA 安全手机',
+    hero_desc: '8 大安全模块 · 22 项核心防护能力 — 从端到端加密通信到硬件级空间隔离，重新定义移动安全边界。',
+    hero_btn_demo: '进入真机演示',
+    hero_btn_matrix: '查看功能矩阵',
+
+    modules_title: '安全功能矩阵',
+    modules_sub: '8 大安全模块覆盖通信加密、隐私空间、网络隐身、应急还原等全方位防护场景',
+
+    module_01_num: '模块 01', module_01_title: '隐私空间',
+    module_01_desc: '物理级多空间隔离 + 应用沙箱 + 文件级加密，双 PIN 码无感切换，独立 UID / 独立密钥。',
+    module_01_tag1: '双PIN切换', module_01_tag2: '文件同步', module_01_tag3: '独立加密',
+
+    module_02_num: '模块 02', module_02_title: '网络隐身与防追踪',
+    module_02_desc: '设备隐身规避嗅探与端口扫描，流量防火墙按应用级精准管控网络访问。',
+    module_02_tag1: '设备隐身', module_02_tag2: '流量管控', module_02_tag3: '反追踪',
+
+    module_03_num: '模块 03', module_03_title: '应用权限管控',
+    module_03_desc: '实时审计所有 APP 对通讯录/相册/麦克风/定位等敏感资源的调用，超级隐私模式一键断联。',
+    module_03_tag1: '权限审计', module_03_tag2: '行为监控', module_03_tag3: '超级隐私',
+
+    module_04_num: '模块 04', module_04_title: '即时通信加密',
+    module_04_desc: '悬浮安全锁唤出密写工具，文字语音文件端到端加密，第三方服务器仅见无法破解的乱码。',
+    module_04_tag1: '密文聊天', module_04_tag2: '.xefc 加密文件', module_04_tag3: '加密语音',
+
+    module_05_num: '模块 05', module_05_title: '私有云加密备份',
+    module_05_desc: '支持 WebDAV 自建 NAS / 个人服务器，离屏即加密，端到端保护，全自主数据主权。',
+    module_05_tag1: 'WebDAV', module_05_tag2: '自动备份', module_05_tag3: '端到端加密',
+
+    module_06_num: '模块 06', module_06_title: '具身安全智能体',
+    module_06_desc: '本地 AI 主动防御：智能识别零日攻击、禁止远控、多维度风险审计、USB-C 端口防护。',
+    module_06_tag1: 'AI 防御', module_06_tag2: '禁止远控', module_06_tag3: '漏洞防护',
+
+    module_07_num: '模块 07', module_07_title: '三级密钥应急体系',
+    module_07_desc: '日常密钥 → 隐私还原密钥 → 手机还原密钥，支持远程锁定 / 轨迹追踪 / 远程抹除。',
+    module_07_tag1: '还原密码', module_07_tag2: '远程锁定', module_07_tag3: '远程抹除',
+
+    module_08_num: '模块 08', module_08_title: '账号安全体系',
+    module_08_desc: '设备硬件唯一强绑定，恢复密语离线保管云端不留存，关键操作强制身份验证。',
+    module_08_tag1: '恢复密语', module_08_tag2: '设备绑定', module_08_tag3: '身份验证',
+
+    demo_title: '真机交互演示',
+    demo_sub: '以下每个 Tab 对应真机上的一项核心安全功能，可直接操作体验',
+
+    demo_tab1: '加密通信', demo_tab2: '文件加密', demo_tab3: '网络隐身',
+    demo_tab4: '超级隐私', demo_tab5: '双 PIN 空间切换', demo_tab6: '应急还原',
+
+    encrypt_chat_title: '端到端加密通信演示',
+    encrypt_chat_desc: '在下方输入明文，点击加密生成密文并自动复制到剪贴板。将密文粘贴到聊天输入框发送，悬浮在密文气泡上即可查看解密后的明文。全程使用 AES-256-GCM 真加密。',
+    encrypt_label: '明文输入',
+    encrypt_placeholder: '在此输入要加密的明文消息...',
+    encrypt_btn: '加密并复制密文',
+    encrypt_toast: '密文已复制到剪贴板，快去粘贴发送吧',
+    encrypt_chat_status: 'AES-256-GCM 端到端加密 | 共享密钥已协商',
+    encrypt_chat_info: '会话已建立（AES-256-GCM），请在加密区域生成密文后粘贴到此发送',
+    encrypt_input_placeholder: '在此粘贴密文，按 Enter 发送...',
+    encrypt_send: '发送',
+
+    encrypt_file_title: '文件加密传输 (.xefc)',
+    encrypt_file_desc: '模拟微信发送加密文件：选择 .xefc 文件 → 发送到聊天 → 点击文件体验 VEILORA 解密流程。',
+    file_picker_title: '选择文件',
+    file_picker_png_meta: '5.1 MB',
+    file_picker_xefc_meta: 'VEILORA 加密文件',
+    wechat_hint: '选择文件后点击发送',
+    wechat_send: '发送',
+
+    cancel: '取消',
+    allow: '允许',
+    dialog_unsupported_title: '暂不支持打开此类文件',
+    dialog_unsupported_desc: '文件格式 .xefc 暂时无法在微信中直接查看',
+    dialog_open_veilora: '用VEILORA密件查看',
+    dialog_leave_title: '即将离开微信，打开VEILORA密件查看',
+    dialog_leave_desc: 'VEILORA 将解密并安全显示该文件内容',
+    img_viewer_badge: 'VEILORA 密件查看',
+
+    stealth_title: '设备网络隐身',
+    stealth_desc: '开启后将设备从局域网/互联网扫描中隐藏，规避嗅探与端口扫描。关闭 GPS 与基站连接，动态收敛攻击面。',
+    stealth_visible: '设备可见',
+    stealth_hidden: '设备已隐身',
+    stealth_btn_on: '开启隐身模式',
+    stealth_btn_off: '关闭隐身模式',
+    stealth_note_on: '当前：设备已从网络中隐藏，无法被扫描发现',
+    stealth_note_off: '当前：设备在网络中可被扫描发现',
+
+    scan_title: '⚡ 真实局域网设备扫描',
+    scan_desc: '对当前局域网执行真实 Ping Sweep + ARP 表扫描，发现所有接入设备。',
+    scan_local_only: '此功能需在本地运行',
+    scan_local_desc: 'Vercel 云端无法访问您的局域网。请将项目克隆到本地后使用。',
+    scan_copy_cmd: '📋 复制克隆命令',
+    scan_download_script: '⚡ 下载一键脚本',
+
+    privacy_title: '超级隐私模式',
+    privacy_desc: '一键触发驱动层强制禁用相机、麦克风及 GPS 定位模块，彻底切断所有数据交互。适用于涉密会议等场景。',
+    privacy_camera: '相机',
+    privacy_mic: '麦克风',
+    privacy_gps: 'GPS 定位',
+    privacy_normal: '正常',
+    privacy_disabled: '已禁用',
+    privacy_master_on: '⚡ 一键启用超级隐私',
+    privacy_master_off: '🔓 退出超级隐私模式',
+
+    dualpin_title: '双 PIN 码空间切换',
+    dualpin_desc: '两套独立 PIN，触发完全隔离的桌面环境。在锁屏输入 <b>123456</b> 进入主空间（应用更多），输入 <b>000000</b> 进入隐私空间（仅保留最基本应用）。',
+    dualpin_enter_pin: '请输入 6 位 PIN 码',
+    dualpin_pin_error: 'PIN 码错误，请重试',
+    dualpin_hint: '提示：123456 触发主空间（含 12 个应用） · 000000 触发隐私空间（含 5 个应用）',
+
+    emergency_title: '应急还原',
+    emergency_desc: '在锁屏界面输入应急还原密码 <b>999999</b>，模拟设备远程抹除与恢复出厂设置。相册中的图片将被清除。',
+    emergency_enter_pin: '输入 6 位应急还原密码（默认：999999）',
+    emergency_welcome: '欢迎使用 VEILORA 安全手机',
+    emergency_welcome_desc: '设备已恢复出厂设置，请跟随向导完成初始配置',
+    emergency_start_config: '开始配置',
+    emergency_select_lang: '选择语言',
+    emergency_select_lang_desc: '请选择系统显示语言',
+    emergency_next: '下一步',
+    emergency_network: '网络设置',
+    emergency_network_desc: '选择 Wi-Fi 网络或稍后设置',
+    emergency_connect: '连接',
+    emergency_skip: '跳过',
+    emergency_done: '配置完成',
+    emergency_done_desc: '所有设置已完成，欢迎开始使用',
+    emergency_enter: '进入主空间',
+    emergency_hint: '提示：输入 <b>999999</b> 触发应急还原 · 还原后相册图片将被清空',
+
+    order_title: '预约购买',
+    order_sub: 'VEILORA 安全手机现支持预约，选择版本后提交联系方式即可',
+    order_standard: '标准版',
+    order_pro: '专业版',
+    order_reserve_standard: '预约标准版',
+    order_reserve_pro: '预约专业版',
+    reserve_title: '预约 VEILORA 标准版',
+    reserve_title_standard: '预约 VEILORA 标准版',
+    reserve_title_pro: '预约 VEILORA 专业版',
+    reserve_name: '姓名',
+    reserve_name_placeholder: '请输入姓名',
+    reserve_phone: '手机号',
+    reserve_phone_placeholder: '请输入手机号',
+    reserve_email: '邮箱（选填）',
+    reserve_email_placeholder: '请输入邮箱',
+    reserve_submit: '提交预约',
+    reserve_success: '预约已提交',
+    reserve_success_desc: '我们将在产品上市后第一时间通知您',
+    reserve_close: '关闭',
+
+    dealer_title: '经销商门户',
+    dealer_sub: '成为 VEILORA 授权经销商，自定义价格，获取专属经销页面',
+    dealer_login: '经销商登录',
+    dealer_register: '经销商注册',
+    dealer_email: '邮箱',
+    dealer_password: '密码',
+    dealer_name: '姓名',
+    dealer_company: '公司名称（选填）',
+    dealer_phone: '手机号（选填）',
+    dealer_login_btn: '登录',
+    dealer_register_btn: '注册',
+    dealer_no_account: '还没有账号？',
+    dealer_has_account: '已有账号？',
+    dealer_register_link: '立即注册',
+    dealer_login_link: '去登录',
+    dealer_logout: '退出登录',
+    dealer_audit_status: '审核状态',
+    dealer_pending_desc: '您的经销商申请正在等待审核中，审核通过后即可使用全部功能。',
+    dealer_apply: '提交申请',
+    dealer_pricing: '定价管理',
+    dealer_standard_price: '标准版 (¥)',
+    dealer_pro_price: 'Pro版 (¥)',
+    dealer_software_price: '安全软件 (¥)',
+    dealer_save_pricing: '保存定价',
+    dealer_link_title: '专属经销页面',
+    dealer_link_desc: '将以上链接分享给客户，客户可查看您的产品价格、提交留资和下单。',
+    dealer_tab_leads: '客户线索',
+    dealer_tab_orders: '订单列表',
+    dealer_leads_title: '客户线索',
+    dealer_orders_title: '订单列表',
+    dealer_rejected: '审核被拒绝',
+    dealer_rejected_desc: '您的经销商申请未通过审核，如需了解更多信息请联系管理员。',
+    dealer_back: '返回经销商门户',
+    dealer_pub_pricing: '产品价格',
+    dealer_pub_contact: '留下联系方式',
+    dealer_lead_name: '姓名',
+    dealer_lead_phone: '手机',
+    dealer_lead_email: '邮箱',
+    dealer_lead_message: '留言（选填）',
+    dealer_submit: '提交',
+    dealer_pub_order: '在线下单',
+    dealer_select_product: '选择产品',
+    dealer_software: '安全软件',
+    dealer_quantity: '数量',
+    dealer_order_name: '姓名',
+    dealer_order_phone: '手机',
+    dealer_submit_order: '提交订单',
+
+    admin_title: '管理后台',
+    admin_sub: '管理所有经销商、审核申请、查看线索与订单',
+    admin_login: '管理员登录',
+    admin_password: '管理员密码',
+    admin_login_btn: '登录',
+    admin_logout: '退出登录',
+    admin_dealer_mgmt: '经销商管理',
+    admin_dealer_list: '经销商列表',
+    admin_tab_leads: '全部线索',
+    admin_tab_orders: '全部订单',
+    admin_leads_title: '全部客户线索',
+    admin_orders_title: '全部订单',
+
+    footer_text: 'VEILORA Security Phone — 真机功能演示 Demo &copy; 2026',
+    empty_loading: '加载中...',
+    empty_no_data: '暂无数据',
+    empty_load_fail: '加载失败',
+  },
+  en: {
+    nav_overview: 'Overview', nav_modules: 'Modules', nav_demo: 'Demo',
+    nav_order: 'Reserve', nav_dealer: 'Dealer Portal', nav_admin: 'Admin',
+
+    ai_title: 'Any questions? Just ask',
+    ai_desc: 'Powered by VEILORA Secure Phone User Manual, get answers quickly',
+    ai_placeholder: 'Ask a question, e.g. How to create a privacy space?',
+    ai_hint: 'Shift+Enter for new line, Enter to send',
+    ai_send: 'Send',
+
+    hero_title: 'VEILORA Secure Phone',
+    hero_desc: '8 Security Modules · 22 Core Protections — From end-to-end encrypted communications to hardware-level space isolation, redefining mobile security boundaries.',
+    hero_btn_demo: 'Enter Demo',
+    hero_btn_matrix: 'Feature Matrix',
+
+    modules_title: 'Security Feature Matrix',
+    modules_sub: '8 security modules covering encrypted communication, privacy space, network stealth, emergency restore and more',
+
+    module_01_num: 'Module 01', module_01_title: 'Privacy Space',
+    module_01_desc: 'Physical multi-space isolation + app sandbox + file-level encryption, seamless dual PIN switching, independent UID / independent keys.',
+    module_01_tag1: 'Dual PIN', module_01_tag2: 'File Sync', module_01_tag3: 'Independent Encryption',
+
+    module_02_num: 'Module 02', module_02_title: 'Network Stealth & Anti-Tracking',
+    module_02_desc: 'Device stealth to evade sniffing and port scanning, traffic firewall with per-app network access control.',
+    module_02_tag1: 'Device Stealth', module_02_tag2: 'Traffic Control', module_02_tag3: 'Anti-Tracking',
+
+    module_03_num: 'Module 03', module_03_title: 'App Permission Control',
+    module_03_desc: 'Real-time audit of all apps accessing sensitive resources like contacts, photos, mic, and location. One-click super privacy mode disconnects everything.',
+    module_03_tag1: 'Permission Audit', module_03_tag2: 'Behavior Monitor', module_03_tag3: 'Super Privacy',
+
+    module_04_num: 'Module 04', module_04_title: 'Instant Messaging Encryption',
+    module_04_desc: 'Floating security lock invokes encryption tools. Text, voice, and files are end-to-end encrypted, third-party servers only see unbreakable ciphertext.',
+    module_04_tag1: 'Encrypted Chat', module_04_tag2: '.xefc Encrypted Files', module_04_tag3: 'Encrypted Voice',
+
+    module_05_num: 'Module 05', module_05_title: 'Private Cloud Encrypted Backup',
+    module_05_desc: 'Supports WebDAV self-hosted NAS / personal server. Encrypt on screen-off, end-to-end protection, full data sovereignty.',
+    module_05_tag1: 'WebDAV', module_05_tag2: 'Auto Backup', module_05_tag3: 'E2E Encryption',
+
+    module_06_num: 'Module 06', module_06_title: 'Embodied Security AI Agent',
+    module_06_desc: 'Local AI proactive defense: intelligent zero-day attack detection, remote control prevention, multi-dimensional risk audit, USB-C port protection.',
+    module_06_tag1: 'AI Defense', module_06_tag2: 'Anti-Remote', module_06_tag3: 'Vulnerability Protection',
+
+    module_07_num: 'Module 07', module_07_title: 'Triple-Key Emergency System',
+    module_07_desc: 'Daily key → Privacy restore key → Phone restore key. Supports remote lock / location tracking / remote wipe.',
+    module_07_tag1: 'Restore PIN', module_07_tag2: 'Remote Lock', module_07_tag3: 'Remote Wipe',
+
+    module_08_num: 'Module 08', module_08_title: 'Account Security System',
+    module_08_desc: 'Hardware-bound device binding, recovery phrase stored offline never on cloud, mandatory identity verification for critical operations.',
+    module_08_tag1: 'Recovery Phrase', module_08_tag2: 'Device Binding', module_08_tag3: 'ID Verification',
+
+    demo_title: 'Real Device Interactive Demo',
+    demo_sub: 'Each tab below corresponds to a core security feature on the actual device, ready for hands-on experience',
+
+    demo_tab1: 'Encrypted Chat', demo_tab2: 'File Encryption', demo_tab3: 'Network Stealth',
+    demo_tab4: 'Super Privacy', demo_tab5: 'Dual PIN Switch', demo_tab6: 'Emergency Restore',
+
+    encrypt_chat_title: 'End-to-End Encrypted Communication Demo',
+    encrypt_chat_desc: 'Enter plaintext below, click encrypt to generate ciphertext which is automatically copied to clipboard. Paste into the chat box below to send, then hover over the ciphertext bubble to reveal the decrypted message. True AES-256-GCM encryption used throughout.',
+    encrypt_label: 'Plaintext Input',
+    encrypt_placeholder: 'Type your message to encrypt...',
+    encrypt_btn: 'Encrypt & Copy Ciphertext',
+    encrypt_toast: 'Ciphertext copied! Paste and send it now.',
+    encrypt_chat_status: 'AES-256-GCM End-to-End Encrypted | Shared Key Negotiated',
+    encrypt_chat_info: 'Session established (AES-256-GCM). Generate ciphertext above and paste here to send.',
+    encrypt_input_placeholder: 'Paste ciphertext here, press Enter to send...',
+    encrypt_send: 'Send',
+
+    encrypt_file_title: 'Encrypted File Transfer (.xefc)',
+    encrypt_file_desc: 'Simulates sending encrypted files via WeChat: select .xefc file → send to chat → click to experience VEILORA decryption flow.',
+    file_picker_title: 'Select File',
+    file_picker_png_meta: '5.1 MB',
+    file_picker_xefc_meta: 'VEILORA Encrypted File',
+    wechat_hint: 'Select a file then click send',
+    wechat_send: 'Send',
+
+    cancel: 'Cancel',
+    allow: 'Allow',
+    dialog_unsupported_title: 'Unable to Open This File Type',
+    dialog_unsupported_desc: 'The .xefc file format cannot be viewed directly in WeChat',
+    dialog_open_veilora: 'Open with VEILORA',
+    dialog_leave_title: 'Leaving WeChat to open with VEILORA',
+    dialog_leave_desc: 'VEILORA will decrypt and securely display the file content',
+    img_viewer_badge: 'VEILORA Secure Viewer',
+
+    stealth_title: 'Device Network Stealth',
+    stealth_desc: 'Hide your device from LAN/Internet scans to evade sniffing and port scanning. Disable GPS and cell tower connections, dynamically shrink your attack surface.',
+    stealth_visible: 'Device Visible',
+    stealth_hidden: 'Device Hidden',
+    stealth_btn_on: 'Enable Stealth Mode',
+    stealth_btn_off: 'Disable Stealth Mode',
+    stealth_note_on: 'Status: Device hidden from network, cannot be discovered by scans',
+    stealth_note_off: 'Status: Device discoverable on network',
+
+    scan_title: '⚡ Real LAN Device Scan',
+    scan_desc: 'Perform a real Ping Sweep + ARP table scan on the current LAN to discover all connected devices.',
+    scan_local_only: 'This feature requires local execution',
+    scan_local_desc: 'Vercel Cloud cannot access your LAN. Please clone the project and run locally.',
+    scan_copy_cmd: '📋 Copy Clone Command',
+    scan_download_script: '⚡ Download Setup Script',
+
+    privacy_title: 'Super Privacy Mode',
+    privacy_desc: 'One-click kernel-level forced disable of camera, microphone, and GPS module. Completely cuts off all data interaction. Ideal for classified meetings.',
+    privacy_camera: 'Camera',
+    privacy_mic: 'Microphone',
+    privacy_gps: 'GPS',
+    privacy_normal: 'Normal',
+    privacy_disabled: 'Disabled',
+    privacy_master_on: '⚡ Enable Super Privacy',
+    privacy_master_off: '🔓 Exit Super Privacy',
+
+    dualpin_title: 'Dual PIN Space Switch',
+    dualpin_desc: 'Two independent PINs trigger completely isolated desktop environments. Enter <b>123456</b> on the lock screen for main space (more apps), or <b>000000</b> for privacy space (essential apps only).',
+    dualpin_enter_pin: 'Enter 6-digit PIN',
+    dualpin_pin_error: 'Incorrect PIN, please retry',
+    dualpin_hint: 'Tip: 123456 for main space (12 apps) · 000000 for privacy space (5 apps)',
+
+    emergency_title: 'Emergency Restore',
+    emergency_desc: 'Enter the emergency restore PIN <b>999999</b> on the lock screen to simulate remote device wipe and factory reset. Photos in gallery will be cleared.',
+    emergency_enter_pin: 'Enter 6-digit emergency restore PIN (default: 999999)',
+    emergency_welcome: 'Welcome to VEILORA Secure Phone',
+    emergency_welcome_desc: 'Device has been restored to factory settings. Follow the wizard to complete initial setup.',
+    emergency_start_config: 'Start Setup',
+    emergency_select_lang: 'Select Language',
+    emergency_select_lang_desc: 'Please select system display language',
+    emergency_next: 'Next',
+    emergency_network: 'Network Setup',
+    emergency_network_desc: 'Select a Wi-Fi network or set up later',
+    emergency_connect: 'Connect',
+    emergency_skip: 'Skip',
+    emergency_done: 'Setup Complete',
+    emergency_done_desc: 'All settings are complete. Welcome aboard.',
+    emergency_enter: 'Enter Main Space',
+    emergency_hint: 'Tip: Enter <b>999999</b> to trigger emergency restore · Gallery images will be cleared after restore',
+
+    order_title: 'Reserve Now',
+    order_sub: 'VEILORA Secure Phone is now available for reservation. Select your edition and submit your contact details.',
+    order_standard: 'Standard',
+    order_pro: 'Pro',
+    order_reserve_standard: 'Reserve Standard',
+    order_reserve_pro: 'Reserve Pro',
+    reserve_title: 'Reserve VEILORA Standard',
+    reserve_title_standard: 'Reserve VEILORA Standard',
+    reserve_title_pro: 'Reserve VEILORA Pro',
+    reserve_name: 'Name',
+    reserve_name_placeholder: 'Enter your name',
+    reserve_phone: 'Phone',
+    reserve_phone_placeholder: 'Enter your phone number',
+    reserve_email: 'Email (optional)',
+    reserve_email_placeholder: 'Enter your email',
+    reserve_submit: 'Submit Reservation',
+    reserve_success: 'Reservation Submitted',
+    reserve_success_desc: 'We will notify you as soon as the product launches',
+    reserve_close: 'Close',
+
+    dealer_title: 'Dealer Portal',
+    dealer_sub: 'Become a VEILORA Authorized Dealer. Custom pricing, get your exclusive dealer page.',
+    dealer_login: 'Dealer Login',
+    dealer_register: 'Dealer Registration',
+    dealer_email: 'Email',
+    dealer_password: 'Password',
+    dealer_name: 'Name',
+    dealer_company: 'Company (optional)',
+    dealer_phone: 'Phone (optional)',
+    dealer_login_btn: 'Login',
+    dealer_register_btn: 'Register',
+    dealer_no_account: "Don't have an account?",
+    dealer_has_account: 'Already have an account?',
+    dealer_register_link: 'Register Now',
+    dealer_login_link: 'Go to Login',
+    dealer_logout: 'Logout',
+    dealer_audit_status: 'Audit Status',
+    dealer_pending_desc: 'Your dealer application is pending review. Full features will be available upon approval.',
+    dealer_apply: 'Submit Application',
+    dealer_pricing: 'Pricing Management',
+    dealer_standard_price: 'Standard (¥)',
+    dealer_pro_price: 'Pro (¥)',
+    dealer_software_price: 'Security Software (¥)',
+    dealer_save_pricing: 'Save Pricing',
+    dealer_link_title: 'Exclusive Dealer Page',
+    dealer_link_desc: 'Share this link with customers to view your product pricing, submit inquiries and place orders.',
+    dealer_tab_leads: 'Leads',
+    dealer_tab_orders: 'Orders',
+    dealer_leads_title: 'Customer Leads',
+    dealer_orders_title: 'Order List',
+    dealer_rejected: 'Application Rejected',
+    dealer_rejected_desc: 'Your dealer application was not approved. Please contact the administrator for more information.',
+    dealer_back: 'Back to Dealer Portal',
+    dealer_pub_pricing: 'Product Pricing',
+    dealer_pub_contact: 'Contact Us',
+    dealer_lead_name: 'Name',
+    dealer_lead_phone: 'Phone',
+    dealer_lead_email: 'Email',
+    dealer_lead_message: 'Message (optional)',
+    dealer_submit: 'Submit',
+    dealer_pub_order: 'Online Order',
+    dealer_select_product: 'Select Product',
+    dealer_software: 'Security Software',
+    dealer_quantity: 'Quantity',
+    dealer_order_name: 'Name',
+    dealer_order_phone: 'Phone',
+    dealer_submit_order: 'Place Order',
+
+    admin_title: 'Admin Panel',
+    admin_sub: 'Manage all dealers, review applications, view leads and orders',
+    admin_login: 'Admin Login',
+    admin_password: 'Admin Password',
+    admin_login_btn: 'Login',
+    admin_logout: 'Logout',
+    admin_dealer_mgmt: 'Dealer Management',
+    admin_dealer_list: 'Dealer List',
+    admin_tab_leads: 'All Leads',
+    admin_tab_orders: 'All Orders',
+    admin_leads_title: 'All Customer Leads',
+    admin_orders_title: 'All Orders',
+
+    footer_text: 'VEILORA Security Phone — Real Device Feature Demo &copy; 2026',
+    empty_loading: 'Loading...',
+    empty_no_data: 'No data',
+    empty_load_fail: 'Failed to load',
+  },
+  ar: {
+    nav_overview: 'نظرة عامة', nav_modules: 'الوحدات', nav_demo: 'عرض توضيحي',
+    nav_order: 'حجز', nav_dealer: 'بوابة الوكلاء', nav_admin: 'الإدارة',
+
+    ai_title: 'أي أسئلة؟ فقط اسأل',
+    ai_desc: 'مدعوم بدليل مستخدم هاتف VEILORA الآمن، احصل على إجابات سريعة',
+    ai_placeholder: 'اطرح سؤالاً، مثال: كيف أنشئ مساحة خصوصية؟',
+    ai_hint: 'Shift+Enter للسطر الجديد، Enter للإرسال',
+    ai_send: 'إرسال',
+
+    hero_title: 'هاتف VEILORA الآمن',
+    hero_desc: '8 وحدات أمان · 22 حماية أساسية — من الاتصالات المشفرة بالكامل إلى عزل المساحات على مستوى الأجهزة، إعادة تعريف حدود الأمان المحمول.',
+    hero_btn_demo: 'الدخول إلى العرض التوضيحي',
+    hero_btn_matrix: 'مصفوفة الميزات',
+
+    modules_title: 'مصفوفة ميزات الأمان',
+    modules_sub: '8 وحدات أمان تغطي الاتصالات المشفرة ومساحة الخصوصية وإخفاء الشبكة والاستعادة الطارئة والمزيد',
+
+    module_01_num: 'الوحدة 01', module_01_title: 'مساحة الخصوصية',
+    module_01_desc: 'عزل متعدد المساحات على المستوى المادي + صندوق رمل للتطبيقات + تشفير على مستوى الملفات، تبديل سلس برمز PIN مزدوج، معرف مستقل / مفاتيح مستقلة.',
+    module_01_tag1: 'رمز PIN مزدوج', module_01_tag2: 'مزامنة الملفات', module_01_tag3: 'تشفير مستقل',
+
+    module_02_num: 'الوحدة 02', module_02_title: 'إخفاء الشبكة ومكافحة التتبع',
+    module_02_desc: 'إخفاء الجهاز لتجنب التنصت ومسح المنافذ، جدار ناري للتحكم في وصول التطبيقات للشبكة.',
+    module_02_tag1: 'إخفاء الجهاز', module_02_tag2: 'التحكم في المرور', module_02_tag3: 'مكافحة التتبع',
+
+    module_03_num: 'الوحدة 03', module_03_title: 'التحكم في أذونات التطبيقات',
+    module_03_desc: 'تدقيق فوري لجميع التطبيقات التي تصل إلى الموارد الحساسة مثل جهات الاتصال والصور والميكروفون والموقع. وضع الخصوصية الفائقة بنقرة واحدة.',
+    module_03_tag1: 'تدقيق الأذونات', module_03_tag2: 'مراقبة السلوك', module_03_tag3: 'خصوصية فائقة',
+
+    module_04_num: 'الوحدة 04', module_04_title: 'تشفير المراسلات الفورية',
+    module_04_desc: 'قفل أمان عائم يستدعي أدوات التشفير. النصوص والصوت والملفات مشفرة بالكامل، الخوادم الخارجية لا ترى سوى نصوص مشفرة.',
+    module_04_tag1: 'دردشة مشفرة', module_04_tag2: 'ملفات .xefc مشفرة', module_04_tag3: 'صوت مشفر',
+
+    module_05_num: 'الوحدة 05', module_05_title: 'نسخ احتياطي سحابي خاص مشفر',
+    module_05_desc: 'يدعم WebDAV للخوادم الشخصية / NAS. تشفير عند إغلاق الشاشة، حماية كاملة، سيادة كاملة على البيانات.',
+    module_05_tag1: 'WebDAV', module_05_tag2: 'نسخ تلقائي', module_05_tag3: 'تشفير كامل',
+
+    module_06_num: 'الوحدة 06', module_06_title: 'وكيل الأمان الذكي المتجسد',
+    module_06_desc: 'دفاع استباقي بالذكاء الاصطناعي المحلي: كشف ذكي لهجمات اليوم صفر، منع التحكم عن بعد، تدقيق متعدد الأبعاد للمخاطر، حماية منفذ USB-C.',
+    module_06_tag1: 'دفاع بالذكاء الاصطناعي', module_06_tag2: 'منع التحكم عن بعد', module_06_tag3: 'حماية من الثغرات',
+
+    module_07_num: 'الوحدة 07', module_07_title: 'نظام الطوارئ ثلاثي المفاتيح',
+    module_07_desc: 'مفتاح يومي → مفتاح استعادة الخصوصية → مفتاح استعادة الهاتف. يدعم القفل عن بعد / تتبع الموقع / المسح عن بعد.',
+    module_07_tag1: 'رمز استعادة', module_07_tag2: 'قفل عن بعد', module_07_tag3: 'مسح عن بعد',
+
+    module_08_num: 'الوحدة 08', module_08_title: 'نظام أمان الحساب',
+    module_08_desc: 'ربط قوي بالأجهزة، عبارة استعادة مخزنة دون اتصال وليس على السحابة، تحقق إلزامي من الهوية للعمليات الحساسة.',
+    module_08_tag1: 'عبارة الاستعادة', module_08_tag2: 'ربط الجهاز', module_08_tag3: 'التحقق من الهوية',
+
+    demo_title: 'عرض توضيحي تفاعلي للجهاز الحقيقي',
+    demo_sub: 'كل تبويب أدناه يمثل ميزة أمان أساسية على الجهاز الحقيقي، جاهز للتجربة العملية',
+
+    demo_tab1: 'دردشة مشفرة', demo_tab2: 'تشفير الملفات', demo_tab3: 'إخفاء الشبكة',
+    demo_tab4: 'خصوصية فائقة', demo_tab5: 'تبديل PIN مزدوج', demo_tab6: 'استعادة طارئة',
+
+    encrypt_chat_title: 'عرض توضيحي للاتصال المشفر بالكامل',
+    encrypt_chat_desc: 'أدخل النص أدناه، انقر للتشفير لإنشاء نص مشفر يُنسخ تلقائياً. الصقه في مربع الدردشة للإرسال، ثم مرر فوق النص المشفر لكشف الرسالة المفكوكة. يستخدم تشفير AES-256-GCM الحقيقي.',
+    encrypt_label: 'إدخال النص',
+    encrypt_placeholder: 'اكتب رسالتك للتشفير...',
+    encrypt_btn: 'تشفير ونسخ النص المشفر',
+    encrypt_toast: 'تم نسخ النص المشفر! الصقه وأرسله الآن.',
+    encrypt_chat_status: 'AES-256-GCM مشفر بالكامل | تم التفاوض على المفتاح المشترك',
+    encrypt_chat_info: 'تم إنشاء الجلسة (AES-256-GCM). قم بإنشاء النص المشفر أعلاه والصقه هنا للإرسال.',
+    encrypt_input_placeholder: 'الصق النص المشفر هنا، اضغط Enter للإرسال...',
+    encrypt_send: 'إرسال',
+
+    encrypt_file_title: 'نقل الملفات المشفرة (.xefc)',
+    encrypt_file_desc: 'محاكاة إرسال الملفات المشفرة عبر WeChat: اختر ملف .xefc → أرسل إلى الدردشة → انقر لتجربة تدفق فك التشفير من VEILORA.',
+    file_picker_title: 'اختر ملفاً',
+    file_picker_png_meta: '5.1 ميغابايت',
+    file_picker_xefc_meta: 'ملف VEILORA مشفر',
+    wechat_hint: 'اختر ملفاً ثم انقر إرسال',
+    wechat_send: 'إرسال',
+
+    cancel: 'إلغاء',
+    allow: 'سماح',
+    dialog_unsupported_title: 'تعذر فتح هذا النوع من الملفات',
+    dialog_unsupported_desc: 'لا يمكن عرض ملفات .xefc مباشرة في WeChat',
+    dialog_open_veilora: 'فتح باستخدام VEILORA',
+    dialog_leave_title: 'مغادرة WeChat للفتح باستخدام VEILORA',
+    dialog_leave_desc: 'سيقوم VEILORA بفك تشفير الملف وعرضه بأمان',
+    img_viewer_badge: 'عارض VEILORA الآمن',
+
+    stealth_title: 'إخفاء الجهاز على الشبكة',
+    stealth_desc: 'إخفاء جهازك من مسح الشبكة المحلية/الإنترنت لتجنب التنصت ومسح المنافذ. تعطيل GPS واتصالات الأبراج الخلوية.',
+    stealth_visible: 'الجهاز مرئي',
+    stealth_hidden: 'الجهاز مخفي',
+    stealth_btn_on: 'تفعيل وضع الإخفاء',
+    stealth_btn_off: 'تعطيل وضع الإخفاء',
+    stealth_note_on: 'الحالة: الجهاز مخفي عن الشبكة، لا يمكن اكتشافه',
+    stealth_note_off: 'الحالة: الجهاز قابل للاكتشاف على الشبكة',
+
+    scan_title: '⚡ مسح حقيقي لأجهزة الشبكة المحلية',
+    scan_desc: 'تنفيذ مسح Ping Sweep + ARP حقيقي على الشبكة المحلية لاكتشاف جميع الأجهزة المتصلة.',
+    scan_local_only: 'هذه الميزة تتطلب التشغيل المحلي',
+    scan_local_desc: 'لا يمكن لـ Vercel Cloud الوصول إلى شبكتك المحلية. يرجى استنساخ المشروع وتشغيله محلياً.',
+    scan_copy_cmd: '📋 نسخ أمر الاستنساخ',
+    scan_download_script: '⚡ تحميل سكريبت التثبيت',
+
+    privacy_title: 'وضع الخصوصية الفائقة',
+    privacy_desc: 'تعطيل إجباري على مستوى النواة للكاميرا والميكروفون وGPS بنقرة واحدة. يقطع تماماً جميع تفاعلات البيانات. مثالي للاجتماعات السرية.',
+    privacy_camera: 'الكاميرا',
+    privacy_mic: 'الميكروفون',
+    privacy_gps: 'GPS',
+    privacy_normal: 'طبيعي',
+    privacy_disabled: 'معطل',
+    privacy_master_on: '⚡ تفعيل الخصوصية الفائقة',
+    privacy_master_off: '🔓 الخروج من الخصوصية الفائقة',
+
+    dualpin_title: 'تبديل المساحة برمز PIN مزدوج',
+    dualpin_desc: 'رمزان PIN مستقلان يشغلان بيئات سطح مكتب معزولة تماماً. أدخل <b>123456</b> على شاشة القفل للمساحة الرئيسية (تطبيقات أكثر)، أو <b>000000</b> لمساحة الخصوصية (تطبيقات أساسية فقط).',
+    dualpin_enter_pin: 'أدخل رمز PIN المكون من 6 أرقام',
+    dualpin_pin_error: 'رمز PIN غير صحيح، يرجى المحاولة مرة أخرى',
+    dualpin_hint: 'تلميح: 123456 للمساحة الرئيسية (12 تطبيقاً) · 000000 لمساحة الخصوصية (5 تطبيقات)',
+
+    emergency_title: 'الاستعادة الطارئة',
+    emergency_desc: 'أدخل رمز الاستعادة الطارئة <b>999999</b> على شاشة القفل لمحاكاة مسح الجهاز عن بعد وإعادة ضبط المصنع. سيتم مسح الصور في المعرض.',
+    emergency_enter_pin: 'أدخل رمز الاستعادة الطارئة المكون من 6 أرقام (الافتراضي: 999999)',
+    emergency_welcome: 'مرحباً بك في هاتف VEILORA الآمن',
+    emergency_welcome_desc: 'تمت استعادة الجهاز إلى إعدادات المصنع. اتبع المعالج لإكمال الإعداد الأولي.',
+    emergency_start_config: 'بدء الإعداد',
+    emergency_select_lang: 'اختر اللغة',
+    emergency_select_lang_desc: 'يرجى اختيار لغة عرض النظام',
+    emergency_next: 'التالي',
+    emergency_network: 'إعداد الشبكة',
+    emergency_network_desc: 'اختر شبكة Wi-Fi أو اضبط لاحقاً',
+    emergency_connect: 'اتصال',
+    emergency_skip: 'تخطي',
+    emergency_done: 'اكتمل الإعداد',
+    emergency_done_desc: 'اكتملت جميع الإعدادات. مرحباً بك.',
+    emergency_enter: 'دخول المساحة الرئيسية',
+    emergency_hint: 'تلميح: أدخل <b>999999</b> لتشغيل الاستعادة الطارئة · سيتم مسح صور المعرض بعد الاستعادة',
+
+    order_title: 'احجز الآن',
+    order_sub: 'هاتف VEILORA الآمن متاح الآن للحجز. اختر الإصدار وأرسل بيانات الاتصال الخاصة بك.',
+    order_standard: 'الإصدار القياسي',
+    order_pro: 'الإصدار المحترف',
+    order_reserve_standard: 'حجز القياسي',
+    order_reserve_pro: 'حجز المحترف',
+    reserve_title: 'حجز VEILORA القياسي',
+    reserve_title_standard: 'حجز VEILORA القياسي',
+    reserve_title_pro: 'حجز VEILORA المحترف',
+    reserve_name: 'الاسم',
+    reserve_name_placeholder: 'أدخل اسمك',
+    reserve_phone: 'رقم الهاتف',
+    reserve_phone_placeholder: 'أدخل رقم هاتفك',
+    reserve_email: 'البريد الإلكتروني (اختياري)',
+    reserve_email_placeholder: 'أدخل بريدك الإلكتروني',
+    reserve_submit: 'إرسال الحجز',
+    reserve_success: 'تم إرسال الحجز',
+    reserve_success_desc: 'سنخطرك فور إطلاق المنتج',
+    reserve_close: 'إغلاق',
+
+    dealer_title: 'بوابة الوكلاء',
+    dealer_sub: 'كن وكيلاً معتمداً لـ VEILORA. أسعار مخصصة، احصل على صفحة الوكيل الحصرية.',
+    dealer_login: 'تسجيل دخول الوكلاء',
+    dealer_register: 'تسجيل وكيل جديد',
+    dealer_email: 'البريد الإلكتروني',
+    dealer_password: 'كلمة المرور',
+    dealer_name: 'الاسم',
+    dealer_company: 'الشركة (اختياري)',
+    dealer_phone: 'الهاتف (اختياري)',
+    dealer_login_btn: 'تسجيل الدخول',
+    dealer_register_btn: 'تسجيل',
+    dealer_no_account: 'ليس لديك حساب؟',
+    dealer_has_account: 'لديك حساب بالفعل؟',
+    dealer_register_link: 'سجل الآن',
+    dealer_login_link: 'اذهب لتسجيل الدخول',
+    dealer_logout: 'تسجيل الخروج',
+    dealer_audit_status: 'حالة المراجعة',
+    dealer_pending_desc: 'طلب الوكيل الخاص بك قيد المراجعة. ستتوفر الميزات الكاملة عند الموافقة.',
+    dealer_apply: 'تقديم الطلب',
+    dealer_pricing: 'إدارة الأسعار',
+    dealer_standard_price: 'الإصدار القياسي (¥)',
+    dealer_pro_price: 'الإصدار المحترف (¥)',
+    dealer_software_price: 'برنامج الأمان (¥)',
+    dealer_save_pricing: 'حفظ الأسعار',
+    dealer_link_title: 'صفحة الوكيل الحصرية',
+    dealer_link_desc: 'شارك هذا الرابط مع العملاء لعرض أسعار منتجاتك وتقديم الاستفسارات والطلبات.',
+    dealer_tab_leads: 'العملاء المحتملون',
+    dealer_tab_orders: 'قائمة الطلبات',
+    dealer_leads_title: 'العملاء المحتملون',
+    dealer_orders_title: 'قائمة الطلبات',
+    dealer_rejected: 'تم رفض الطلب',
+    dealer_rejected_desc: 'لم تتم الموافقة على طلب الوكيل الخاص بك. يرجى الاتصال بالمسؤول لمزيد من المعلومات.',
+    dealer_back: 'العودة إلى بوابة الوكلاء',
+    dealer_pub_pricing: 'أسعار المنتجات',
+    dealer_pub_contact: 'اتصل بنا',
+    dealer_lead_name: 'الاسم',
+    dealer_lead_phone: 'الهاتف',
+    dealer_lead_email: 'البريد الإلكتروني',
+    dealer_lead_message: 'الرسالة (اختياري)',
+    dealer_submit: 'إرسال',
+    dealer_pub_order: 'طلب عبر الإنترنت',
+    dealer_select_product: 'اختر المنتج',
+    dealer_software: 'برنامج الأمان',
+    dealer_quantity: 'الكمية',
+    dealer_order_name: 'الاسم',
+    dealer_order_phone: 'الهاتف',
+    dealer_submit_order: 'تقديم الطلب',
+
+    admin_title: 'لوحة الإدارة',
+    admin_sub: 'إدارة جميع الوكلاء، مراجعة الطلبات، عرض العملاء المحتملين والطلبات',
+    admin_login: 'تسجيل دخول المسؤول',
+    admin_password: 'كلمة مرور المسؤول',
+    admin_login_btn: 'تسجيل الدخول',
+    admin_logout: 'تسجيل الخروج',
+    admin_dealer_mgmt: 'إدارة الوكلاء',
+    admin_dealer_list: 'قائمة الوكلاء',
+    admin_tab_leads: 'جميع العملاء المحتملين',
+    admin_tab_orders: 'جميع الطلبات',
+    admin_leads_title: 'جميع العملاء المحتملين',
+    admin_orders_title: 'جميع الطلبات',
+
+    footer_text: 'VEILORA Security Phone — عرض توضيحي لميزات الجهاز الحقيقي &copy; 2026',
+    empty_loading: 'جار التحميل...',
+    empty_no_data: 'لا توجد بيانات',
+    empty_load_fail: 'فشل التحميل',
+  }
+};
+
+// Product specs
+const SPECS = {
+  standard: {
+    zh: ['VEILORA OS 3.0', '安全芯片 SE-200', '6.7" AMOLED', '16GB + 128GB', '基础安全套件'],
+    en: ['VEILORA OS 3.0', 'Security Chip SE-200', '6.7" AMOLED', '16GB + 128GB', 'Basic Security Suite'],
+    ar: ['VEILORA OS 3.0', 'شريحة أمان SE-200', '6.7" AMOLED', '16GB + 128GB', 'مجموعة الأمان الأساسية']
+  },
+  pro: {
+    zh: ['VEILORA OS 3.0 Pro', '安全芯片 SE-300', '6.9" LTPO AMOLED', '16GB + 512GB', '高级安全套件 + 应急保护'],
+    en: ['VEILORA OS 3.0 Pro', 'Security Chip SE-300', '6.9" LTPO AMOLED', '16GB + 512GB', 'Advanced Security Suite + Emergency Protection'],
+    ar: ['VEILORA OS 3.0 Pro', 'شريحة أمان SE-300', '6.9" LTPO AMOLED', '16GB + 512GB', 'مجموعة الأمان المتقدمة + حماية الطوارئ']
+  }
+};
+
+let currentLang = 'zh';
+
+function t(key) {
+  var val = I18N[currentLang] ? I18N[currentLang][key] : undefined;
+  if (val === undefined) val = I18N['zh'][key];
+  return val || key;
+}
+
+function updateSpecs() {
+  var stdSpecs = SPECS.standard[currentLang] || SPECS.standard.zh;
+  var proSpecs = SPECS.pro[currentLang] || SPECS.pro.zh;
+  var stdEl = document.getElementById('specs-standard');
+  var proEl = document.getElementById('specs-pro');
+  if (stdEl) { stdEl.innerHTML = stdSpecs.map(function(s) { return '<div class="spec-item">' + s + '</div>'; }).join(''); }
+  if (proEl) { proEl.innerHTML = proSpecs.map(function(s) { return '<div class="spec-item">' + s + '</div>'; }).join(''); }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('veilora_lang', lang);
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  // Update text content
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    el.textContent = t(el.dataset.i18n);
+  });
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  // Update lang switch buttons
+  document.querySelectorAll('.lang-switch button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  // Update specs
+  updateSpecs();
+  // Update dealer auth UI if in register mode
+  if (typeof authIsLogin !== 'undefined' && !authIsLogin) {
+    document.getElementById('authTitle').textContent = t('dealer_register');
+    document.getElementById('authBtn').textContent = t('dealer_register_btn');
+  }
+  // Update empty states
+  document.querySelectorAll('.empty-state').forEach(function(el) {
+    if (el.textContent === '加载中...' || el.textContent === 'Loading...' || el.textContent === 'جار التحميل...')
+      el.textContent = t('empty_loading');
+    else if (el.textContent === '暂无数据' || el.textContent === 'No data' || el.textContent === 'لا توجد بيانات')
+      el.textContent = t('empty_no_data');
+  });
+  // Update stealth toggle text
+  if (typeof stealthOn !== 'undefined') {
+    var radarLabel = document.getElementById('radarLabel');
+    var stealthBtn = document.getElementById('stealthBtn');
+    var stealthNote = document.getElementById('stealthNote');
+    if (radarLabel) radarLabel.textContent = stealthOn ? t('stealth_hidden') : t('stealth_visible');
+    if (stealthBtn) stealthBtn.textContent = stealthOn ? t('stealth_btn_off') : t('stealth_btn_on');
+    if (stealthNote) stealthNote.textContent = stealthOn ? t('stealth_note_on') : t('stealth_note_off');
+  }
+  // Update super privacy toggle text
+  if (typeof superPrivacyOn !== 'undefined') {
+    var pStates = document.querySelectorAll('.pstate');
+    pStates.forEach(function(el) { el.textContent = superPrivacyOn ? t('privacy_disabled') : t('privacy_normal'); });
+    var pmBtn = document.getElementById('privacyMaster');
+    if (pmBtn) pmBtn.textContent = superPrivacyOn ? t('privacy_master_off') : t('privacy_master_on');
+  }
+}
+
+// Init I18N
+(function() {
+  var saved = localStorage.getItem('veilora_lang');
+  var params = new URLSearchParams(location.search);
+  var langParam = params.get('lang');
+  var lang;
+  if (langParam && ['zh','en','ar'].indexOf(langParam) !== -1) {
+    lang = langParam;
+  } else if (saved && ['zh','en','ar'].indexOf(saved) !== -1) {
+    lang = saved;
+  } else {
+    var navLang = navigator.language || '';
+    if (navLang.startsWith('ar')) lang = 'ar';
+    else if (navLang.startsWith('zh')) lang = 'zh';
+    else lang = 'en';
+  }
+  setLang(lang);
+
+  // Bind lang switch buttons
+  document.querySelectorAll('.lang-switch button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setLang(this.dataset.lang);
+    });
+  });
+})();
+
+// toggleStealth uses i18n via t() function for all text
+
 // ===== 经销商品牌页检测 =====
 (function() {
   var m = location.pathname.match(/^\/brand\/(\d+)/);
