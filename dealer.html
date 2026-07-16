@@ -224,7 +224,7 @@ async function doLogin() {
   if (!u || !p) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
   try {
     const data = await api('/api/dealer/login', { method:'POST', body:JSON.stringify({username:u,password:p}) });
-    if (data.error) { document.getElementById('loginErr').textContent = data.error; return; }
+    if (!data.token) { document.getElementById('loginErr').textContent = data.detail || '用户名或密码错误'; return; }
     token = data.token;
     dealerId = data.dealer_id;
     document.getElementById('headerBrand').textContent = (data.company_name||'经销商') + ' 经销商门户';

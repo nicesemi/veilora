@@ -1971,8 +1971,7 @@ async function startNetworkScan() {
   summary.textContent = '';
   tbody.innerHTML = '';
 
-  const port = document.location.port || '8443';
-  const apiUrl = `${document.location.protocol}//${document.location.hostname}:${port}/network-scan?timeout=2`;
+  const apiUrl = '/api/network-scan';
 
   try {
     const resp = await fetch(apiUrl);

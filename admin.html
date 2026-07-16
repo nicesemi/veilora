@@ -209,7 +209,7 @@ async function doLogin() {
   if (!u || !p) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
   try {
     const data = await api('/api/admin/login', { method:'POST', body:JSON.stringify({username:u,password:p}) });
-    if (data.error) { document.getElementById('loginErr').textContent = data.error; return; }
+    if (!data.token) { document.getElementById('loginErr').textContent = data.detail || '用户名或密码错误'; return; }
     token = data.token;
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('mainWrap').style.display = '';

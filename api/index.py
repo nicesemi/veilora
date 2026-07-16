@@ -421,6 +421,14 @@ async def ai_chat(req: Request):
     except Exception as e:
         return {"answer": f"AI 服务请求失败：{str(e)[:100]}"}
 
+# --- Network Scan (cloud fallback) ---
+@app.get("/api/network-scan")
+async def network_scan():
+    return {
+        "success": False,
+        "error": "局域网设备扫描功能需要在本地运行。请将项目 clone 到本地后启动 server.py，通过 localhost 访问即可使用此功能。"
+    }
+
 # --- Static pages ---
 @app.get("/brand/{dealer_id}")
 async def brand_page(dealer_id: int):
