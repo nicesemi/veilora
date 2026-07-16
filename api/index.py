@@ -358,6 +358,69 @@ async def submit_lead(req: Request):
         await kv_set(dl_key, dl_list)
     return {"ok": True, "message": "预约成功"}
 
+# --- AI Chat ---
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
+VEILORA_KNOWLEDGE = """你是 VEILORA（隐御）安全手机的智能客服助手。以下是产品核心知识，请严格据此回答用户问题：
+
+【产品定位】VEILORA 是专注数字终端隐私保护与安全防护的专业操作系统，面向军队、警察、政府要员、高价值商务人士、科学家等。依托自研具身安全内核，整合网络安全、隐私管控、加密通信、隔离存储、应急防护、数据防提取、安全云备份、智能防御八大核心能力。
+
+【隐私空间】VEILORA 支持全系统多层级隔离加密存储，可创建独立的隐私空间。通过设置「双 PIN 码」实现空间切换——输入主 PIN 进入日常主空间，输入隐私 PIN 进入隐私空间。支持跨空间文件同步（主空间→隐私空间）。
+
+【防追踪画像】具备主动网络攻击防护，智能流量异常管控，防止被外界网络画像追踪。
+
+【应用隐私防护】权限管控与风险审计，一键超级隐私防护模式，防止 APP 窃取隐私。
+
+【加密通信】支持密写转换工具、加密消息通讯、加密文件发送与浏览、加密语音通讯。
+
+【私有云备份】支持 WebDAV 云空间配置，可设置自动/手动备份计划，支持本地数据恢复。
+
+【应急还原】支持还原整个手机、还原隐私空间、远程锁定与远程抹除。紧急情况下输入特定 PIN 可触发还原流程。
+
+【设备安全】设备硬件唯一强绑定，恢复密语离线保管云端不留存，关键操作强制身份验证。核心秘钥仅保存在本地硬件安全模块中，官方服务器不备份、不存储任何解密凭证。
+
+【免责声明】因用户遗失密语/遗忘密码导致的数据无法解密，官方无法提供强制破解或数据恢复服务。严禁非官方授权的 Root/解锁/刷机等操作。
+
+请用中文回答，语气专业友善。如果问题超出上述知识范围，请诚实告知用户该问题暂无法解答，并建议联系官方客服。"""
+
+@app.post("/api/chat")
+async def ai_chat(req: Request):
+    if not DEEPSEEK_API_KEY:
+        return {"answer": "智能问答服务暂未配置 AI API Key，请联系管理员设置 DEEPSEEK_API_KEY 环境变量。"}
+    try:
+        d = await req.json()
+        question = d.get('question', '').strip()
+        if not question:
+            return {"answer": "请输入您的问题。"}
+    except Exception:
+        return {"answer": "请求格式有误。"}
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://api.deepseek.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "deepseek-chat",
+                    "messages": [
+                        {"role": "system", "content": VEILORA_KNOWLEDGE},
+                        {"role": "user", "content": question}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 500
+                }
+            )
+        if resp.status_code == 200:
+            data = resp.json()
+            answer = data["choices"][0]["message"]["content"]
+            return {"answer": answer}
+        else:
+            return {"answer": f"AI 服务返回错误 (HTTP {resp.status_code})，请稍后重试。"}
+    except Exception as e:
+        return {"answer": f"AI 服务请求失败：{str(e)[:100]}"}
+
 # --- Static pages ---
 @app.get("/brand/{dealer_id}")
 async def brand_page(dealer_id: int):
