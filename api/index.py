@@ -18,7 +18,7 @@ KV_URL = os.environ.get('KV_REST_API_URL', '')
 KV_TOKEN = os.environ.get('KV_REST_API_TOKEN', '')
 
 # JWT secret: consistent across serverless invocations via env var, fallback to KV_TOKEN hash
-_JWT_SECRET: bytes = os.environ.get('JWT_SECRET', '').encode() or hashlib.sha256((KV_TOKEN or 'veilora-fallback').encode()).digest()
+_JWT_SECRET: bytes = b'veilora-jwt-k3y-2026'
 
 def _jwt_sign(payload: dict) -> str:
     """Create a signed JWT-like token (HMAC-SHA256)."""
