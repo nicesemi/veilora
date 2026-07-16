@@ -1163,9 +1163,21 @@ textarea.form-input { resize:vertical; min-height:80px; }
 
       <h4 style="margin-bottom:.6rem">⚡ 真实局域网设备扫描</h4>
       <p style="color:var(--text-muted);font-size:.8rem;margin-bottom:1rem;">对当前局域网执行真实 Ping Sweep + ARP 表扫描，发现所有接入设备。</p>
-      <div class="scan-bar">
-        <button class="scan-btn" id="scanBtn" onclick="startNetworkScan()">🔍 扫描局域网</button>
-        <span class="scan-status" id="scanStatus"></span>
+      <div style="background:linear-gradient(135deg,#0f0f1a,#1a1a2e);border:1px solid var(--accent);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem">
+        <p style="color:#ffd700;font-weight:600;margin:0 0 .4rem">此功能需在本地运行</p>
+        <p style="color:var(--text-muted);font-size:.8rem;margin:0 0 1rem">Vercel 云端无法访问您的局域网。请将项目克隆到本地后使用。</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="scan-btn" onclick="copyCloneCmd()" title="复制克隆命令">📋 复制克隆命令</button>
+          <button class="scan-btn" onclick="downloadSetupScript()" title="下载一键安装脚本">⚡ 下载一键脚本</button>
+        </div>
+        <div id="cloneCmdCopied" style="color:#4caf50;font-size:.75rem;margin-top:.6rem;display:none">已复制，粘贴到终端即可</div>
+        <details style="margin-top:.8rem">
+          <summary style="color:var(--text-muted);font-size:.75rem;cursor:pointer">手动步骤</summary>
+          <pre style="background:#000;color:#0f0;padding:.6rem;border-radius:6px;font-size:.7rem;margin-top:.4rem;overflow-x:auto">git clone https://github.com/nicesemi/veilora.git
+cd veilora
+pip3 install -r requirements.txt
+python3 server.py</pre>
+        </details>
       </div>
       <div class="scan-results" id="scanResults" style="display:none">
         <div class="scan-summary" id="scanSummary"></div>
@@ -1957,6 +1969,44 @@ function toggleStealth() {
 }
 
 // ---------- 3b. 真实局域网扫描 ----------
+
+function copyCloneCmd() {
+  const cmd = 'git clone https://github.com/nicesemi/veilora.git && cd veilora && pip3 install -r requirements.txt && python3 server.py';
+  navigator.clipboard.writeText(cmd).then(() => {
+    const el = document.getElementById('cloneCmdCopied');
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
+  }).catch(() => {
+    alert('复制失败，请手动复制:\n' + cmd);
+  });
+}
+
+function downloadSetupScript() {
+  const script = `#!/bin/bash
+set -e
+REPO="https://github.com/nicesemi/veilora.git"
+DIR="$HOME/veilora-local"
+echo "克隆项目到 $DIR ..."
+rm -rf "$DIR"
+git clone "$REPO" "$DIR"
+cd "$DIR"
+pip3 install -r requirements.txt
+echo "启动服务器，即将打开浏览器..."
+sleep 2
+open "http://localhost:9000" 2>/dev/null || true
+python3 server.py
+`;
+  const blob = new Blob([script], { type: 'application/x-sh' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'veilora-setup.sh';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 async function startNetworkScan() {
   const btn = document.getElementById('scanBtn');
   const status = document.getElementById('scanStatus');

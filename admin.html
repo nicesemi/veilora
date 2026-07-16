@@ -122,6 +122,7 @@ tr:hover td { background:rgba(0,212,255,.03); }
 
 <!-- Login -->
 <div class="login-wrap" id="loginWrap">
+  <div id="kvBanner" style="display:none;background:#1a0000;border:1px solid #ff4444;border-radius:8px;padding:.8rem 1rem;margin-bottom:1rem;color:#ff6666;font-size:.82rem;text-align:center;max-width:340px;width:100%"></div>
   <div class="login-card">
     <h1>VEILORA</h1>
     <div class="sub">管理后台</div>
@@ -199,8 +200,25 @@ let token = '';
 function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = 'Bearer ' + token;
-  return fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } }).then(r => r.json());
+  return fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } }).then(async r => {
+    if (!r.ok) {
+      const detail = (await r.json().catch(() => ({}))).detail || `HTTP ${r.status}`;
+      throw new Error(detail);
+    }
+    return r.json();
+  });
 }
+
+// KV health check on load
+(async function checkKV() {
+  try {
+    const h = await api('/api/health');
+    if (!h.kv_available) {
+      document.getElementById('kvBanner').style.display = 'block';
+      document.getElementById('kvBanner').textContent = '⚠ KV 数据库未连接。请在 Vercel Dashboard → Storage → KV 创建并关联项目。';
+    }
+  } catch(e) {}
+})();
 
 // ---- Login ----
 async function doLogin() {
@@ -216,7 +234,7 @@ async function doLogin() {
     loadDashboard();
     loadDealers();
     loadLeads();
-  } catch(e) { document.getElementById('loginErr').textContent = '网络错误'; }
+  } catch(e) { document.getElementById('loginErr').textContent = e.message || '网络错误'; }
 }
 
 function doLogout() {
@@ -246,7 +264,9 @@ async function loadDashboard() {
       <div class="stat-card"><div class="num">${s.standard_count||0}</div><div class="label">标准版预约</div></div>
       <div class="stat-card"><div class="num">${s.pro_count||0}</div><div class="label">专业版预约</div></div>
     `;
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('statsGrid').innerHTML = '<div class="empty" style="color:#ff6666">数据加载失败: ' + esc(e.message) + '</div>';
+  }
 }
 
 // ---- Dealers ----
@@ -264,7 +284,9 @@ async function loadDealers() {
       html += '</tbody></table>';
       document.getElementById('dealerTableWrap').innerHTML = html;
     }
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('dealerTableWrap').innerHTML = '<div class="empty" style="color:#ff6666">加载失败: ' + esc(e.message) + '</div>';
+  }
 }
 
 function openDealerModal() { document.getElementById('dealerModal').classList.add('show'); }
@@ -283,20 +305,20 @@ async function createDealer() {
   if (!co || !u || !p) { document.getElementById('dlErr').textContent = '所有字段必填'; return; }
   try {
     const r = await api('/api/admin/dealers', { method:'POST', body:JSON.stringify({company_name:co,username:u,password:p}) });
-    if (r.error) { document.getElementById('dlErr').textContent = r.error; return; }
+    if (!r.ok) { document.getElementById('dlErr').textContent = r.message || '创建失败'; return; }
     closeDealerModal();
-    loadDealers();
-    loadDashboard();
-    loadLeads(); // refresh filter
-  } catch(e) { document.getElementById('dlErr').textContent = '网络错误'; }
+    await loadDealers();
+    await loadDashboard();
+    await loadLeads();
+  } catch(e) { document.getElementById('dlErr').textContent = e.message || '网络错误'; }
 }
 
 async function deleteDealer(id) {
   if (!confirm('确定删除该经销商？')) return;
   await api('/api/admin/dealers/' + id, { method:'DELETE' });
-  loadDealers();
-  loadDashboard();
-  loadLeads();
+  await loadDealers();
+  await loadDashboard();
+  await loadLeads();
 }
 
 // ---- Leads ----
@@ -323,7 +345,9 @@ async function loadLeads() {
       html += '</tbody></table>';
       document.getElementById('leadTableWrap').innerHTML = html;
     }
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('leadTableWrap').innerHTML = '<div class="empty" style="color:#ff6666">加载失败: ' + esc(e.message) + '</div>';
+  }
 }
 
 function esc(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }

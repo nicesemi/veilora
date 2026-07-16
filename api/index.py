@@ -103,6 +103,9 @@ async def _dealer(auth: str = Header(None)):
 
 async def fallback_admin_check():
     """Ensure default admin exists if KV is empty"""
+    if not KV_URL:
+        print("[startup] WARNING: KV_REST_API_URL not set, skipping admin seed")
+        return
     existing = await kv_get("admin:username:admin")
     if not existing:
         await kv_set("admin:username:admin", {"password_hash": hash_pw("admin123")})
@@ -111,16 +114,29 @@ async def fallback_admin_check():
 async def startup():
     await fallback_admin_check()
 
+# --- Health ---
+@app.get("/api/health")
+async def health_check():
+    kv_ok = False
+    if KV_URL:
+        test = await kv_get("admin:username:admin")
+        kv_ok = test is not None
+    return {"ok": True, "kv_available": kv_ok, "kv_url_set": bool(KV_URL)}
+
 # --- Auth routes ---
 @app.post("/api/admin/login")
 async def admin_login(req: Request):
+    if not KV_URL:
+        raise HTTPException(503, "KV 数据库未配置，请在 Vercel Dashboard → Storage → KV 中创建数据库并关联到此项目")
     d = await req.json()
     u = d.get('username', '').strip()
     p = d.get('password', '').strip()
     if not u or not p:
         raise HTTPException(400, "用户名和密码不能为空")
     entry = await kv_get(f"admin:username:{u}")
-    if not entry or entry.get('password_hash') != hash_pw(p):
+    if entry is None:
+        raise HTTPException(503, "KV 数据库连接失败，请检查 Vercel KV 配置")
+    if entry.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
     token = secrets.token_hex(24)
     await kv_set(f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
@@ -128,6 +144,8 @@ async def admin_login(req: Request):
 
 @app.post("/api/dealer/login")
 async def dealer_login(req: Request):
+    if not KV_URL:
+        raise HTTPException(503, "KV 数据库未配置，请在 Vercel Dashboard → Storage → KV 中创建数据库并关联到此项目")
     d = await req.json()
     u = d.get('username', '').strip()
     p = d.get('password', '').strip()
