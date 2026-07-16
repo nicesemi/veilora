@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """VEILORA 预约购买管理后台 — FastAPI + Vercel KV (Serverless)"""
 
-import hashlib, json, os, secrets, time, uuid
+import asyncio, hashlib, json, os, secrets, time, uuid
 from urllib.parse import quote
 from fastapi import FastAPI, Request, HTTPException, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +25,21 @@ app.add_middleware(
 )
 
 # --- Vercel KV helpers ---
+
+async def _kv_retry(fn, *args, max_retries=3, **kwargs):
+    """Retry KV operations with exponential backoff for transient failures."""
+    for attempt in range(max_retries):
+        try:
+            result = await fn(*args, **kwargs)
+            if result is not None and result is not False:
+                return result
+            if attempt < max_retries - 1:
+                await asyncio.sleep(0.2 * (2 ** attempt))
+        except Exception:
+            if attempt < max_retries - 1:
+                await asyncio.sleep(0.2 * (2 ** attempt))
+    return None
+
 async def kv_get(key: str):
     if not KV_URL:
         return None
@@ -87,7 +102,7 @@ async def _admin(auth: str = Header(None)):
     if not auth:
         raise HTTPException(401, detail="未授权")
     token = auth.replace('Bearer ', '')
-    session = await kv_get(f"admin:token:{token}")
+    session = await _kv_retry(kv_get, f"admin:token:{token}")
     if not session:
         raise HTTPException(401, detail="未授权或已过期")
     return session
@@ -96,7 +111,7 @@ async def _dealer(auth: str = Header(None)):
     if not auth:
         raise HTTPException(401, detail="未授权")
     token = auth.replace('Bearer ', '')
-    session = await kv_get(f"dealer:token:{token}")
+    session = await _kv_retry(kv_get, f"dealer:token:{token}")
     if not session:
         raise HTTPException(401, detail="未授权或已过期")
     return session
