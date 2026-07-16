@@ -138,6 +138,36 @@ async def health_check():
         kv_ok = test is not None
     return {"ok": True, "kv_available": kv_ok, "kv_url_set": bool(KV_URL)}
 
+@app.get("/api/debug/auth")
+async def debug_auth_test():
+    """Test write → read cycle and return diagnostics."""
+    import sys
+    test_key = f"debug:auth:{int(time.time())}"
+    test_val = {"test": True, "ts": time.time()}
+    
+    # Test kv_set
+    set_ok = await _kv_retry(kv_set, test_key, test_val, ttl=60)
+    
+    # Test kv_get with retry
+    got = await _kv_retry(kv_get, test_key)
+    
+    # Cleanup
+    if got:
+        await kv_del(test_key)
+    
+    # Check if _admin/_dealer functions have retry (import check)
+    _admin_src = sys.modules[__name__].__dict__.get('_admin')
+    _dealer_src = sys.modules[__name__].__dict__.get('_dealer')
+    
+    return {
+        "kv_set_retry_ok": set_ok,
+        "kv_get_retry_ok": got is not None and got.get("test") == True,
+        "kv_url_preview": KV_URL[:40] + "..." if KV_URL else None,
+        "admin_has_retry": "_kv_retry" in str(_admin_src.__code__.co_names) if _admin_src else False,
+        "dealer_has_retry": "_kv_retry" in str(_dealer_src.__code__.co_names) if _dealer_src else False,
+        "python_version": sys.version,
+    }
+
 # --- Auth routes ---
 @app.post("/api/admin/login")
 async def admin_login(req: Request):
