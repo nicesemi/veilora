@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """VEILORA 预约购买管理后台 — FastAPI + Vercel KV (Serverless)"""
 
-import asyncio, hashlib, json, os, secrets, time, uuid
+import asyncio, base64, hashlib, hmac, json, os, secrets, time, uuid
 from urllib.parse import quote
 from fastapi import FastAPI, Request, HTTPException, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +16,34 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 KV_URL = os.environ.get('KV_REST_API_URL', '')
 KV_TOKEN = os.environ.get('KV_REST_API_TOKEN', '')
+
+# JWT secret: consistent across serverless invocations via env var, fallback to KV_TOKEN hash
+_JWT_SECRET = os.environ.get('JWT_SECRET', hashlib.sha256((KV_TOKEN or 'veilora-fallback').encode()).digest())
+
+def _jwt_sign(payload: dict) -> str:
+    """Create a signed JWT-like token (HMAC-SHA256)."""
+    header_b64 = base64.urlsafe_b64encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode()).rstrip(b'=').decode()
+    payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b'=').decode()
+    signing_input = f"{header_b64}.{payload_b64}"
+    sig = base64.urlsafe_b64encode(hmac.digest(_JWT_SECRET, signing_input.encode(), 'sha256')).rstrip(b'=').decode()
+    return f"{signing_input}.{sig}"
+
+def _jwt_verify(token: str) -> dict | None:
+    """Verify JWT token, return payload or None."""
+    try:
+        header_b64, payload_b64, sig = token.split('.')
+        signing_input = f"{header_b64}.{payload_b64}"
+        expected_sig = base64.urlsafe_b64encode(hmac.digest(_JWT_SECRET, signing_input.encode(), 'sha256')).rstrip(b'=').decode()
+        if not hmac.compare_digest(sig, expected_sig):
+            return None
+        # Pad for base64 decode
+        payload_b64 += '=' * ((4 - len(payload_b64) % 4) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+        if payload.get('exp', 0) < time.time():
+            return None
+        return payload
+    except Exception:
+        return None
 
 app = FastAPI()
 
@@ -99,32 +127,20 @@ def hash_pw(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
 
 async def _admin(auth: str = Header(None)):
-    if not auth:
-        print("[AUTH] No auth header")
+    if not auth or not auth.startswith('Bearer '):
         raise HTTPException(401, detail="未授权")
-    token = auth.replace('Bearer ', '')
-    key = f"admin:token:{token}"
-    print(f"[AUTH] Looking up key: {key[:30]}... (token prefix: {token[:8]}...)")
-    session = await _kv_retry(kv_get, key)
-    if not session:
-        print(f"[AUTH] Session NOT FOUND for key: {key[:30]}...")
+    payload = _jwt_verify(auth[7:])
+    if not payload or payload.get('type') != 'admin':
         raise HTTPException(401, detail="未授权或已过期")
-    print(f"[AUTH] Session OK")
-    return session
+    return payload
 
 async def _dealer(auth: str = Header(None)):
-    if not auth:
-        print("[AUTH-DEALER] No auth header")
+    if not auth or not auth.startswith('Bearer '):
         raise HTTPException(401, detail="未授权")
-    token = auth.replace('Bearer ', '')
-    key = f"dealer:token:{token}"
-    print(f"[AUTH-DEALER] Looking up key: {key[:30]}...")
-    session = await _kv_retry(kv_get, key)
-    if not session:
-        print(f"[AUTH-DEALER] Session NOT FOUND")
+    payload = _jwt_verify(auth[7:])
+    if not payload or payload.get('type') != 'dealer':
         raise HTTPException(401, detail="未授权或已过期")
-    print(f"[AUTH-DEALER] Session OK")
-    return session
+    return payload
 
 async def fallback_admin_check():
     """Ensure default admin exists if KV is empty"""
@@ -150,31 +166,21 @@ async def health_check():
 
 @app.get("/api/debug/auth")
 async def debug_auth_test():
-    """Test write → read cycle and return diagnostics."""
+    """Test JWT sign → verify cycle and KV connectivity."""
     import sys
-    test_key = f"debug:auth:{int(time.time())}"
-    test_val = {"test": True, "ts": time.time()}
+    test_val = {"type": "test", "id": 1, "exp": int(time.time()) + 60}
+    token = _jwt_sign(test_val)
+    verified = _jwt_verify(token)
     
-    # Test kv_set
-    set_ok = await _kv_retry(kv_set, test_key, test_val, ttl=60)
-    
-    # Test kv_get with retry
-    got = await _kv_retry(kv_get, test_key)
-    
-    # Cleanup
-    if got:
-        await kv_del(test_key)
-    
-    # Check if _admin/_dealer functions have retry (import check)
-    _admin_src = sys.modules[__name__].__dict__.get('_admin')
-    _dealer_src = sys.modules[__name__].__dict__.get('_dealer')
+    kv_ok = False
+    if KV_URL:
+        kv_ok = (await kv_get("admin:username:admin")) is not None
     
     return {
-        "kv_set_retry_ok": set_ok,
-        "kv_get_retry_ok": got is not None and got.get("test") == True,
-        "kv_url_preview": KV_URL[:40] + "..." if KV_URL else None,
-        "admin_has_retry": "_kv_retry" in str(_admin_src.__code__.co_names) if _admin_src else False,
-        "dealer_has_retry": "_kv_retry" in str(_dealer_src.__code__.co_names) if _dealer_src else False,
+        "auth_type": "JWT (self-contained, no KV dependency)",
+        "jwt_sign_ok": True,
+        "jwt_verify_ok": verified is not None and verified.get("type") == "test",
+        "kv_available": kv_ok,
         "python_version": sys.version,
     }
 
@@ -193,12 +199,7 @@ async def admin_login(req: Request):
         raise HTTPException(503, "KV 数据库连接失败，请检查 Vercel KV 配置")
     if entry.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
-    token = secrets.token_hex(24)
-    ok = await _kv_retry(kv_set, f"admin:token:{token}", {"type": "admin", "username": u}, ttl=86400)
-    if not ok:
-        print(f"[LOGIN] kv_set FAILED for token prefix: {token[:8]}...")
-        raise HTTPException(503, "会话创建失败，请重试")
-    print(f"[LOGIN] Token stored OK, prefix: {token[:8]}...")
+    token = _jwt_sign({"type": "admin", "username": u, "exp": int(time.time()) + 86400})
     return {"token": token, "username": u}
 
 @app.post("/api/dealer/login")
@@ -216,10 +217,7 @@ async def dealer_login(req: Request):
     dealer = await kv_get(f"dealer:{dealer_id}")
     if not dealer or dealer.get('password_hash') != hash_pw(p):
         raise HTTPException(401, "用户名或密码错误")
-    token = secrets.token_hex(24)
-    ok = await _kv_retry(kv_set, f"dealer:token:{token}", {"type": "dealer", "id": dealer_id}, ttl=86400)
-    if not ok:
-        raise HTTPException(503, "会话创建失败，请重试")
+    token = _jwt_sign({"type": "dealer", "id": dealer_id, "exp": int(time.time()) + 86400})
     return {"token": token, "dealer_id": dealer_id, "company_name": dealer.get('company_name', '')}
 
 # --- Admin: dealer management ---
