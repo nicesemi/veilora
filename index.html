@@ -2305,7 +2305,7 @@ async function sendAI() {
   // 创建问答卡片
   const card = document.createElement('div');
   card.className = 'ai-answer-card';
-  card.innerHTML = '" + (currentLang==='en'?'<div class="q-label">Your Question</div>':currentLang==='ar'?'<div class="q-label">سؤالك</div>':'<div class="q-label">你的问题</div>') + "<div class="q-text">' + question + '</div><div class="a-loading">思考中...</div>';
+  card.innerHTML = (currentLang==='en'?'<div class="q-label">Your Question</div>':currentLang==='ar'?'<div class="q-label">سؤالك</div>':'<div class="q-label">你的问题</div>') + '<div class="q-text">' + question + '</div><div class="a-loading">思考中...</div>';
   answers.prepend(card);
 
   input.value = '';
